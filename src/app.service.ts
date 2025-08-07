@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AppService {
-  getHello(): string {
-    return 'Ochiga backend is active 🚀';
+  getStatus(): string {
+    return '🚀 Ochiga backend is active!';
   }
 }
