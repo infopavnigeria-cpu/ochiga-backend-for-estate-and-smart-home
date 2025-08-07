@@ -1,23 +1,14 @@
-import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
+import { UserService } from './user.service';
 
 @Controller('user')
 export class UserController {
-  private users = [
-    { id: 1, name: 'Jane Doe' },
-    { id: 2, name: 'John Doe' }
-  ];
+  constructor(private readonly userService: UserService) {}
 
   @Get()
-  getAllUsers(): any {
-    return this.users;
+  getAllUsers() {
+    return this.userService.getUsers();
   }
-
-  @Get(':id')
-  getUserById(@Param('id') id: string): any {
-    const user = this.users.find(u => u.id === parseInt(id));
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    return user;
+}
   }
 }
