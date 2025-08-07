@@ -1,10 +1,12 @@
-import { Controller, Get, Res } from '@nestjs/common';
+import { Controller, Get, Res, Header } from '@nestjs/common';
 import { Response } from 'express';
 
 @Controller()
 export class AppController {
   @Get()
+  @Header('Content-Type', 'text/html')
   getStatus(@Res() res: Response) {
+    console.log('✅ GET / route hit');
     res.send(`
       <!DOCTYPE html>
       <html lang="en">
