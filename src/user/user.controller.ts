@@ -23,9 +23,3 @@ export class UserController {
     return newUser;
   }
 }
-  getAllUsers() {
-    return this.userService.getUsers();
-  }
-}
-  }
-}
