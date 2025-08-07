@@ -6,7 +6,7 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  getHello(): string {
-    return 'Ochiga backend is active 🚀';
+  getStatus(): string {
+    return this.appService.getStatus();
   }
 }
