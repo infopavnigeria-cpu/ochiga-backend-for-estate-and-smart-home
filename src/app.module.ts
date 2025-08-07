@@ -1,11 +1,22 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { HelloController } from './hello.controller'; // 👈 Add this line
 
 @Module({
-  imports: [],
-  controllers: [AppController, HelloController], // 👈 Register both controllers
+  imports: [
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: 'postgres',
+      database: 'ochiga_db',
+      autoLoadEntities: true,
+      synchronize: true, // Turn off in production
+    }),
+  ],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
