@@ -1,0 +1,9 @@
+### Create a new user
+POST http://localhost:3000/user
+Content-Type: application/json
+
+{
+  "name": "Ochiga Smart",
+  "email": "smart@ochiga.com",
+  "password": "secret123"
+}
