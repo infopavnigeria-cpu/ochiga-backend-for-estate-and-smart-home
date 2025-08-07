@@ -1,21 +1,21 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'postgres',
-      database: 'ochiga_db',
-      autoLoadEntities: true,
-      synchronize: true, // Turn off in production
-    }),
+    // Commented out for now:
+    // TypeOrmModule.forRoot({
+    //   type: 'postgres',
+    //   host: 'localhost',
+    //   port: 5432,
+    //   username: 'postgres',
+    //   password: 'postgres',
+    //   database: 'ochiga_db',
+    //   autoLoadEntities: true,
+    //   synchronize: true,
+    // }),
     UserModule,
   ],
   controllers: [AppController],
