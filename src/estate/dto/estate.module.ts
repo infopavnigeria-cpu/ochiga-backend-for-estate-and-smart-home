@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { EstateService } from './estate.service';
 import { EstateController } from './estate.controller';
+import { EstateService } from './estate.service';
 
 @Module({
   controllers: [EstateController],
