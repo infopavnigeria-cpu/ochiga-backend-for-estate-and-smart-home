@@ -1,3 +1,4 @@
+// src/estate/estate.controller.ts
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { EstateService } from './estate.service';
 import { CreateEstateDto } from './dto/create-estate.dto';
