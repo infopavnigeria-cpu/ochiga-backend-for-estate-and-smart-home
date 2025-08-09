@@ -1,11 +1,13 @@
+// src/estate/estate.module.ts
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { EstateModule } from './estate/estate.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { EstateController } from './estate.controller';
+import { EstateService } from './estate.service';
+import { Estate } from './entities/estate.entity';
 
 @Module({
-  imports: [EstateModule],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [TypeOrmModule.forFeature([Estate])],
+  controllers: [EstateController],
+  providers: [EstateService],
 })
-export class AppModule {}
+export class EstateModule {}
