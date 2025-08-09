@@ -1,40 +1,27 @@
+// src/estate/estate.service.ts
 import { Injectable } from '@nestjs/common';
 import { CreateEstateDto } from './dto/create-estate.dto';
 import { UpdateEstateDto } from './dto/update-estate.dto';
 
 @Injectable()
 export class EstateService {
-  private estates = [];
-
   create(createEstateDto: CreateEstateDto) {
-    const newEstate = { id: Date.now(), ...createEstateDto };
-    this.estates.push(newEstate);
-    return newEstate;
+    return { message: 'Estate created', data: createEstateDto };
   }
 
   findAll() {
-    return this.estates;
+    return [{ id: 1, name: 'Estate One' }];
   }
 
   findOne(id: number) {
-    return this.estates.find(estate => estate.id === id);
+    return { id, name: `Estate ${id}` };
   }
 
   update(id: number, updateEstateDto: UpdateEstateDto) {
-    const index = this.estates.findIndex(estate => estate.id === id);
-    if (index > -1) {
-      this.estates[index] = { ...this.estates[index], ...updateEstateDto };
-      return this.estates[index];
-    }
-    return null;
+    return { message: `Estate ${id} updated`, data: updateEstateDto };
   }
 
   remove(id: number) {
-    const index = this.estates.findIndex(estate => estate.id === id);
-    if (index > -1) {
-      const deleted = this.estates.splice(index, 1);
-      return deleted[0];
-    }
-    return null;
+    return { message: `Estate ${id} removed` };
   }
 }
