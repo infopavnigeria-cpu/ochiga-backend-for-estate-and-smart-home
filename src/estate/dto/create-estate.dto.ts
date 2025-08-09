@@ -1,4 +1,6 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateEstateDto } from './create-estate.dto';
-
-export class UpdateEstateDto extends PartialType(CreateEstateDto) {}
+// src/estate/dto/create-estate.dto.ts
+export class CreateEstateDto {
+  name: string;
+  location: string;
+  size?: number; // optional
+}
