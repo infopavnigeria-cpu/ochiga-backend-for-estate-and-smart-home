@@ -8,9 +8,12 @@ export class Estate {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ nullable: true })
   location: string;
 
   @Column({ nullable: true })
-  description?: string;
+  description: string;
+
+  @Column({ default: true })
+  active: boolean;
 }
