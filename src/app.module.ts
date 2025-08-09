@@ -1,13 +1,22 @@
 // src/estate/estate.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { EstateController } from './estate.controller';
-import { EstateService } from './estate.service';
-import { Estate } from './entities/estate.entity';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { EstateModule } from './estate/estate.module';
+import { Estate } from './estate/entities/estate.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Estate])],
-  controllers: [EstateController],
-  providers: [EstateService],
+  imports: [
+    TypeOrmModule.forRoot({
+      type: 'sqlite', // You can switch to 'postgres' or 'mysql'
+      database: 'db.sqlite',
+      entities: [Estate],
+      synchronize: true, // Auto-create tables (good for dev only)
+    }),
+    EstateModule,
+  ],
+  controllers: [AppController],
+  providers: [AppService],
 })
-export class EstateModule {}
+export class AppModule {}
