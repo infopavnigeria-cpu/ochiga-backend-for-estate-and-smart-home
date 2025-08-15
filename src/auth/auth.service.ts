@@ -10,25 +10,26 @@ export class AuthService {
 
   constructor(private readonly jwtService: JwtService) {}
 
-  async register(dto: RegisterDto) {
-    const userExists = this.users.find(user => user.email === dto.email);
+  async register(registerDto: RegisterDto) {
+    const userExists = this.users.find(u => u.email === registerDto.email);
     if (userExists) {
       throw new BadRequestException('User already exists');
     }
 
     const newUser: User = {
       id: this.users.length + 1,
-      email: dto.email,
-      password: dto.password // In production, hash the password!
+      email: registerDto.email,
+      password: registerDto.password // ❗ In production, hash this
     };
-
     this.users.push(newUser);
 
-    return { message: 'Registration successful' };
+    return { message: 'Registration successful', user: newUser };
   }
 
-  async login(dto: LoginDto) {
-    const user = this.users.find(user => user.email === dto.email && user.password === dto.password);
+  async login(loginDto: LoginDto) {
+    const user = this.users.find(
+      u => u.email === loginDto.email && u.password === loginDto.password
+    );
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
