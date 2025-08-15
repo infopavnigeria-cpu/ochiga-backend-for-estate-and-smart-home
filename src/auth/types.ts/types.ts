@@ -1,7 +1,6 @@
-// src/auth/types/types.ts
+// src/auth/types.ts
 export interface User {
   id: number;
-  name?: string;
   email: string;
-  password?: string;
+  password: string; // Store hashed password in a real app
 }
