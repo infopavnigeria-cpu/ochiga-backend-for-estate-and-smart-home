@@ -1,14 +1,21 @@
 // src/estate/dto/create-estate.dto.ts
-import { IsString, IsOptional, IsBoolean, IsInt, Min, MaxLength } from 'class-validator';
+import { 
+  IsString, 
+  IsOptional, 
+  IsBoolean, 
+  IsInt, 
+  Min, 
+  MaxLength 
+} from 'class-validator';
 
 export class CreateEstateDto {
   @IsString()
   @MaxLength(255)
-  name: string;
+  name!: string; // Definite assignment assertion
 
   @IsString()
   @MaxLength(500)
-  location: string;
+  location!: string; // Definite assignment assertion
 
   @IsOptional()
   @IsString()
