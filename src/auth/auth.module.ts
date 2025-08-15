@@ -1,18 +1,12 @@
-import { Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
-import { JwtModule } from '@nestjs/jwt';
+import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
 
-@Module({
-  imports: [
-    JwtModule.register({
-      global: true,
-      secret: 'YOUR_SECRET_KEY', // IMPORTANT: Use a secure, environment variable for this key
-      signOptions: { expiresIn: '60m' },
-    }),
-  ],
-  controllers: [AuthController],
-  providers: [AuthService],
-  exports: [AuthService],
-})
-export class AuthModule {}
+export class LoginDto {
+  @IsEmail()
+  @IsNotEmpty()
+  email: string = '';
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(6, { message: 'Password must be at least 6 characters long' })
+  password: string = '';
+}
