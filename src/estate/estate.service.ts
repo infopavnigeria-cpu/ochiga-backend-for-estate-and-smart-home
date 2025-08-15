@@ -1,26 +1,41 @@
-import { Injectable } from '@nestjs/common';
+// src/estate/estate.service.ts
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Estate } from './entities/estate.entity';
 import { CreateEstateDto } from './dto/create-estate.dto';
 import { UpdateEstateDto } from './dto/update-estate.dto';
 
 @Injectable()
 export class EstateService {
-  create(createEstateDto: CreateEstateDto) {
-    return `This action adds a new estate: ${createEstateDto.name}`;
+  constructor(
+    @InjectRepository(Estate)
+    private readonly estateRepository: Repository<Estate>,
+  ) {}
+
+  async create(createEstateDto: CreateEstateDto): Promise<Estate> {
+    const estate = this.estateRepository.create(createEstateDto);
+    return this.estateRepository.save(estate);
   }
 
-  findAll() {
-    return `This action returns all estates`;
+  async findAll(): Promise<Estate[]> {
+    return this.estateRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns estate #${id}`;
+  async findOne(id: number): Promise<Estate> {
+    const estate = await this.estateRepository.findOne({ where: { id } });
+    if (!estate) throw new NotFoundException(`Estate with ID ${id} not found`);
+    return estate;
   }
 
-  update(id: number, updateEstateDto: UpdateEstateDto) {
-    return `This action updates estate #${id}`;
+  async update(id: number, updateEstateDto: UpdateEstateDto): Promise<Estate> {
+    const estate = await this.findOne(id);
+    Object.assign(estate, updateEstateDto);
+    return this.estateRepository.save(estate);
   }
 
-  remove(id: number) {
-    return `This action removes estate #${id}`;
+  async remove(id: number): Promise<void> {
+    const estate = await this.findOne(id);
+    await this.estateRepository.remove(estate);
   }
 }
