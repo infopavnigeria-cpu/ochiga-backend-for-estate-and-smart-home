@@ -1,6 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
-import { User } from '../user/user.entity';
-import { Room } from '../room/room.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Room } from '../../room/entities/room.entity';
 
 @Entity()
 export class Home {
@@ -10,9 +9,7 @@ export class Home {
   @Column()
   name: string;
 
-  @ManyToOne(() => User, (user) => user.homes)
-  owner: User;
-
-  @OneToMany(() => Room, (room) => room.home, { cascade: true })
+  // ✅ Add this relation so each home can have many rooms
+  @OneToMany(() => Room, room => room.home, { cascade: true })
   rooms: Room[];
 }
