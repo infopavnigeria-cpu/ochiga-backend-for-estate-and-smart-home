@@ -32,17 +32,3 @@ export class EstateController {
     return this.estateService.remove(+id);
   }
 }
-  findOne(@Param('id') id: string) {
-    return this.estateService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateEstateDto: UpdateEstateDto) {
-    return this.estateService.update(+id, updateEstateDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.estateService.remove(+id);
-  }
-}
