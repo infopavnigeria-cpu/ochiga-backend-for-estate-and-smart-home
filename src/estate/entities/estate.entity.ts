@@ -1,38 +1,38 @@
 // src/estate/entities/estate.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
-@Entity('estates') // Optional: name the table explicitly
+@Entity('estates')
 export class Estate {
   @PrimaryGeneratedColumn()
-  id!: number; // Auto-generated ID
+  id!: number;
 
   @Column({ unique: true })
-  name!: string; // Estate name (unique to avoid duplicates)
+  name!: string;
 
   @Column()
-  location!: string; // Estate location
+  location!: string;
 
   @Column({ nullable: true, type: 'text' })
-  description?: string; // Optional description
+  description?: string;
 
   @Column({ default: true })
-  active!: boolean; // Estate status (default: active)
+  active!: boolean;
 
   @Column({ nullable: true })
-  managerName?: string; // Optional: name of estate manager
+  managerName?: string;
 
   @Column({ nullable: true })
-  contactNumber?: string; // Optional: estate contact phone
+  contactNumber?: string;
 
   @Column({ nullable: true })
-  totalUnits?: number; // Optional: number of housing units
+  totalUnits?: number;
 
   @Column({ nullable: true })
-  smartIntegration?: boolean; // Whether smart home features are enabled
+  smartIntegration?: boolean;
 
   @CreateDateColumn()
-  createdAt!: Date; // Auto timestamp when record is created
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt!: Date; // Auto timestamp when record is updated
+  updatedAt!: Date;
 }
