@@ -1,5 +1,14 @@
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Home } from '../home/home.entity';
+
+@Entity()
 export class Room {
+  @PrimaryGeneratedColumn()
   id: number;
+
+  @Column()
   name: string;
-  homeId: number;
+
+  @ManyToOne(() => Home, (home) => home.rooms)
+  home: Home;
 }
