@@ -37,13 +37,3 @@ export class EstateService {
     const estate = await this.findOne(id);
     Object.assign(estate, updateEstateDto);
     return await this.estateRepository.save(estate);
-  }
-
-  // Delete estate by ID
-  async remove(id: number): Promise<void> {
-    const result = await this.estateRepository.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException(`Estate with ID ${id} not found`);
-    }
-  }
-}
