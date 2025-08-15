@@ -1,22 +1,23 @@
-import { IsString, IsOptional, IsBoolean, IsNumber } from 'class-validator';
+// src/estate/dto/create-estate.dto.ts
+import { IsString, IsOptional, IsBoolean, IsInt, Min, MaxLength } from 'class-validator';
 
 export class CreateEstateDto {
   @IsString()
-  name!: string;
+  @MaxLength(255)
+  name: string;
 
   @IsString()
-  location!: string;
+  @MaxLength(500)
+  location: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(1000)
   description?: string;
 
   @IsOptional()
-  @IsBoolean()
-  active?: boolean;
-
-  @IsOptional()
   @IsString()
+  @MaxLength(255)
   managerName?: string;
 
   @IsOptional()
@@ -24,7 +25,8 @@ export class CreateEstateDto {
   contactNumber?: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsInt()
+  @Min(1)
   totalUnits?: number;
 
   @IsOptional()
