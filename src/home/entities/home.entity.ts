@@ -9,7 +9,10 @@ export class Home {
   @Column()
   name: string;
 
-  // ✅ Add this relation so each home can have many rooms
-  @OneToMany(() => Room, room => room.home, { cascade: true })
+  // ✅ Add this so we can filter rooms by the user who owns the home
+  @Column()
+  userId: number;
+
+  @OneToMany(() => Room, (room) => room.home)
   rooms: Room[];
 }
