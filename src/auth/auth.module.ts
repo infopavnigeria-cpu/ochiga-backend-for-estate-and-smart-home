@@ -13,7 +13,7 @@ import { JwtModule } from '@nestjs/jwt';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService], // <-- This is crucial
+  providers: [AuthService], // <--- This line is crucial
   exports: [AuthService],
 })
 export class AuthModule {}
