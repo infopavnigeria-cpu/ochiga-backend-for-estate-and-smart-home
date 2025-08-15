@@ -3,7 +3,7 @@ import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { User } from './types'; // <-- Add this import
+import { User } from './types'; // Assuming this file now exists and is correct
 
 @Controller('auth')
 export class AuthController {
@@ -24,6 +24,7 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   async logout(): Promise<{ message: string }> {
+    // This method doesn't call a service method, so it's fine
     return { message: 'Logout successful.' };
   }
 }
