@@ -3,7 +3,7 @@ import { EstateService } from './estate.service';
 import { CreateEstateDto } from './dto/create-estate.dto';
 import { UpdateEstateDto } from './dto/update-estate.dto';
 
-@Controller('estate')
+@Controller('estates')
 export class EstateController {
   constructor(private readonly estateService: EstateService) {}
 
@@ -18,6 +18,20 @@ export class EstateController {
   }
 
   @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.estateService.findOne(+id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateEstateDto: UpdateEstateDto) {
+    return this.estateService.update(+id, updateEstateDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.estateService.remove(+id);
+  }
+}
   findOne(@Param('id') id: string) {
     return this.estateService.findOne(+id);
   }
