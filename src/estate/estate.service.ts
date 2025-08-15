@@ -37,3 +37,11 @@ export class EstateService {
     const estate = await this.findOne(id);
     Object.assign(estate, updateEstateDto);
     return await this.estateRepository.save(estate);
+  }
+
+  // Remove estate by ID
+  async remove(id: number): Promise<void> {
+    const estate = await this.findOne(id);
+    await this.estateRepository.remove(estate);
+  }
+}
