@@ -1,3 +1,4 @@
+// src/auth/auth.service.ts
 import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -10,7 +11,7 @@ export class AuthService {
 
   constructor(private readonly jwtService: JwtService) {}
 
-  async register(registerDto: RegisterDto) {
+  async register(registerDto: RegisterDto): Promise<{ user: User; token: string }> {
     const userExists = this.users.find(u => u.email === registerDto.email);
     if (userExists) {
       throw new BadRequestException('User already exists');
@@ -19,24 +20,27 @@ export class AuthService {
     const newUser: User = {
       id: this.users.length + 1,
       email: registerDto.email,
-      password: registerDto.password // ❗ In production, hash this
+      password: registerDto.password // In production, hash this password!
     };
+
     this.users.push(newUser);
 
-    return { message: 'Registration successful', user: newUser };
+    const token = this.jwtService.sign({ sub: newUser.id, email: newUser.email });
+
+    return { user: newUser, token };
   }
 
-  async login(loginDto: LoginDto) {
+  async login(loginDto: LoginDto): Promise<{ user: User; token: string }> {
     const user = this.users.find(
       u => u.email === loginDto.email && u.password === loginDto.password
     );
+
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload = { sub: user.id, email: user.email };
-    const token = this.jwtService.sign(payload);
+    const token = this.jwtService.sign({ sub: user.id, email: user.email });
 
-    return { access_token: token };
+    return { user, token };
   }
 }
