@@ -1,10 +1,10 @@
-// src/app.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { EstateModule } from './estate/estate.module';
+import { AuthModule } from './auth/auth.module'; // <-- Add this line
 
 @Module({
   imports: [
@@ -16,6 +16,7 @@ import { EstateModule } from './estate/estate.module';
     }),
     UserModule,
     EstateModule,
+    AuthModule, // <-- Add AuthModule to the imports array
   ],
   controllers: [AppController],
   providers: [AppService],
