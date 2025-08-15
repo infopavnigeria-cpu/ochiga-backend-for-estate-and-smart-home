@@ -2,20 +2,11 @@ import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
-
-// Define a simple User interface
-interface User {
-  id: number;
-  name?: string;
-  email: string;
-  password?: string;
-}
+import { User } from './types'; // <-- Add this import
 
 @Injectable()
 export class AuthService {
-  // A simple array for a temporary in-memory database of users
   private users: User[] = [];
-
   constructor(private readonly jwtService: JwtService) {}
 
   async register(registerDto: RegisterDto) {
@@ -36,8 +27,6 @@ export class AuthService {
 
   async login(loginDto: LoginDto) {
     const user = this.users.find(user => user.email === loginDto.email);
-    
-    // The conditional check here is crucial to prevent the TS2339 error
     if (!user || user.password !== loginDto.password) {
       throw new UnauthorizedException('Invalid credentials.');
     }
@@ -45,7 +34,7 @@ export class AuthService {
     const token = await this.generateToken(user);
     return { user, token };
   }
-
+  
   async logout(user: any) {
     return { message: 'Logout successful.' };
   }
