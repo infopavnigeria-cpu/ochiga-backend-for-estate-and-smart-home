@@ -1,21 +1,20 @@
 // src/estate/entities/estate.entity.ts
-
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity()
 export class Estate {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  name: string;
+  name!: string;
 
   @Column({ nullable: true })
-  location: string;
+  location!: string;
 
   @Column({ nullable: true })
-  description: string;
+  description!: string;
 
   @Column({ default: true })
-  active: boolean;
+  active!: boolean;
 }
