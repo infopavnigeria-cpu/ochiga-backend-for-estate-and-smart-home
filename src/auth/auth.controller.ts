@@ -26,9 +26,3 @@ export class AuthController {
     return { message: 'Logout successful.' };
   }
 }
-'logout')
-  @HttpCode(HttpStatus.OK)
-  async logout() {
-    return { message: 'Logout successful.' };
-  }
-}
