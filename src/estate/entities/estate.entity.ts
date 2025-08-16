@@ -1,5 +1,13 @@
 // src/estate/entities/estate.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+} from 'typeorm';
+import { Home } from '../../home/entities/home.entity';
 
 @Entity('estates')
 export class Estate {
@@ -27,8 +35,17 @@ export class Estate {
   @Column({ nullable: true })
   totalUnits?: number;
 
-  @Column({ nullable: true })
-  smartIntegration?: boolean;
+  // Smart integrations flag
+  @Column({ default: false })
+  smartIntegration!: boolean;
+
+  // Extra: estate-wide settings (JSON for flexibility)
+  @Column({ type: 'json', nullable: true })
+  settings?: Record<string, any>;
+
+  // Relation → Homes
+  @OneToMany(() => Home, (home) => home.estate)
+  homes!: Home[];
 
   @CreateDateColumn()
   createdAt!: Date;
