@@ -1,5 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { Room } from '../../room/entities/room.entity';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
+import { User } from '../user/user.entity';
+import { Estate } from '../estates/estate.entity';
+import { Room } from '../rooms/room.entity';
 
 @Entity()
 export class Home {
@@ -7,11 +9,13 @@ export class Home {
   id: number;
 
   @Column()
-  name: string;
+  name: string; // e.g., "Ochiga Villa", "Apartment 12B"
 
-  // ✅ Add this so we can filter rooms by the user who owns the home
-  @Column()
-  userId: number;
+  @ManyToOne(() => User, (user) => user.homes, { onDelete: 'CASCADE' })
+  user: User;
+
+  @ManyToOne(() => Estate, (estate) => estate.homes, { onDelete: 'CASCADE' })
+  estate: Estate;
 
   @OneToMany(() => Room, (room) => room.home)
   rooms: Room[];
