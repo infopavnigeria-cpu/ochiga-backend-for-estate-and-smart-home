@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Home } from '../../home/entities/home.entity';
+import { Home } from '../homes/home.entity';
 
 @Entity()
 export class Room {
@@ -7,8 +7,8 @@ export class Room {
   id: number;
 
   @Column()
-  name: string;
+  name: string; // e.g., "Living Room", "Master Bedroom"
 
-  @ManyToOne(() => Home, (home) => home.rooms)
+  @ManyToOne(() => Home, (home) => home.rooms, { onDelete: 'CASCADE' })
   home: Home;
 }
