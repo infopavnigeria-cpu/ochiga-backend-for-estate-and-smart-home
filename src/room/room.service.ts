@@ -1,24 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Room } from './entities/room.entity';
+import { Room } from './room.entity';
+import { Home } from '../homes/home.entity';
 
 @Injectable()
-export class RoomService {
+export class RoomsService {
   constructor(
     @InjectRepository(Room)
-    private readonly roomRepository: Repository<Room>,
+    private roomsRepo: Repository<Room>,
+    @InjectRepository(Home)
+    private homesRepo: Repository<Home>,
   ) {}
 
-  async create(name: string, homeId: number) {
-    const room = this.roomRepository.create({ name, home: { id: homeId } as any });
-    return this.roomRepository.save(room);
+  async createRoom(homeId: number, name: string) {
+    const home = await this.homesRepo.findOne({ where: { id: homeId } });
+    const room = this.roomsRepo.create({ name, home });
+    return this.roomsRepo.save(room);
   }
 
-  async findAll(userId: number) {
-    return this.roomRepository.find({
-      relations: ['home'],
-      where: { home: { userId } }, // ✅ Works now because Home has userId
-    });
+  async findAllByHome(homeId: number) {
+    return this.roomsRepo.find({ where: { home: { id: homeId } } });
   }
 }
