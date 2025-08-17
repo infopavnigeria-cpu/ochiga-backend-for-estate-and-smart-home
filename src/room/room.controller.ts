@@ -1,40 +1,20 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Patch,
-  Delete,
-  Param,
-  Body,
-  HttpCode,
-  HttpStatus,
-} from '@nestjs/common';
+import { Controller, Post, Get, Param, Body } from '@nestjs/common';
 import { RoomService } from './room.service';
 import { CreateRoomDto } from './dto/create-room.dto';
-import { UpdateRoomDto } from './dto/update-room.dto';
 
 @Controller('rooms')
 export class RoomController {
   constructor(private readonly roomService: RoomService) {}
 
+  // Create a new room under a home
   @Post()
-  @HttpCode(HttpStatus.CREATED)
-  create(@Body() dto: CreateRoomDto) {
-    return this.roomService.create(dto);
+  async create(@Body() createRoomDto: CreateRoomDto) {
+    return this.roomService.createRoom(createRoomDto.homeId, createRoomDto.name);
   }
 
-  @Get(':homeId')
-  findByHome(@Param('homeId') homeId: string) {
-    return this.roomService.findByHome(+homeId);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateRoomDto) {
-    return this.roomService.update(+id, dto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.roomService.remove(+id);
+  // Get all rooms under a specific home
+  @Get('home/:homeId')
+  async findAllByHome(@Param('homeId') homeId: number) {
+    return this.roomService.findAllByHome(homeId);
   }
 }
