@@ -4,53 +4,45 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Room } from './room.entity';
 import { Home } from '../homes/home.entity';
+import { UpdateRoomDto } from './dto/update-room.dto';
 
 @Injectable()
 export class RoomService {
   constructor(
     @InjectRepository(Room)
-    private readonly roomRepo: Repository<Room>,
-
+    private roomsRepo: Repository<Room>,
     @InjectRepository(Home)
-    private readonly homeRepo: Repository<Home>,
+    private homesRepo: Repository<Home>,
   ) {}
 
-  // ✅ Create a room under a specific home
-  async createRoom(homeId: number, name: string): Promise<Room> {
-    const home = await this.homeRepo.findOne({ where: { id: homeId } });
+  async createRoom(homeId: number, name: string) {
+    const home = await this.homesRepo.findOne({ where: { id: homeId } });
     if (!home) {
       throw new NotFoundException(`Home with ID ${homeId} not found`);
     }
-
-    const room = this.roomRepo.create({ name, home });
-    return this.roomRepo.save(room);
+    const room = this.roomsRepo.create({ name, home });
+    return this.roomsRepo.save(room);
   }
 
-  // ✅ Get all rooms for a home
-  async findAllByHome(homeId: number): Promise<Room[]> {
-    return this.roomRepo.find({
-      where: { home: { id: homeId } },
-      relations: ['home'], // includes home details in response
-    });
+  async findAllByHome(homeId: number) {
+    return this.roomsRepo.find({ where: { home: { id: homeId } } });
   }
 
-  // ✅ Find single room
-  async findOne(id: number): Promise<Room> {
-    const room = await this.roomRepo.findOne({
-      where: { id },
-      relations: ['home'],
-    });
+  async update(id: number, dto: UpdateRoomDto) {
+    const room = await this.roomsRepo.findOne({ where: { id } });
     if (!room) {
       throw new NotFoundException(`Room with ID ${id} not found`);
     }
-    return room;
+
+    Object.assign(room, dto);
+    return this.roomsRepo.save(room);
   }
 
-  // ✅ Delete room
-  async remove(id: number): Promise<void> {
-    const result = await this.roomRepo.delete(id);
-    if (result.affected === 0) {
+  async remove(id: number) {
+    const room = await this.roomsRepo.findOne({ where: { id } });
+    if (!room) {
       throw new NotFoundException(`Room with ID ${id} not found`);
     }
+    return this.roomsRepo.remove(room);
   }
 }
