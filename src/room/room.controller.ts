@@ -1,4 +1,3 @@
-// src/rooms/room.controller.ts
 import {
   Controller,
   Post,
@@ -18,35 +17,24 @@ import { UpdateRoomDto } from './dto/update-room.dto';
 export class RoomController {
   constructor(private readonly roomService: RoomService) {}
 
-  // ✅ Create a room under a specific home
-  @Post(':homeId')
+  @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(
-    @Param('homeId') homeId: string,
-    @Body() dto: CreateRoomDto,
-  ) {
-    return this.roomService.createRoom(+homeId, dto.name);
+  create(@Body() dto: CreateRoomDto) {
+    return this.roomService.create(dto);
   }
 
-  // ✅ Get all rooms in a specific home
   @Get(':homeId')
   findByHome(@Param('homeId') homeId: string) {
-    return this.roomService.findAllByHome(+homeId);
+    return this.roomService.findByHome(+homeId);
   }
 
-  // ✅ Update room
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateRoomDto) {
     return this.roomService.update(+id, dto);
   }
 
-  // ✅ Delete room
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.roomService.remove(+id);
-  }
-}
-  remove(@Req() req, @Param('id') id: string) {
-    return this.roomService.remove(req.user.id, +id);
   }
 }
