@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
 import { User } from '../user/user.entity';
-import { Estate } from '../estates/estate.entity';
-import { Room } from '../rooms/room.entity';
+import { Estate } from '../estate/estate.entity';
+import { Room } from '../room/room.entity';
 
 @Entity()
 export class Home {
