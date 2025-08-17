@@ -3,10 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Home } from './home.entity';
 import { User } from '../user/user.entity';
-import { Estate } from '../estates/estate.entity';
+import { Estate } from '../estate/estate.entity';
 
 @Injectable()
-export class HomesService {
+export class HomeService {
   constructor(
     @InjectRepository(Home)
     private homesRepo: Repository<Home>,
@@ -20,11 +20,18 @@ export class HomesService {
     const user = await this.usersRepo.findOne({ where: { id: userId } });
     const estate = await this.estatesRepo.findOne({ where: { id: estateId } });
 
+    if (!user || !estate) {
+      throw new Error('User or Estate not found');
+    }
+
     const home = this.homesRepo.create({ name, user, estate });
     return this.homesRepo.save(home);
   }
 
   async findAllByUser(userId: number) {
-    return this.homesRepo.find({ where: { user: { id: userId } }, relations: ['estate', 'rooms'] });
+    return this.homesRepo.find({
+      where: { user: { id: userId } },
+      relations: ['estate', 'rooms'],
+    });
   }
 }
