@@ -16,16 +16,25 @@ export class HomeService {
     @InjectRepository(Estate) private readonly estatesRepo: Repository<Estate>,
   ) {}
 
-  async createHome(name: string, estateId: number, ownerId: number): Promise<Home> {
+  /**
+   * Create a home inside an estate and link an owner as a member
+   */
+  async createHome(
+    name: string,
+    estateId: number,
+    ownerId: number,
+  ): Promise<Home> {
     const estate = await this.estatesRepo.findOneBy({ id: estateId });
     if (!estate) throw new Error('Estate not found');
 
     const owner = await this.usersRepo.findOneBy({ id: ownerId });
     if (!owner) throw new Error('User not found');
 
+    // ✅ Home has no "user" property anymore
     const home = this.homesRepo.create({ name, estate });
     await this.homesRepo.save(home);
 
+    // ✅ Relationship handled via HomeMember
     const membership = this.membersRepo.create({
       home,
       user: owner,
@@ -36,7 +45,14 @@ export class HomeService {
     return home;
   }
 
-  async addMember(homeId: number, userId: number, role: 'ADMIN' | 'MEMBER' = 'MEMBER') {
+  /**
+   * Add another user to a home with a role
+   */
+  async addMember(
+    homeId: number,
+    userId: number,
+    role: 'ADMIN' | 'MEMBER' = 'MEMBER',
+  ): Promise<HomeMember> {
     const home = await this.homesRepo.findOneBy({ id: homeId });
     if (!home) throw new Error('Home not found');
 
@@ -50,5 +66,15 @@ export class HomeService {
     });
 
     return this.membersRepo.save(membership);
+  }
+
+  /**
+   * Find all members of a home
+   */
+  async getMembers(homeId: number): Promise<HomeMember[]> {
+    return this.membersRepo.find({
+      where: { home: { id: homeId } },
+      relations: ['user', 'home'],
+    });
   }
 }
