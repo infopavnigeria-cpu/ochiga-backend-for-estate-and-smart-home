@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
-import { Estate } from '../estate/estate.entity';
+import { Estate } from '../../estate/entities/estate.entity';
 import { Room } from '../room/room.entity';
 
 @Entity()
