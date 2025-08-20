@@ -1,13 +1,8 @@
 // src/user/entities/user.entity.ts
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToMany,
-} from 'typeorm';
-import { Home } from '../../home/entities/home.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { HomeMember } from '../../home/entities/home-member.entity';
 
-@Entity('users')
+@Entity()
 export class User {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -22,5 +17,5 @@ export class User {
   password!: string;
 
   @OneToMany(() => HomeMember, (member) => member.user)
-  memberships!: HomeMember[];
+  homeMembers!: HomeMember[];
 }
