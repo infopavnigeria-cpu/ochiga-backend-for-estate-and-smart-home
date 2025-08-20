@@ -3,7 +3,11 @@ import { Entity, PrimaryGeneratedColumn, ManyToOne, Column } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Home } from './home.entity';
 
-export type HomeRole = 'OWNER' | 'ADMIN' | 'MEMBER';
+export enum HomeRole {
+  OWNER = 'OWNER',
+  ADMIN = 'ADMIN',
+  MEMBER = 'MEMBER',
+}
 
 @Entity()
 export class HomeMember {
@@ -16,7 +20,7 @@ export class HomeMember {
   @ManyToOne(() => Home, (home) => home.members, { onDelete: 'CASCADE' })
   home!: Home;
 
-  @Column({ type: 'varchar', default: 'MEMBER' })
+  @Column({ type: 'enum', enum: HomeRole, default: HomeRole.MEMBER })
   role!: HomeRole;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
