@@ -24,4 +24,3 @@ export class User {
   @OneToMany(() => HomeMember, (member) => member.user)
   memberships!: HomeMember[];
 }
-}
