@@ -21,6 +21,7 @@ export class User {
   @Column()
   password!: string;
 
-  @OneToMany(() => Home, (home) => home.owner)
-  homes!: Home[];
+  @OneToMany(() => HomeMember, (member) => member.user)
+  memberships!: HomeMember[];
+}
 }
