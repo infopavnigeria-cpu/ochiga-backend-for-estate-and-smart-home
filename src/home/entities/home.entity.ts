@@ -10,7 +10,9 @@ import { Estate } from '../../estate/entities/estate.entity';
 import { Room } from '../room/room.entity';
 import { User } from '../../user/entities/user.entity';
 
-@Entity('homes')
+entity';
+
+@Entity()
 export class Home {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -21,9 +23,9 @@ export class Home {
   @ManyToOne(() => Estate, (estate) => estate.homes, { onDelete: 'CASCADE' })
   estate!: Estate;
 
+  @ManyToOne(() => User, (user) => user.homes, { onDelete: 'CASCADE' })
+  user!: User;   // 👈 new relation
+
   @OneToMany(() => Room, (room) => room.home, { cascade: true })
   rooms!: Room[];
-
-  @ManyToOne(() => User, (user) => user.homes, { onDelete: 'SET NULL' })
-  owner?: User;
 }
