@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Home } from './home.entity';
-import { User } from '../user/user.entity';
-import { Estate } from '../estate/estate.entity';
+import { Home } from './entities/home.entity';
+import { User } from '../user/entities/user.entity';
+import { Estate } from '../estate/entities/estate.entity';
 
 @Injectable()
 export class HomeService {
