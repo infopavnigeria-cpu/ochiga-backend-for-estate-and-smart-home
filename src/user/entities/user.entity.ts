@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { Home } from '../../homes/entities/home.entity';
+// adjust the path when home.entity.ts exists
+import { Home } from '../../homes/home.entity';
 
 @Entity()
 export class User {
@@ -15,7 +16,7 @@ export class User {
   @Column()
   password!: string;
 
-  // Example relation: one user can own many homes
+  // One user can own many homes
   @OneToMany(() => Home, (home) => home.owner)
-  homes: Home[];
+  homes!: Home[];  // <-- "!" fixes the TS2564 error
 }
