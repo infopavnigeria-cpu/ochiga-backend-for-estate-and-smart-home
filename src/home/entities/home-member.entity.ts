@@ -1,29 +1,24 @@
+// src/home/entities/home-member.entity.ts
 import { Entity, PrimaryGeneratedColumn, ManyToOne, Column } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Home } from './home.entity';
 
-export enum HomeRole {
-  OWNER = 'owner',
-  ADMIN = 'admin',
-  MODERATOR = 'moderator',
-  RESIDENT = 'resident',
-}
+export type HomeRole = 'OWNER' | 'ADMIN' | 'MEMBER';
 
 @Entity()
 export class HomeMember {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne(() => User, (user) => user.memberships, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.homeMembers, { onDelete: 'CASCADE' })
   user!: User;
 
   @ManyToOne(() => Home, (home) => home.members, { onDelete: 'CASCADE' })
   home!: Home;
 
-  @Column({
-    type: 'enum',
-    enum: HomeRole,
-    default: HomeRole.RESIDENT,
-  })
+  @Column({ type: 'varchar', default: 'MEMBER' })
   role!: HomeRole;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  joinedAt!: Date;
 }
