@@ -21,7 +21,6 @@ export class User {
   @Column()
   password!: string;
 
-  // Relation → Homes
   @OneToMany(() => Home, (home) => home.owner)
   homes!: Home[];
 }
