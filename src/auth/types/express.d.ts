@@ -1,4 +1,3 @@
-// src/auth/types/express.d.ts
 import { User } from '../../user/entities/user.entity';
 
 declare module 'express-serve-static-core' {
