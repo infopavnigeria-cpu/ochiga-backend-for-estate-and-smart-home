@@ -13,7 +13,7 @@
     "incremental": true,
     "strict": true,
     "typeRoots": ["./src/auth/types", "./node_modules/@types"],
-    "types": ["node", "express"]
+    "types": ["node", "express", "jest"]
   },
   "exclude": ["node_modules", "dist"]
 }
