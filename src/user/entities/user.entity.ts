@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 // adjust the path when home.entity.ts exists
-import { Home } from '../../homes/home.entity';
+import { Home } from '../../home/entities/home.entity';
 
 @Entity()
 export class User {
