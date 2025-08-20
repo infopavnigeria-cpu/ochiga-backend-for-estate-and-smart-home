@@ -7,7 +7,13 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
-    "types": ["node", "jest"]   // ✅ Add this
+
+    // ✅ Required for NestJS decorators
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    // ✅ For Jest tests
+    "types": ["node", "jest"]
   },
   "exclude": ["node_modules", "dist"]
 }
