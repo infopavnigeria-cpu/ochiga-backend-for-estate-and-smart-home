@@ -12,14 +12,12 @@ export class Home {
   @Column()
   name!: string;
 
-  @ManyToOne(() => Estate, (estate) => estate.homes, { onDelete: 'CASCADE' })
+    @ManyToOne(() => Estate, (estate) => estate.homes, { onDelete: 'CASCADE' })
   estate!: Estate;
-
-  // One home has many members (owner, admins, moderators, etc.)
-  @OneToMany(() => HomeMember, (member) => member.home, { cascade: true })
-  members!: HomeMember[];
 
   @OneToMany(() => Room, (room) => room.home, { cascade: true })
   rooms!: Room[];
-}
+
+  @OneToMany(() => HomeMember, (member) => member.home, { cascade: true })
+  members!: HomeMember[];
 }
