@@ -1,4 +1,4 @@
 export class CreateHomeDto {
-  name: string;
-  address: string;
+  name!: string;
+  address!: string;
 }
