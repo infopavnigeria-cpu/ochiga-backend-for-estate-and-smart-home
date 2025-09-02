@@ -1,17 +1,18 @@
+// src/data-source.ts
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import { User } from "./user/entities/user.entity"; 
-// later add Home, HomeMember, etc
+import { User } from "./user/entities/user.entity";
+import { Estate } from "./estate/entities/estate.entity";  // add this
 
 export const AppDataSource = new DataSource({
-  type: "postgres",            // or "mysql" depending on your DB
+  type: "postgres",           
   host: "localhost",
-  port: 5432,                  // postgres default
-  username: "postgres",        // your db username
-  password: "password",        // your db password
-  database: "ochiga_db",       // your db name
-  entities: [User],            // add more entities here
+  port: 5432,                  
+  username: "postgres",        
+  password: "password",        
+  database: "ochiga_db",       
+  entities: [User, Estate],    // include Estate here
   migrations: ["dist/migrations/*.js"], 
-  synchronize: false,          // true for dev, false in prod
+  synchronize: false,          // set true only in dev for testing
   logging: true,
 });
