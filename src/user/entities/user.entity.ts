@@ -21,9 +21,9 @@ export class User {
   @Column()
   password!: string;
 
+  // ✅ Use text instead of enum for SQLite
   @Column({
-    type: 'enum',
-    enum: UserRole,
+    type: 'text',
     default: UserRole.RESIDENT,
   })
   role!: UserRole;
