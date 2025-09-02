@@ -35,15 +35,13 @@ export class Estate {
   @Column({ nullable: true })
   totalUnits?: number;
 
-  // Smart integrations flag
   @Column({ default: false })
   smartIntegration!: boolean;
 
-  // Extra: estate-wide settings (JSON for flexibility)
-  @Column({ type: 'json', nullable: true })
-  settings?: Record<string, any>;
+  // ✅ FIXED: JSON → text
+  @Column({ type: 'text', nullable: true })
+  settings?: string;
 
-  // Relation → Homes
   @OneToMany(() => Home, (home) => home.estate)
   homes!: Home[];
 
