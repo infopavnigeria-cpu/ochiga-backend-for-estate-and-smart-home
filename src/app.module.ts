@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './users/user.entity';
-import { Estate } from './estates/estate.entity';
-import { Home } from './homes/home.entity';
-import { Room } from './rooms/room.entity';
+import { User } from './user/entities/user.entity';
+import { Estate } from './estate/entities/estate.entity';
+import { Home } from './home/entities/home.entity';
+import { Room } from './room/entities/room.entity';
 
 @Module({
   imports: [
@@ -11,9 +11,8 @@ import { Room } from './rooms/room.entity';
       type: 'sqlite',
       database: 'db.sqlite',
       entities: [User, Estate, Home, Room],
-      synchronize: true,  // auto-create tables in dev
+      synchronize: true,
     }),
-    TypeOrmModule.forFeature([User, Estate, Home, Room]),
   ],
 })
 export class AppModule {}
