@@ -1,3 +1,11 @@
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Estate } from './estate/entities/estate.entity';
+import { Home } from './home/entities/home.entity';
+import { Room } from './room/entities/room.entity';
+import { User } from './user/entities/user.entity';
+import { HomeMember } from './home/entities/home-member.entity';
+
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -8,6 +16,5 @@
     }),
     TypeOrmModule.forFeature([Estate, Home, Room, User, HomeMember]),
   ],
-})
 })
 export class AppModule {}
