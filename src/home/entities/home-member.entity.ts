@@ -20,9 +20,9 @@ export class HomeMember {
   @ManyToOne(() => Home, (home) => home.members, { onDelete: 'CASCADE' })
   home!: Home;
 
-  // ✅ Change from enum → text (for SQLite support)
+  // ✅ Store as text (SQLite safe), but still use HomeRole enum in code
   @Column({ type: 'text', default: HomeRole.MEMBER })
-  role!: HomeRole;
+  role!: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   joinedAt!: Date;
