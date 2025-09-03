@@ -22,11 +22,8 @@ export class User {
   password!: string;
 
   // ✅ Use text instead of enum for SQLite
-  @Column({
-    type: 'text',
-    default: UserRole.RESIDENT,
-  })
-  role!: UserRole;
+  @Column({ type: 'text', default: 'resident' })
+role!: string;
 
   @OneToMany(() => HomeMember, (member) => member.user)
   homeMembers!: HomeMember[];
