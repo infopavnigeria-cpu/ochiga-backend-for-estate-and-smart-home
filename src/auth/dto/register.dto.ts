@@ -1,16 +1,22 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+// src/auth/dto/register.dto.ts
+import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class RegisterDto {
-  @IsString()
-  @IsNotEmpty()
-  name: string = '';
-
   @IsEmail()
-  @IsNotEmpty()
-  email: string = '';
+  email: string;
 
-  @IsString()
   @IsNotEmpty()
-  @MinLength(6, { message: 'Password must be at least 6 characters long' })
-  password: string = '';
+  password: string;
+
+  @IsOptional()
+  role?: 'manager' | 'resident';
+
+  @IsOptional()
+  estate?: string;
+
+  @IsOptional()
+  name?: string;
+
+  @IsOptional()
+  house?: string;
 }
