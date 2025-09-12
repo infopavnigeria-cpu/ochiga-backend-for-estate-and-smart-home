@@ -7,7 +7,26 @@ import { User } from './types';
 
 @Injectable()
 export class AuthService {
-  private users: User[] = [];
+  private users: User[] = [
+    {
+      id: 1,
+      email: 'ada@p2e.com',
+      password: 'password123',
+      role: 'manager',
+      estate: 'P2E Estate',
+      name: 'Ada',
+      house: 'B12',
+    },
+    {
+      id: 2,
+      email: 'emeka@green.com',
+      password: 'mypassword',
+      role: 'resident',
+      estate: 'GreenVille',
+      name: 'Emeka',
+      house: 'C4',
+    },
+  ];
 
   constructor(private readonly jwtService: JwtService) {}
 
@@ -19,13 +38,12 @@ export class AuthService {
 
     const newUser: User = {
       id: this.users.length + 1,
-      email: registerDto.email,
-      password: registerDto.password // In production, hash this password!
+      ...registerDto,
     };
 
     this.users.push(newUser);
 
-    const token = this.jwtService.sign({ sub: newUser.id, email: newUser.email });
+    const token = this.jwtService.sign({ sub: newUser.id, email: newUser.email, role: newUser.role });
 
     return { user: newUser, token };
   }
@@ -39,7 +57,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const token = this.jwtService.sign({ sub: user.id, email: user.email });
+    const token = this.jwtService.sign({ sub: user.id, email: user.email, role: user.role });
 
     return { user, token };
   }
