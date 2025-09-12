@@ -2,6 +2,7 @@
 import { Body, Controller, Get, Post, Param, Put } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateResidentDto } from './dto/create-resident.dto';
+import { RegisterResidentDto } from './dto/register-resident.dto';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -21,6 +22,11 @@ export class UserController {
   @Post('resident')
   createResident(@Body() createResidentDto: CreateResidentDto) {
     return this.userService.createResident(createResidentDto);
+  }
+
+  @Post('register')
+  registerResident(@Body() registerDto: RegisterResidentDto) {
+    return this.userService.registerResident(registerDto);
   }
 
   @Get(':id')
