@@ -16,15 +16,15 @@ import { RoomModule } from './room/room.module';
 
 @Module({
   imports: [
+    // ✅ Global DB connection (applies to all modules)
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: 'db.sqlite',
       entities: [Estate, Home, Room, User, HomeMember],
-      synchronize: true, // ⚠️ don’t use in production, only dev
+      synchronize: true, // ⚠️ dev only, disable in production
     }),
-    TypeOrmModule.forFeature([Estate, Home, Room, User, HomeMember]),
 
-    // 🔑 Feature modules
+    // ✅ Feature modules
     AuthModule,
     DashboardModule,
     UserModule,
