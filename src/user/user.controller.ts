@@ -1,3 +1,4 @@
+// src/user/user.controller.ts
 import { Body, Controller, Get, Post, Param, Put } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserService } from './user.service';
@@ -24,11 +25,5 @@ export class UserController {
   @Put(':id')
   updateUser(@Param('id') id: string, @Body() updateData: any) {
     return this.userService.updateUser(Number(id), updateData);
-  }
-
-  // 🔑 New: Register endpoint
-  @Post('register')
-  registerResident(@Body() body: { inviteToken: string; password: string }) {
-    return this.userService.registerResident(body.inviteToken, body.password);
   }
 }
