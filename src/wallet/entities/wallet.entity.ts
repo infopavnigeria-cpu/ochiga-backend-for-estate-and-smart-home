@@ -8,12 +8,8 @@ export class Wallet {
   @Column()
   userId!: string; // foreign key to User (UUID)
 
-  @Column({
-    type: process.env.DB_TYPE === 'sqlite' ? 'real' : 'decimal',
-    precision: 12,
-    scale: 2,
-    default: 0,
-  })
+  // store as integer (cents / kobo) for accuracy
+  @Column({ type: 'integer', default: 0 })
   balance!: number;
 
   @Column({ nullable: true })
@@ -22,9 +18,9 @@ export class Wallet {
   @Column({ default: false })
   isActive!: boolean;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'text' })
   createdAt!: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'text' })
   updatedAt!: Date;
 }
