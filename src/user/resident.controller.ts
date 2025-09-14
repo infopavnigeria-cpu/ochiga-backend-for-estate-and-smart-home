@@ -30,16 +30,16 @@ export class ResidentController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.residentService.findOne(+id); // ✅ convert string param to number
+    return this.residentService.findOne(id); // ✅ keep as string
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: Partial<Resident>) {
-    return this.residentService.update(+id, dto); // ✅ number
+    return this.residentService.update(id, dto); // ✅ keep as string
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.residentService.remove(+id); // ✅ number
+    return this.residentService.remove(id); // ✅ keep as string
   }
 }
