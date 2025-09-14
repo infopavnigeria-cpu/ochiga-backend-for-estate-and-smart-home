@@ -6,7 +6,7 @@ import {
   Request,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { UserRole } from './entities/user.entity';   // ✅ Import enum from entity, not service
+import { UserRole } from './entities/user.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
