@@ -6,8 +6,8 @@ import { HomeMember } from './home-member.entity';
 
 @Entity()
 export class Home {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn('uuid')   // ✅ switched to UUID
+  id!: string;
 
   @Column()
   name!: string;
