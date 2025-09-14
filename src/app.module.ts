@@ -6,6 +6,7 @@ import { Home } from './home/entities/home.entity';
 import { Room } from './room/entities/room.entity';
 import { User } from './user/entities/user.entity';
 import { HomeMember } from './home/entities/home-member.entity';
+import { Wallet } from './wallet/entities/wallet.entity';
 
 import { AuthModule } from './auth/auth.module';
 import { DashboardModule } from './dashboard/dashboard.module';
@@ -13,17 +14,16 @@ import { UserModule } from './user/user.module';
 import { EstateModule } from './estate/estate.module';
 import { HomeModule } from './home/home.module';
 import { RoomModule } from './room/room.module';
-import { WalletModule } from './wallet/wallet.module';   // 👈 Add wallet module
-import { Wallet } from './wallet/entities/wallet.entity'; // 👈 Add wallet entity
+import { WalletModule } from './wallet/wallet.module';
 
 @Module({
   imports: [
-    // ✅ Global DB connection (applies to all modules)
+    // ✅ Global DB connection
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: 'db.sqlite',
-      entities: [Estate, Home, Room, User, HomeMember, Wallet], // 👈 include Wallet
-      synchronize: true, // ⚠️ dev only, disable in production
+      entities: [Estate, Home, Room, User, HomeMember, Wallet],
+      synchronize: true, // ⚠️ dev only, disable in prod
     }),
 
     // ✅ Feature modules
@@ -33,7 +33,7 @@ import { Wallet } from './wallet/entities/wallet.entity'; // 👈 Add wallet ent
     EstateModule,
     HomeModule,
     RoomModule,
-    WalletModule,  // 👈 new wallet feature
+    WalletModule,
   ],
 })
 export class AppModule {}
