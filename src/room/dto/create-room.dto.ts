@@ -1,5 +1,10 @@
-// src/rooms/dto/create-room.dto.ts
+// src/room/dto/create-room.dto.ts
+import { IsString } from 'class-validator';
+
 export class CreateRoomDto {
+  @IsString()
   name!: string;
-  homeId!: number;
+
+  @IsString()
+  homeId!: string;  // 👈 change number → string
 }
