@@ -1,4 +1,3 @@
-// src/home/entities/home.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
 import { Estate } from '../../estate/entities/estate.entity';
 import { Room } from '../../room/entities/room.entity';
@@ -6,7 +5,7 @@ import { HomeMember } from './home-member.entity';
 
 @Entity()
 export class Home {
-  @PrimaryGeneratedColumn('uuid')   // ✅ switched to UUID
+  @PrimaryGeneratedColumn('uuid')
   id!: string;
 
   @Column()
