@@ -13,6 +13,8 @@ import { UserModule } from './user/user.module';
 import { EstateModule } from './estate/estate.module';
 import { HomeModule } from './home/home.module';
 import { RoomModule } from './room/room.module';
+import { WalletModule } from './wallet/wallet.module';   // 👈 Add wallet module
+import { Wallet } from './wallet/entities/wallet.entity'; // 👈 Add wallet entity
 
 @Module({
   imports: [
@@ -20,7 +22,7 @@ import { RoomModule } from './room/room.module';
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: 'db.sqlite',
-      entities: [Estate, Home, Room, User, HomeMember],
+      entities: [Estate, Home, Room, User, HomeMember, Wallet], // 👈 include Wallet
       synchronize: true, // ⚠️ dev only, disable in production
     }),
 
@@ -31,6 +33,7 @@ import { RoomModule } from './room/room.module';
     EstateModule,
     HomeModule,
     RoomModule,
+    WalletModule,  // 👈 new wallet feature
   ],
 })
 export class AppModule {}
