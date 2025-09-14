@@ -14,9 +14,10 @@ export class Resident {
   @Column()
   house!: string;
 
-  @Column('simple-array', { nullable: true })
-  records: string[] = [];
+  // Stored as comma-separated text in SQLite
+  @Column('text', { nullable: true })
+  records?: string; // convert manually to array
 
-  @Column('simple-array', { nullable: true })
-  history: string[] = [];
+  @Column('text', { nullable: true })
+  history?: string; // convert manually to array
 }
