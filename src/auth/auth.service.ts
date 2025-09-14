@@ -25,12 +25,13 @@ export class AuthService {
     );
   }
 
+  // ✅ Secure register
   async register(registerDto: RegisterDto): Promise<{ user: User; token: string }> {
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
 
     const user = await this.userService.createUser({
       ...registerDto,
-      password: hashedPassword,
+      password: hashedPassword, // ✅ store hash
       role: registerDto.role ?? UserRole.RESIDENT,
     });
 
@@ -38,6 +39,7 @@ export class AuthService {
     return { user, token };
   }
 
+  // ✅ Resident registration via invite
   async registerResident(inviteToken: string, password: string): Promise<{ user: User; token: string }> {
     if (!inviteToken || inviteToken !== 'VALID_INVITE') {
       throw new UnauthorizedException('Invalid invite token');
@@ -48,7 +50,7 @@ export class AuthService {
 
     const user = await this.userService.createUser({
       email,
-      password: hashedPassword,
+      password: hashedPassword, // ✅ store hash
       role: UserRole.RESIDENT,
     });
 
@@ -56,10 +58,11 @@ export class AuthService {
     return { user, token };
   }
 
+  // ✅ Login with bcrypt password check
   async login(loginDto: LoginDto): Promise<{ user: User; token: string }> {
     const user = await this.userService.findByEmail(loginDto.email);
 
-    if (!user) {
+    if (!user || !user.password) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
