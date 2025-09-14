@@ -1,4 +1,3 @@
-// src/user/user.service.ts
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -18,27 +17,29 @@ export class UserService {
     if (exists) {
       throw new BadRequestException('User already exists');
     }
+
     const newUser = this.userRepo.create({
       ...data,
       role: data.role ?? UserRole.RESIDENT,
     });
+
     return this.userRepo.save(newUser);
   }
 
-  findAll(): Promise<User[]> {
+  async getAllUsers(): Promise<User[]> {
     return this.userRepo.find();
   }
 
-  findByEmail(email: string): Promise<User | null> {
-    return this.userRepo.findOne({ where: { email } });
+  async getUserById(id: string): Promise<User | null> {
+    return this.userRepo.findOne({ where: { id } });
   }
 
-  findById(id: string): Promise<User | null> {
-    return this.userRepo.findOne({ where: { id } });
+  async findByEmail(email: string): Promise<User | null> {
+    return this.userRepo.findOne({ where: { email } });
   }
 
   async updateUser(id: string, updateData: Partial<User>): Promise<User | null> {
     await this.userRepo.update(id, updateData);
-    return this.findById(id);
+    return this.getUserById(id);
   }
 }
