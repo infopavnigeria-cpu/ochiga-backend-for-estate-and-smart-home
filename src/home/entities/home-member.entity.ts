@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, ManyToOne, Column, CreateDateColumn } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Home } from './home.entity';
 
@@ -19,19 +19,9 @@ export class HomeMember {
   @ManyToOne(() => Home, (home) => home.members, { onDelete: 'CASCADE' })
   home!: Home;
 
-  @Column({
-    type: process.env.DB_TYPE === 'sqlite' ? 'text' : 'enum',
-    enum: HomeRole,
-    default: HomeRole.MEMBER,
-  })
+  @Column({ type: 'text', default: HomeRole.MEMBER })
   role!: HomeRole;
 
-  @Column({
-    type: process.env.DB_TYPE === 'sqlite' ? 'text' : 'timestamp',
-    default: () =>
-      process.env.DB_TYPE === 'sqlite'
-        ? "(datetime('now'))"
-        : 'CURRENT_TIMESTAMP',
-  })
+  @CreateDateColumn({ type: 'text' })
   joinedAt!: Date;
 }
