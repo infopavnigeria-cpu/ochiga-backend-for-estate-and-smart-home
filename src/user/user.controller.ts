@@ -1,25 +1,32 @@
+// src/user/user.controller.ts
 import {
-  Body,
   Controller,
   Get,
-  Post,
-  Put,
   UseGuards,
   Request,
 } from '@nestjs/common';
-import { UserService, UserRole } from './user.service';
+import { UserService } from './user.service';
+import { UserRole } from './entities/user.entity';   // ✅ Import enum from entity, not service
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
+
+interface AuthenticatedRequest {
+  user: {
+    id: number;
+    email: string;
+    role: UserRole;
+  };
+}
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // 🔒 Only logged-in users (any role)
+  // 🔒 Any logged-in user
   @Get('profile')
   @UseGuards(JwtAuthGuard)
-  getProfile(@Request() req) {
+  getProfile(@Request() req: AuthenticatedRequest) {
     return req.user;
   }
 
@@ -35,7 +42,7 @@ export class UserController {
   @Get('my-data')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.RESIDENT)
-  getMyData(@Request() req: { user: { id: number } }) {
+  getMyData(@Request() req: AuthenticatedRequest) {
     return this.userService.getUserById(req.user.id);
   }
 }
