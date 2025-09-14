@@ -3,7 +3,7 @@ import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { User } from './types';
+import { User } from '../user/entities/user.entity'; // ✅ use real entity
 
 @Controller('auth')
 export class AuthController {
