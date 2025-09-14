@@ -1,5 +1,8 @@
-export interface User {
-  id: number;
+// src/auth/types.ts
+import { UserRole } from '../enums/user-role.enum';
+
+export interface JwtPayload {
+  id: string;      // ✅ UUID string
   email: string;
-  password: string;
+  role: UserRole;
 }
