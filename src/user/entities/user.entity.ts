@@ -1,30 +1,23 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { HomeMember } from '../../home/entities/home-member.entity';
-
+// src/user/entities/user.entity.ts
 export enum UserRole {
-  ADMIN = 'admin',
-  RESIDENT = 'resident',
-  MANAGER = 'manager',
+  Manager = 'manager',
+  Resident = 'resident',
 }
 
-@Entity()
-export class User {
-  @PrimaryGeneratedColumn()
-  id!: number;
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  role: UserRole;
+  password: string | null;
 
-  @Column()
-  name!: string;
+  // only needed for residents
+  estate?: string;
+  house?: string;
 
-  @Column({ unique: true })
-  email!: string;
+  records: any[];
+  history: any[];
 
-  @Column()
-  password!: string;
-
-  // ✅ Use text instead of enum for SQLite
-  @Column({ type: 'text', default: 'resident' })
-role!: string;
-
-  @OneToMany(() => HomeMember, (member) => member.user)
-  homeMembers!: HomeMember[];
+  inviteToken?: string;
+  inviteLink?: string;
 }
