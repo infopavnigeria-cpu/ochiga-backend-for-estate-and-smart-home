@@ -1,22 +1,23 @@
+// src/user/entities/resident.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity()
 export class Resident {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;   // definite assignment
 
   @Column()
-  estate: string;
+  estate!: string;
 
   @Column()
-  name: string;
+  name!: string;
 
   @Column()
-  house: string;
+  house!: string;
 
   @Column("simple-array", { nullable: true })
-  records: string[];
+  records: string[] = [];   // default empty array
 
   @Column("simple-array", { nullable: true })
-  history: string[];
+  history: string[] = [];   // default empty array
 }
