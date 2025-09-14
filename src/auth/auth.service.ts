@@ -30,24 +30,28 @@ export class AuthService {
     );
   }
 
+  private sanitizeUser(user: User): Omit<User, 'password'> {
+    const { password, ...safeUser } = user;
+    return safeUser;
+  }
+
   // ✅ Secure register
-  async register(registerDto: RegisterDto): Promise<{ user: User; token: string }> {
+  async register(registerDto: RegisterDto): Promise<{ user: Omit<User, 'password'>; token: string }> {
     try {
       const hashedPassword = await bcrypt.hash(registerDto.password, 10);
 
       const user = await this.userService.createUser({
         ...registerDto,
-        password: hashedPassword, // ✅ store hash
+        password: hashedPassword,
         role: registerDto.role ?? UserRole.RESIDENT,
       });
 
       const token = this.generateJwt(user);
-      return { user, token };
+      return { user: this.sanitizeUser(user), token };
     } catch (err: unknown) {
       console.error('❌ AuthService.register error:', err);
 
       const error = err as { code?: string; message?: string };
-
       if (error.code === 'SQLITE_CONSTRAINT' || error.code === '23505') {
         throw new BadRequestException('User already exists');
       }
@@ -62,7 +66,7 @@ export class AuthService {
   async registerResident(
     inviteToken: string,
     password: string,
-  ): Promise<{ user: User; token: string }> {
+  ): Promise<{ user: Omit<User, 'password'>; token: string }> {
     try {
       if (!inviteToken || inviteToken !== 'VALID_INVITE') {
         throw new UnauthorizedException('Invalid invite token');
@@ -73,12 +77,12 @@ export class AuthService {
 
       const user = await this.userService.createUser({
         email,
-        password: hashedPassword, // ✅ store hash
+        password: hashedPassword,
         role: UserRole.RESIDENT,
       });
 
       const token = this.generateJwt(user);
-      return { user, token };
+      return { user: this.sanitizeUser(user), token };
     } catch (err: unknown) {
       console.error('❌ AuthService.registerResident error:', err);
 
@@ -90,7 +94,7 @@ export class AuthService {
   }
 
   // ✅ Login with bcrypt password check
-  async login(loginDto: LoginDto): Promise<{ user: User; token: string }> {
+  async login(loginDto: LoginDto): Promise<{ user: Omit<User, 'password'>; token: string }> {
     try {
       const user = await this.userService.findByEmail(loginDto.email);
 
@@ -104,7 +108,7 @@ export class AuthService {
       }
 
       const token = this.generateJwt(user);
-      return { user, token };
+      return { user: this.sanitizeUser(user), token };
     } catch (err: unknown) {
       console.error('❌ AuthService.login error:', err);
 
