@@ -4,23 +4,23 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 @Entity('wallets')
 export class Wallet {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column()
-  userId: string; // Foreign key (link to User entity)
+  userId!: string; // Foreign key (link to User entity)
 
   @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
-  balance: number;
+  balance!: number;
 
   @Column({ nullable: true })
-  currency: string; // e.g., NGN, USD
+  currency!: string; // e.g., NGN, USD
 
   @Column({ default: false })
-  isActive: boolean;
+  isActive!: boolean;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 }
