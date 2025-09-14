@@ -20,7 +20,7 @@ export class ResidentService {
     return this.residentRepo.find();
   }
 
-  async findOne(id: number): Promise<Resident> {
+  async findOne(id: string): Promise<Resident> {   // 🔑 id must be string (UUID)
     const resident = await this.residentRepo.findOne({ where: { id } });
     if (!resident) {
       throw new NotFoundException(`Resident with ID ${id} not found`);
@@ -28,13 +28,13 @@ export class ResidentService {
     return resident;
   }
 
-  async update(id: number, dto: Partial<Resident>): Promise<Resident> {
+  async update(id: string, dto: Partial<Resident>): Promise<Resident> {  // 🔑 also string
     const resident = await this.findOne(id);
     Object.assign(resident, dto);
     return this.residentRepo.save(resident);
   }
 
-  async remove(id: number): Promise<{ message: string }> {
+  async remove(id: string): Promise<{ message: string }> {  // 🔑 also string
     const result = await this.residentRepo.delete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Resident with ID ${id} not found`);
