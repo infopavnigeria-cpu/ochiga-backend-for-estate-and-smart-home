@@ -1,6 +1,8 @@
 // src/app.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';   // ✅ import ConfigModule
+
 import { Estate } from './estate/entities/estate.entity';
 import { Home } from './home/entities/home.entity';
 import { Room } from './room/entities/room.entity';
@@ -18,12 +20,15 @@ import { WalletModule } from './wallet/wallet.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),  // ✅ loads .env everywhere
+
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: 'db.sqlite',
       entities: [Estate, Home, Room, User, HomeMember, Wallet],
       synchronize: true,
     }),
+
     AuthModule,
     DashboardModule,
     UserModule,
