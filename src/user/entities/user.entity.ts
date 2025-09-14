@@ -1,5 +1,6 @@
 // src/user/entities/user.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { HomeMember } from '../../home/entities/home-member.entity';
 
 export enum UserRole {
   MANAGER = 'manager',
@@ -29,5 +30,7 @@ export class User {
   @Column({ nullable: true })
   house?: string;
 
-  // you can add records/history later as relations
+  // ✅ Add relation for HomeMembers
+  @OneToMany(() => HomeMember, (homeMember) => homeMember.user, { cascade: true })
+  homeMembers!: HomeMember[];
 }
