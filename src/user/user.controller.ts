@@ -6,7 +6,7 @@ import {
   Request,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { UserRole } from '../../enums/user-role.enum'; // ✅ FIXED
+import { UserRole } from '../enums/user-role.enum'; // ✅ fixed path
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
