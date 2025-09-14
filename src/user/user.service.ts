@@ -1,5 +1,9 @@
 // src/user/user.service.ts
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -31,16 +35,25 @@ export class UserService {
     return this.userRepo.find();
   }
 
-  async getUserById(id: string): Promise<User | null> {
-    return this.userRepo.findOne({ where: { id } }); // ✅ id is string
+  async getUserById(id: string): Promise<User> {
+    const user = await this.userRepo.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`User ${id} not found`);
+    }
+    return user;
   }
 
-  async findByEmail(email: string): Promise<User | null> {
-    return this.userRepo.findOne({ where: { email } });
+  async findByEmail(email: string): Promise<User> {
+    const user = await this.userRepo.findOne({ where: { email } });
+    if (!user) {
+      throw new NotFoundException(`User with email ${email} not found`);
+    }
+    return user;
   }
 
-  async updateUser(id: string, updateData: Partial<User>): Promise<User | null> {
-    await this.userRepo.update(id, updateData); // ✅ uuid string accepted
-    return this.getUserById(id);
+  async updateUser(id: string, updateData: Partial<User>): Promise<User> {
+    const user = await this.getUserById(id); // throws if not found
+    Object.assign(user, updateData);
+    return this.userRepo.save(user);
   }
 }
