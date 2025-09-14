@@ -1,9 +1,16 @@
-import { IsNotEmpty } from 'class-validator';
+// src/user/dto/create-resident.dto.ts
+import { IsEmail, IsNotEmpty } from 'class-validator';
 
-export class RegisterResidentDto {
+export class CreateResidentDto {
   @IsNotEmpty()
-  inviteToken!: string;
+  name: string;
+
+  @IsEmail()
+  email: string;
 
   @IsNotEmpty()
-  password!: string;
+  estate: string;
+
+  @IsNotEmpty()
+  house: string;
 }
