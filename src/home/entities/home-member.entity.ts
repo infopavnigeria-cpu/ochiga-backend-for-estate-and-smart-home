@@ -26,6 +26,12 @@ export class HomeMember {
   })
   role!: HomeRole;
 
-  @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({
+    type: process.env.DB_TYPE === 'sqlite' ? 'text' : 'timestamp',
+    default: () =>
+      process.env.DB_TYPE === 'sqlite'
+        ? "(datetime('now'))"
+        : 'CURRENT_TIMESTAMP',
+  })
   joinedAt!: Date;
 }
