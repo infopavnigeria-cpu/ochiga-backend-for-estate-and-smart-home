@@ -16,11 +16,7 @@ export class User {
   @Column({ nullable: true })
   password?: string;
 
-  @Column({
-    type: process.env.DB_TYPE === 'sqlite' ? 'text' : 'enum',
-    enum: UserRole,
-    default: UserRole.RESIDENT,
-  })
+  @Column({ type: 'text', default: UserRole.RESIDENT })
   role!: UserRole;
 
   @Column({ nullable: true })
