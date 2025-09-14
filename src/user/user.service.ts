@@ -1,71 +1,49 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateManagerDto } from './dto/create-manager.dto';
 import { CreateResidentDto } from './dto/create-resident.dto';
+import { User, UserRole } from './entities/user.entity';
 import * as QRCode from 'qrcode';
-
-// 👇 Explicitly define our User model
-interface User {
-  id: number;
-  estate: string;
-  name: string;
-  house: string;
-  role: 'manager' | 'resident';
-  email: string;
-  password: string | null;
-  records: any[];
-  history: any[];
-  inviteToken?: string;
-  inviteLink?: string; // 👈 added this
-}
 
 @Injectable()
 export class UserService {
   private users: User[] = [
-    { 
-      id: 1, estate: 'P2E Estate', name: 'Ada', house: 'B12', role: 'manager', 
-      email: 'ada@p2e.com', password: '123456', records: [], history: [] 
-    },
-    { 
-      id: 2, estate: 'GreenVille', name: 'Emeka', house: 'C4', role: 'resident', 
-      email: 'emeka@green.com', password: null, inviteToken: 'sample-token', records: [], history: [] 
-    },
+    { id: 1, name: 'Ada', email: 'ada@p2e.com', role: UserRole.Manager, password: '123456', records: [], history: [] },
+    { id: 2, name: 'Emeka', email: 'emeka@green.com', role: UserRole.Resident, estate: 'GreenVille', house: 'C4', password: null, inviteToken: 'sample-token', records: [], history: [] },
   ];
 
   getAllUsers() {
     return this.users;
   }
 
-  createUser(createUserDto: CreateUserDto) {
-    const newUser: User = {
+  createManager(dto: CreateManagerDto) {
+    const newManager: User = {
       id: this.users.length + 1,
-      role: 'manager',
+      role: UserRole.Manager,
       records: [],
       history: [],
-      password: createUserDto.password ?? null,
-      ...createUserDto,
+      ...dto,
     };
-    this.users.push(newUser);
-    return newUser;
+    this.users.push(newManager);
+    return newManager;
   }
 
-  async createResident(createResidentDto: CreateResidentDto) {
+  async createResident(dto: CreateResidentDto) {
     const inviteToken = `invite-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
     const inviteLink = `http://localhost:3000/register?token=${inviteToken}`;
 
     const newResident: User = {
       id: this.users.length + 1,
-      role: 'resident',
-      password: null, // set later via register
+      role: UserRole.Resident,
+      password: null,
       inviteToken,
       inviteLink,
       records: [],
       history: [],
-      ...createResidentDto,
+      ...dto,
     };
 
     this.users.push(newResident);
 
-    // Generate QR Code for the invite link
     const qrCodeDataUrl = await QRCode.toDataURL(inviteLink);
 
     return {
@@ -87,11 +65,8 @@ export class UserService {
     return user;
   }
 
-  // 🔑 Register a resident using inviteToken
   registerResident(inviteToken: string, password: string) {
-    const user = this.users.find(
-      (u) => u.role === 'resident' && u.inviteToken === inviteToken,
-    );
+    const user = this.users.find(u => u.role === UserRole.Resident && u.inviteToken === inviteToken);
     if (!user) {
       return { success: false, message: 'Invalid or expired invite token' };
     }
@@ -100,8 +75,8 @@ export class UserService {
     }
 
     user.password = password;
-    delete user.inviteToken; // remove token after use
-    delete user.inviteLink;  // 👈 no more TS error
+    delete user.inviteToken;
+    delete user.inviteLink;
 
     return { success: true, message: 'Registration successful', user };
   }
