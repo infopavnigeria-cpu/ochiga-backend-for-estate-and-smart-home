@@ -25,6 +25,6 @@ export class User {
   @Column({ nullable: true })
   house?: string;
 
-  @OneToMany(() => HomeMember, (homeMember) => homeMember.user, { cascade: true })
+  @OneToMany(() => HomeMember, (homeMember: HomeMember) => homeMember.user, { cascade: true })
   homeMembers!: HomeMember[];
 }
