@@ -18,15 +18,12 @@ import { WalletModule } from './wallet/wallet.module';
 
 @Module({
   imports: [
-    // ✅ Global DB connection
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: 'db.sqlite',
       entities: [Estate, Home, Room, User, HomeMember, Wallet],
-      synchronize: true, // ⚠️ dev only, disable in prod
+      synchronize: true,
     }),
-
-    // ✅ Feature modules
     AuthModule,
     DashboardModule,
     UserModule,
