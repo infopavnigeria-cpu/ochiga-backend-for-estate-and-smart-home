@@ -11,8 +11,8 @@ export enum HomeRole {
 
 @Entity()
 export class HomeMember {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn('uuid')  // 👈 switch to UUID since Home is using UUID
+  id!: string;
 
   @ManyToOne(() => User, (user) => user.homeMembers, { onDelete: 'CASCADE' })
   user!: User;
@@ -26,6 +26,3 @@ export class HomeMember {
   @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
   joinedAt!: Date;
 }
-
-// ✅ make sure it's exported
-export { HomeMember };
