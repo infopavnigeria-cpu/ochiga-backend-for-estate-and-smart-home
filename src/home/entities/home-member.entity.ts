@@ -11,7 +11,7 @@ export enum HomeRole {
 
 @Entity()
 export class HomeMember {
-  @PrimaryGeneratedColumn('uuid')  // 👈 switch to UUID since Home is using UUID
+  @PrimaryGeneratedColumn('uuid')  // ✅ use UUID
   id!: string;
 
   @ManyToOne(() => User, (user) => user.homeMembers, { onDelete: 'CASCADE' })
