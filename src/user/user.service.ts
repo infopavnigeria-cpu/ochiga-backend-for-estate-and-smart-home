@@ -1,4 +1,3 @@
-// src/user/user.service.ts
 import { Injectable, BadRequestException } from '@nestjs/common';
 
 export interface User {
@@ -20,7 +19,7 @@ export class UserService {
     const newUser: User = {
       id: this.users.length + 1,
       email: data.email,
-      password: data.password, // hash later
+      password: data.password, // 🔐 will hash later
     };
 
     this.users.push(newUser);
