@@ -1,3 +1,4 @@
+i// src/auth/auth.module.ts
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
@@ -11,10 +12,10 @@ import { UserModule } from '../user/user.module';
     PassportModule,
     JwtModule.register({
       global: true,
-      secret: process.env.JWT_SECRET || 'supersecret',
+      secret: process.env.JWT_SECRET || 'supersecret', // ✅ one default
       signOptions: { expiresIn: '1d' },
     }),
-    UserModule, // ✅ keep this only
+    UserModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
