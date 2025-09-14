@@ -1,55 +1,44 @@
+// src/user/user.service.ts
 import { Injectable, BadRequestException } from '@nestjs/common';
-
-export enum UserRole {
-  RESIDENT = 'resident',
-  MANAGER = 'manager',
-  ADMIN = 'admin',
-}
-
-export interface User {
-  id: number;
-  email: string;
-  password: string;
-  role: UserRole;
-}
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './entities/user.entity';
+import { UserRole } from '../enums/user-role.enum';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UserService {
-  private users: User[] = [];
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
+  ) {}
 
-  createUser(data: { email: string; password: string; role?: UserRole }): User {
-    const exists = this.users.find((u) => u.email === data.email);
+  async createUser(data: CreateUserDto): Promise<User> {
+    const exists = await this.userRepo.findOne({ where: { email: data.email } });
     if (exists) {
       throw new BadRequestException('User already exists');
     }
-
-    const newUser: User = {
-      id: this.users.length + 1,
-      email: data.email,
-      password: data.password, // ⚠️ hash later in production
+    const newUser = this.userRepo.create({
+      ...data,
       role: data.role ?? UserRole.RESIDENT,
-    };
-
-    this.users.push(newUser);
-    return newUser;
+    });
+    return this.userRepo.save(newUser);
   }
 
-  getAllUsers(): User[] {
-    return this.users;
+  findAll(): Promise<User[]> {
+    return this.userRepo.find();
   }
 
-  findByEmail(email: string): User | undefined {
-    return this.users.find((u) => u.email === email);
+  findByEmail(email: string): Promise<User | null> {
+    return this.userRepo.findOne({ where: { email } });
   }
 
-  getUserById(id: number): User | undefined {
-    return this.users.find((u) => u.id === id);
+  findById(id: string): Promise<User | null> {
+    return this.userRepo.findOne({ where: { id } });
   }
 
-  updateUser(id: number, updateData: Partial<User>): User | null {
-    const user = this.getUserById(id);
-    if (!user) return null;
-    Object.assign(user, updateData);
-    return user;
+  async updateUser(id: string, updateData: Partial<User>): Promise<User | null> {
+    await this.userRepo.update(id, updateData);
+    return this.findById(id);
   }
 }
