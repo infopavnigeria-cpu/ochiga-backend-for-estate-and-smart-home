@@ -1,16 +1,11 @@
-// src/user/entities/user.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { HomeMember } from '../../home/entities/home-member.entity';
-
-export enum UserRole {
-  MANAGER = 'manager',
-  RESIDENT = 'resident',
-}
+import { UserRole } from '../../enums/user-role.enum';
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
 
   @Column()
   name!: string;
@@ -21,7 +16,7 @@ export class User {
   @Column({ nullable: true })
   password?: string;
 
-  @Column({ type: 'text', default: UserRole.RESIDENT })
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.RESIDENT })
   role!: UserRole;
 
   @Column({ nullable: true })
@@ -30,7 +25,6 @@ export class User {
   @Column({ nullable: true })
   house?: string;
 
-  // ✅ Add relation for HomeMembers
   @OneToMany(() => HomeMember, (homeMember) => homeMember.user, { cascade: true })
   homeMembers!: HomeMember[];
 }
