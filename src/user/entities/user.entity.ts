@@ -16,7 +16,12 @@ export class User {
   @Column({ nullable: true })
   password?: string;
 
-  @Column({ type: 'enum', enum: UserRole, default: UserRole.RESIDENT })
+  // ✅ Fix: store enum as string for SQLite compatibility
+  @Column({
+    type: process.env.DB_TYPE === 'sqlite' ? 'text' : 'enum',
+    enum: UserRole,
+    default: UserRole.RESIDENT,
+  })
   role!: UserRole;
 
   @Column({ nullable: true })
