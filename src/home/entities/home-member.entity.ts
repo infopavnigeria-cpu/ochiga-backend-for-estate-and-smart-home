@@ -1,36 +1,32 @@
-// src/home/entities/home-member.entity.ts
-import { Entity, PrimaryGeneratedColumn, ManyToOne, Column, JoinColumn } from 'typeorm';
-import { User } from '../../user/entities/user.entity';
-import { Home } from './home.entity';
+// src/home/home-member.service.ts
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { HomeMember } from './entities/home-member.entity';
 
-export enum HomeRole {
-  OWNER = 'OWNER',
-  ADMIN = 'ADMIN',
-  MEMBER = 'MEMBER',
-}
+@Injectable()
+export class HomeMemberService {
+  constructor(
+    @InjectRepository(HomeMember)
+    private readonly homeMemberRepo: Repository<HomeMember>,
+  ) {}
 
-@Entity()
-export class HomeMember {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  async findMembership(userId: number, homeId: number): Promise<HomeMember | null> {
+    return this.homeMemberRepo.findOne({
+      where: { userId, homeId }, // ✅ simpler now
+      relations: ['user', 'home'], // still load full User + Home objects
+    });
+  }
 
-  @Column()
-  userId!: number; // ✅ FK column
+  async addMember(userId: number, homeId: number, role = 'MEMBER'): Promise<HomeMember> {
+    const member = this.homeMemberRepo.create({ userId, homeId, role });
+    return this.homeMemberRepo.save(member);
+  }
 
-  @Column()
-  homeId!: number; // ✅ FK column
-
-  @ManyToOne(() => User, (user) => user.homeMembers, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'userId' }) // links FK to User
-  user!: User;
-
-  @ManyToOne(() => Home, (home) => home.members, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'homeId' }) // links FK to Home
-  home!: Home;
-
-  @Column({ type: 'text', default: HomeRole.MEMBER })
-  role!: string;
-
-  @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
-  joinedAt!: Date;
+  async getMembers(homeId: number): Promise<HomeMember[]> {
+    return this.homeMemberRepo.find({
+      where: { homeId },
+      relations: ['user'],
+    });
+  }
 }
