@@ -6,6 +6,7 @@ import { Home } from './entities/home.entity';
 import { HomeMember, HomeRole } from './entities/home-member.entity';
 import { CreateHomeDto } from './dto/create-home.dto';
 import { UpdateHomeDto } from './dto/update-home.dto';
+import { User } from '../user/entities/user.entity';
 
 @Injectable()
 export class HomeService {
@@ -18,14 +19,14 @@ export class HomeService {
   ) {}
 
   /** Create a home and add creator as OWNER */
-  async create(userId: number, dto: CreateHomeDto) {
+  async create(userId: string, dto: CreateHomeDto) {
     const home = this.homeRepo.create(dto);
     const savedHome = await this.homeRepo.save(home);
 
     const member = this.memberRepo.create({
       home: savedHome,
-      user: { id: userId } as any, // reference user correctly
-      role: 'OWNER' as HomeRole,
+      user: { id: userId } as User, // ✅ userId is string
+      role: HomeRole.OWNER,
     });
     await this.memberRepo.save(member);
 
@@ -33,7 +34,7 @@ export class HomeService {
   }
 
   /** Get all homes a user belongs to */
-  async findAll(userId: number) {
+  async findAll(userId: string) {
     const memberships = await this.memberRepo.find({
       where: { user: { id: userId } },
       relations: ['home'],
@@ -42,7 +43,7 @@ export class HomeService {
   }
 
   /** Helper: check if user is a member of a home */
-  private async ensureMembership(userId: number, homeId: number) {
+  private async ensureMembership(userId: string, homeId: string) {
     const member = await this.memberRepo.findOne({
       where: { user: { id: userId }, home: { id: homeId } },
       relations: ['home'],
@@ -55,7 +56,7 @@ export class HomeService {
   }
 
   /** Get one home */
-  async findOne(userId: number, id: number) {
+  async findOne(userId: string, id: string) {
     await this.ensureMembership(userId, id);
 
     const home = await this.homeRepo.findOne({ where: { id } });
@@ -64,9 +65,9 @@ export class HomeService {
   }
 
   /** Update a home (only OWNER or ADMIN allowed) */
-  async update(userId: number, id: number, dto: UpdateHomeDto) {
+  async update(userId: string, id: string, dto: UpdateHomeDto) {
     const member = await this.ensureMembership(userId, id);
-    if (member.role !== 'OWNER' && member.role !== 'ADMIN') {
+    if (member.role !== HomeRole.OWNER && member.role !== HomeRole.ADMIN) {
       throw new ForbiddenException('Only admins can update this home');
     }
 
@@ -75,9 +76,9 @@ export class HomeService {
   }
 
   /** Remove a home (only OWNER allowed) */
-  async remove(userId: number, id: number) {
+  async remove(userId: string, id: string) {
     const member = await this.ensureMembership(userId, id);
-    if (member.role !== 'OWNER') {
+    if (member.role !== HomeRole.OWNER) {
       throw new ForbiddenException('Only the OWNER can delete this home');
     }
 
