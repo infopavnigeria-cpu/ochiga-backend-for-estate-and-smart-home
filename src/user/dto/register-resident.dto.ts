@@ -3,14 +3,14 @@ import { IsEmail, IsNotEmpty } from 'class-validator';
 
 export class CreateResidentDto {
   @IsNotEmpty()
-  name: string;
+  name!: string;
 
   @IsEmail()
-  email: string;
+  email!: string;
 
   @IsNotEmpty()
-  estate: string;
+  estate!: string;
 
   @IsNotEmpty()
-  house: string;
+  house!: string;
 }
