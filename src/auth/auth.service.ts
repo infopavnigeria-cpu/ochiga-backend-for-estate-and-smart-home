@@ -1,8 +1,10 @@
+// src/auth/auth.service.ts
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { UserService, User } from '../user/user.service';
+import { UserService } from '../user/user.service';
+import { User } from '../user/entities/user.entity'; // ✅ use actual entity type
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { UserRole } from './enums/user-role.enum';
+import { UserRole } from '../enums/user-role.enum'; // ✅ fixed path
 import * as jwt from 'jsonwebtoken';
 
 @Injectable()
@@ -18,7 +20,7 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto): Promise<{ user: User; token: string }> {
-    const user = this.userService.createUser({
+    const user = await this.userService.createUser({
       ...registerDto,
       role: registerDto.role ?? UserRole.RESIDENT, // default to resident
     });
@@ -35,7 +37,7 @@ export class AuthService {
 
     const email = `resident+${Date.now()}@ochiga.com`; // generate resident email (or fetch from invite table)
 
-    const user = this.userService.createUser({
+    const user = await this.userService.createUser({
       email,
       password,
       role: UserRole.RESIDENT,
@@ -46,7 +48,7 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto): Promise<{ user: User; token: string }> {
-    const user = this.userService.findByEmail(loginDto.email);
+    const user = await this.userService.findByEmail(loginDto.email);
 
     if (!user || user.password !== loginDto.password) {
       throw new UnauthorizedException('Invalid credentials');
