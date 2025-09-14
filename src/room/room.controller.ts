@@ -14,7 +14,7 @@ export class RoomController {
 
   // Get all rooms under a specific home
   @Get('home/:homeId')
-  async findAllByHome(@Param('homeId') homeId: number) {
+  async findAllByHome(@Param('homeId') homeId: string) {  // 👈 use string not number
     return this.roomService.findAllByHome(homeId);
   }
 }
