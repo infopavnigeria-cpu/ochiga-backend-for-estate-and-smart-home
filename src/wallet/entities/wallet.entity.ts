@@ -1,4 +1,3 @@
-// src/wallet/entities/wallet.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('wallets')
@@ -7,13 +6,18 @@ export class Wallet {
   id!: string;
 
   @Column()
-  userId!: string; // Foreign key (link to User entity)
+  userId!: string; // foreign key to User (UUID)
 
-  @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
+  @Column({
+    type: process.env.DB_TYPE === 'sqlite' ? 'real' : 'decimal',
+    precision: 12,
+    scale: 2,
+    default: 0,
+  })
   balance!: number;
 
   @Column({ nullable: true })
-  currency!: string; // e.g., NGN, USD
+  currency!: string; // NGN, USD, etc.
 
   @Column({ default: false })
   isActive!: boolean;
