@@ -9,19 +9,19 @@ export enum UserRole {
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  name: string;
+  name!: string;
 
   @Column({ unique: true })
-  email: string;
+  email!: string;
 
   @Column({ nullable: true })
-  password: string;
+  password?: string;
 
   @Column({ type: 'text', default: UserRole.RESIDENT })
-  role: UserRole;
+  role!: UserRole;
 
   @Column({ nullable: true })
   estate?: string;
