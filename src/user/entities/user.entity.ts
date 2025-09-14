@@ -2,8 +2,8 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 export enum UserRole {
-  Manager = 'manager',
-  Resident = 'resident',
+  MANAGER = 'manager',
+  RESIDENT = 'resident',
 }
 
 @Entity()
@@ -20,7 +20,7 @@ export class User {
   @Column({ nullable: true })
   password: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', default: UserRole.RESIDENT })
   role: UserRole;
 
   @Column({ nullable: true })
