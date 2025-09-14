@@ -20,7 +20,7 @@ export class AuthService {
   private generateJwt(user: User): string {
     const secret = process.env.JWT_SECRET;
     if (!secret) {
-      throw new InternalServerErrorException('JWT_SECRET not configured');
+      throw new Error('JWT_SECRET not configured');
     }
 
     return jwt.sign(
@@ -30,10 +30,8 @@ export class AuthService {
     );
   }
 
-  // ✅ Secure register with error handling
-  async register(
-    registerDto: RegisterDto,
-  ): Promise<{ user: User; token: string }> {
+  // ✅ Secure register
+  async register(registerDto: RegisterDto): Promise<{ user: User; token: string }> {
     try {
       const hashedPassword = await bcrypt.hash(registerDto.password, 10);
 
@@ -45,16 +43,17 @@ export class AuthService {
 
       const token = this.generateJwt(user);
       return { user, token };
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('❌ AuthService.register error:', err);
 
-      if (err.code === 'SQLITE_CONSTRAINT' || err.code === '23505') {
-        // SQLite or Postgres unique constraint violation
+      const error = err as { code?: string; message?: string };
+
+      if (error.code === 'SQLITE_CONSTRAINT' || error.code === '23505') {
         throw new BadRequestException('User already exists');
       }
 
       throw new InternalServerErrorException(
-        err.message || 'Registration failed',
+        error.message || 'Registration failed',
       );
     }
   }
@@ -64,37 +63,55 @@ export class AuthService {
     inviteToken: string,
     password: string,
   ): Promise<{ user: User; token: string }> {
-    if (!inviteToken || inviteToken !== 'VALID_INVITE') {
-      throw new UnauthorizedException('Invalid invite token');
+    try {
+      if (!inviteToken || inviteToken !== 'VALID_INVITE') {
+        throw new UnauthorizedException('Invalid invite token');
+      }
+
+      const email = `resident+${Date.now()}@ochiga.com`;
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const user = await this.userService.createUser({
+        email,
+        password: hashedPassword, // ✅ store hash
+        role: UserRole.RESIDENT,
+      });
+
+      const token = this.generateJwt(user);
+      return { user, token };
+    } catch (err: unknown) {
+      console.error('❌ AuthService.registerResident error:', err);
+
+      const error = err as { message?: string };
+      throw new InternalServerErrorException(
+        error.message || 'Resident registration failed',
+      );
     }
-
-    const email = `resident+${Date.now()}@ochiga.com`;
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = await this.userService.createUser({
-      email,
-      password: hashedPassword,
-      role: UserRole.RESIDENT,
-    });
-
-    const token = this.generateJwt(user);
-    return { user, token };
   }
 
   // ✅ Login with bcrypt password check
   async login(loginDto: LoginDto): Promise<{ user: User; token: string }> {
-    const user = await this.userService.findByEmail(loginDto.email);
+    try {
+      const user = await this.userService.findByEmail(loginDto.email);
 
-    if (!user || !user.password) {
-      throw new UnauthorizedException('Invalid credentials');
+      if (!user || !user.password) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      const isMatch = await bcrypt.compare(loginDto.password, user.password);
+      if (!isMatch) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      const token = this.generateJwt(user);
+      return { user, token };
+    } catch (err: unknown) {
+      console.error('❌ AuthService.login error:', err);
+
+      const error = err as { message?: string };
+      throw new InternalServerErrorException(
+        error.message || 'Login failed',
+      );
     }
-
-    const isMatch = await bcrypt.compare(loginDto.password, user.password);
-    if (!isMatch) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    const token = this.generateJwt(user);
-    return { user, token };
   }
 }
