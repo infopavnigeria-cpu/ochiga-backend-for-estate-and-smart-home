@@ -43,9 +43,9 @@ export class Estate {
   @OneToMany(() => Home, (home) => home.estate)
   homes!: Home[];
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'text' })
   createdAt!: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'text' })
   updatedAt!: Date;
 }
