@@ -24,7 +24,7 @@ export class EstateService {
   }
 
   // Get one estate by ID
-  async findOne(id: number): Promise<Estate> {
+  async findOne(id: string): Promise<Estate> {
     const estate = await this.estateRepository.findOne({ where: { id } });
     if (!estate) {
       throw new NotFoundException(`Estate with ID ${id} not found`);
@@ -33,14 +33,14 @@ export class EstateService {
   }
 
   // Update estate by ID
-  async update(id: number, updateEstateDto: UpdateEstateDto): Promise<Estate> {
+  async update(id: string, updateEstateDto: UpdateEstateDto): Promise<Estate> {
     const estate = await this.findOne(id);
     Object.assign(estate, updateEstateDto);
     return await this.estateRepository.save(estate);
   }
 
   // Remove estate by ID
-  async remove(id: number): Promise<void> {
+  async remove(id: string): Promise<void> {
     const estate = await this.findOne(id);
     await this.estateRepository.remove(estate);
   }
