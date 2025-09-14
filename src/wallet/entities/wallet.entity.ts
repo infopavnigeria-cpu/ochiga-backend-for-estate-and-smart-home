@@ -17,7 +17,7 @@ export class Wallet {
   balance!: number;
 
   @Column({ nullable: true })
-  currency!: string; // NGN, USD, etc.
+  currency?: string; // NGN, USD, etc.
 
   @Column({ default: false })
   isActive!: boolean;
