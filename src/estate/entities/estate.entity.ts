@@ -1,4 +1,3 @@
-// src/estate/entities/estate.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -11,8 +10,8 @@ import { Home } from '../../home/entities/home.entity';
 
 @Entity('estates')
 export class Estate {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
 
   @Column({ unique: true })
   name!: string;
@@ -38,7 +37,6 @@ export class Estate {
   @Column({ default: false })
   smartIntegration!: boolean;
 
-  // ✅ FIXED: JSON → text
   @Column({ type: 'text', nullable: true })
   settings?: string;
 
