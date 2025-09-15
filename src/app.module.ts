@@ -1,7 +1,7 @@
 // src/app.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';   // ✅ import ConfigModule
+import { ConfigModule } from '@nestjs/config';
 
 import { Estate } from './estate/entities/estate.entity';
 import { Home } from './home/entities/home.entity';
@@ -9,7 +9,8 @@ import { Room } from './room/entities/room.entity';
 import { User } from './user/entities/user.entity';
 import { HomeMember } from './home/entities/home-member.entity';
 import { Wallet } from './wallet/entities/wallet.entity';
-import { Payment } from './payments/entities/payment.entity'; // ✅ add Payment entity
+import { Payment } from './payments/entities/payment.entity';
+import { Visitor } from './visitors/visitor.entity';
 
 import { AuthModule } from './auth/auth.module';
 import { DashboardModule } from './dashboard/dashboard.module';
@@ -18,11 +19,12 @@ import { EstateModule } from './estate/estate.module';
 import { HomeModule } from './home/home.module';
 import { RoomModule } from './room/room.module';
 import { WalletModule } from './wallet/wallet.module';
-import { PaymentsModule } from './payments/payments.module'; // ✅ add PaymentsModule
+import { PaymentsModule } from './payments/payments.module';
+import { VisitorsModule } from './visitors/visitors.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),  // ✅ loads .env everywhere
+    ConfigModule.forRoot({ isGlobal: true }),
 
     TypeOrmModule.forRoot({
       type: 'sqlite',
@@ -34,7 +36,8 @@ import { PaymentsModule } from './payments/payments.module'; // ✅ add Payments
         User,
         HomeMember,
         Wallet,
-        Payment, // ✅ include Payment entity
+        Payment,
+        Visitor,
       ],
       synchronize: true,
     }),
@@ -46,7 +49,8 @@ import { PaymentsModule } from './payments/payments.module'; // ✅ add Payments
     HomeModule,
     RoomModule,
     WalletModule,
-    PaymentsModule, // ✅ now live
+    PaymentsModule,
+    VisitorsModule,
   ],
 })
 export class AppModule {}
