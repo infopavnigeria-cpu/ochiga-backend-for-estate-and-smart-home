@@ -1,4 +1,3 @@
-// src/wallet/wallet.controller.ts
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 
@@ -7,22 +6,22 @@ export class WalletController {
   constructor(private readonly walletService: WalletService) {}
 
   @Post(':userId')
-  createWallet(@Param('userId') userId: number) {
-    return this.walletService.createWallet(Number(userId));
+  createWallet(@Param('userId') userId: string) {
+    return this.walletService.createWallet(userId);
   }
 
   @Get(':userId')
-  getWallet(@Param('userId') userId: number) {
-    return this.walletService.getWallet(Number(userId));
+  getWallet(@Param('userId') userId: string) {
+    return this.walletService.getWallet(userId);
   }
 
   @Post(':userId/fund')
-  fundWallet(@Param('userId') userId: number, @Body('amount') amount: number) {
-    return this.walletService.fundWallet(Number(userId), Number(amount));
+  fundWallet(@Param('userId') userId: string, @Body('amount') amount: number) {
+    return this.walletService.fundWallet(userId, amount);
   }
 
   @Post(':userId/debit')
-  debitWallet(@Param('userId') userId: number, @Body('amount') amount: number) {
-    return this.walletService.debitWallet(Number(userId), Number(amount));
+  debitWallet(@Param('userId') userId: string, @Body('amount') amount: number) {
+    return this.walletService.debitWallet(userId, amount);
   }
 }
