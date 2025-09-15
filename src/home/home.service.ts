@@ -11,6 +11,7 @@ import { HomeMember, HomeRole } from './entities/home-member.entity';
 import { CreateHomeDto } from './dto/create-home.dto';
 import { UpdateHomeDto } from './dto/update-home.dto';
 import { User } from '../user/entities/user.entity';
+import { Wallet } from '../wallet/entities/wallet.entity';
 
 @Injectable()
 export class HomeService {
@@ -20,28 +21,44 @@ export class HomeService {
 
     @InjectRepository(HomeMember)
     private readonly memberRepo: Repository<HomeMember>,
+
+    @InjectRepository(Wallet)
+    private readonly walletRepo: Repository<Wallet>,
   ) {}
 
-  /** Create a home and add creator as OWNER */
+  /** Create a home and add creator as OWNER (auto-creates wallet if missing) */
   async create(userId: string, dto: CreateHomeDto) {
     const home = this.homeRepo.create(dto);
     const savedHome = await this.homeRepo.save(home);
 
+    // create membership
     const member = this.memberRepo.create({
       home: savedHome,
-      user: { id: userId } as User, // ✅ userId is UUID string
+      user: { id: userId } as User,
       role: HomeRole.OWNER,
     });
     await this.memberRepo.save(member);
 
-    return savedHome;
+    // auto-create wallet if missing
+    let wallet = await this.walletRepo.findOne({ where: { user: { id: userId } } });
+    if (!wallet) {
+      wallet = this.walletRepo.create({
+        user: { id: userId } as User,
+        balance: 0,
+        currency: 'NGN',
+        isActive: true,
+      });
+      await this.walletRepo.save(wallet);
+    }
+
+    return { ...savedHome, wallet };
   }
 
   /** Get all homes a user belongs to */
   async findAll(userId: string) {
     const memberships = await this.memberRepo.find({
       where: { user: { id: userId } },
-      relations: ['home'],
+      relations: ['home', 'home.members'],
     });
     return memberships.map((m) => m.home);
   }
@@ -63,7 +80,10 @@ export class HomeService {
   async findOne(userId: string, id: string) {
     await this.ensureMembership(userId, id);
 
-    const home = await this.homeRepo.findOne({ where: { id } });
+    const home = await this.homeRepo.findOne({
+      where: { id },
+      relations: ['members', 'rooms'],
+    });
     if (!home) throw new NotFoundException('Home not found');
     return home;
   }
@@ -71,7 +91,7 @@ export class HomeService {
   /** Update a home (only OWNER or ADMIN allowed) */
   async update(userId: string, id: string, dto: UpdateHomeDto) {
     const member = await this.ensureMembership(userId, id);
-    if (member.role !== HomeRole.OWNER && member.role !== HomeRole.ADMIN) {
+    if (![HomeRole.OWNER, HomeRole.ADMIN].includes(member.role)) {
       throw new ForbiddenException('Only admins can update this home');
     }
 
@@ -86,7 +106,7 @@ export class HomeService {
       throw new ForbiddenException('Only the OWNER can delete this home');
     }
 
-    await this.homeRepo.delete(id); // ✅ fixed: delete by id instead of remove(entity)
+    await this.homeRepo.delete(id);
     return { message: 'Home deleted successfully' };
   }
 }
