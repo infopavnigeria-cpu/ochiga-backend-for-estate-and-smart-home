@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Payment, PaymentStatus } from './entities/payment.entity';
@@ -12,16 +12,28 @@ export class PaymentsService {
   constructor(
     @InjectRepository(Payment)
     private paymentsRepo: Repository<Payment>,
+
+    @InjectRepository(Wallet)
+    private walletsRepo: Repository<Wallet>,
   ) {}
 
-  async create(user: User, wallet: Wallet, dto: CreatePaymentDto) {
+  async create(user: User, dto: CreatePaymentDto) {
+    const wallet = await this.walletsRepo.findOne({
+      where: { user: { id: user.id } },
+    });
+
+    if (!wallet) {
+      throw new NotFoundException('Wallet not found for this user');
+    }
+
     const payment = this.paymentsRepo.create({
       ...dto,
       user,
       wallet,
-      reference: uuid(), // unique payment ref
+      reference: dto.reference ?? uuid(), // allow override if provided
       status: PaymentStatus.PENDING,
     });
+
     return this.paymentsRepo.save(payment);
   }
 
@@ -30,17 +42,32 @@ export class PaymentsService {
   }
 
   async findOne(id: string) {
-    return this.paymentsRepo.findOne({
-      where: { id }, // ✅ keep id as UUID string
+    const payment = await this.paymentsRepo.findOne({
+      where: { id },
       relations: ['user', 'wallet'],
     });
+
+    if (!payment) throw new NotFoundException('Payment not found');
+    return payment;
   }
 
-  async updateStatus(reference: string, status: PaymentStatus) {
+  async updateStatus(reference: string, status: string) {
     const payment = await this.paymentsRepo.findOne({ where: { reference } });
-    if (!payment) throw new Error('Payment not found');
+    if (!payment) throw new NotFoundException('Payment not found');
 
-    payment.status = status;
+    let mappedStatus: PaymentStatus;
+    switch (status.toLowerCase()) {
+      case 'success':
+        mappedStatus = PaymentStatus.SUCCESS;
+        break;
+      case 'failed':
+        mappedStatus = PaymentStatus.FAILED;
+        break;
+      default:
+        mappedStatus = PaymentStatus.PENDING;
+    }
+
+    payment.status = mappedStatus;
     return this.paymentsRepo.save(payment);
   }
 }
