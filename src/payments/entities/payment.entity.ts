@@ -28,7 +28,7 @@ export class Payment {
   description!: string;
 
   @Column()
-  provider!: string; // e.g. paystack, flutterwave
+  provider!: string;
 
   @Column({ default: 'NGN' })
   currency!: string;
@@ -46,9 +46,7 @@ export class Payment {
   @ManyToOne(() => User, (user) => user.payments, { onDelete: 'CASCADE' })
   user!: User;
 
-  @ManyToOne(() => Wallet, (wallet) => wallet.payments, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => Wallet, (wallet) => wallet.payments, { onDelete: 'CASCADE' })
   wallet!: Wallet;
 
   @CreateDateColumn()
