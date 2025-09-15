@@ -1,26 +1,30 @@
-// src/visitors/visitor.controller.ts
-import { Controller, Post, Body, Get, UseGuards, Req } from '@nestjs/common';
-import { VisitorsService } from './visitor.service';
-import { CreateVisitorDto } from './dto/create-visitor.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Controller, Post, Get, Param, Body, Req, Delete } from '@nestjs/common';
+import { VisitorsService } from './visitors.service';
+import { Visitor } from './visitors.entity';
 import { Request } from 'express';
-import { User } from '../user/entities/user.entity';
 
 @Controller('visitors')
 export class VisitorsController {
   constructor(private readonly visitorsService: VisitorsService) {}
 
-  @UseGuards(JwtAuthGuard)
   @Post()
-  async create(@Body() dto: CreateVisitorDto, @Req() req: Request) {
-    const user = req.user as User; // ✅ injected by JWT strategy
-    return this.visitorsService.create(dto, user);
+  async create(@Req() req: Request, @Body() dto: Partial<Visitor>) {
+    const user: any = (req as any).user; // assume injected by AuthGuard
+    return this.visitorsService.create(user, dto);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get()
-  async findMyVisitors(@Req() req: Request) {
-    const user = req.user as User;
-    return this.visitorsService.findByUser(user.id);
+  async findAll() {
+    return this.visitorsService.findAll();
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return this.visitorsService.findOne(id);
+  }
+
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    return this.visitorsService.remove(id);
   }
 }
