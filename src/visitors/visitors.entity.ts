@@ -1,3 +1,4 @@
+// src/visitors/visitors.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -7,7 +8,7 @@ import {
   UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
-import { User } from '../user/entities/user.entity'; // correct path
+import { User } from '../../user/entities/user.entity';
 
 @Entity('visitors')
 export class Visitor {
@@ -20,22 +21,15 @@ export class Visitor {
   @Column()
   purpose!: string;
 
-  @Column()
-  time!: string;
-
-  @Column({ default: 'Pending' })
-  status!: string;
-
   @Column({ unique: true })
   code!: string;
 
-  // ✅ safer relation
+  @Column({ default: 'PENDING' })
+  status!: string;
+
   @ManyToOne(() => User, (user) => user.invitedVisitors, { eager: true })
   @JoinColumn({ name: 'invitedById' })
   invitedBy!: User;
-
-  @Column()
-  invitedById!: string; // keep foreign key
 
   @CreateDateColumn()
   createdAt!: Date;
