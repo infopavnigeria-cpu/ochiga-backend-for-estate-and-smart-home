@@ -17,7 +17,7 @@ export enum PaymentStatus {
 
 @Entity()
 export class Payment {
-  @PrimaryGeneratedColumn('uuid') // ✅ use uuid instead of default int
+  @PrimaryGeneratedColumn('uuid') // ✅ UUID not int
   id!: string;
 
   @Column()
