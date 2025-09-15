@@ -19,10 +19,7 @@ export class Wallet {
   @JoinColumn({ name: 'userId' })
   user!: User;
 
-  @Column()
-  userId!: string; // still keep foreign key column
-
-  // ✅ store as integer (cents/kobo) for accuracy
+  // ✅ store as integer (kobo/cent) for accuracy
   @Column({ type: 'integer', default: 0 })
   balance!: number;
 
