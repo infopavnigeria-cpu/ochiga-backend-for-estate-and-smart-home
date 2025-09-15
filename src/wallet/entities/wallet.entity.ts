@@ -19,6 +19,9 @@ export class Wallet {
   @JoinColumn({ name: 'userId' })
   user!: User;
 
+  @Column()
+  userId!: string;   // ✅ keep foreign key explicitly
+
   // ✅ store as integer (kobo/cent) for accuracy
   @Column({ type: 'integer', default: 0 })
   balance!: number;
