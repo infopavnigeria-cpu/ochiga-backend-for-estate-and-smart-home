@@ -14,15 +14,15 @@ export class Wallet {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  // ✅ Relation to User
+  // Relation to User
   @OneToOne(() => User, (user) => user.wallet, { eager: true })
   @JoinColumn({ name: 'userId' })
   user!: User;
 
   @Column()
-  userId!: string;   // ✅ keep foreign key explicitly
+  userId!: string;   // keep foreign key explicitly
 
-  // ✅ store as integer (kobo/cent) for accuracy
+  // Store balance as integer for accuracy
   @Column({ type: 'integer', default: 0 })
   balance!: number;
 
