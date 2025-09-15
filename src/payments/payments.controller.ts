@@ -1,9 +1,7 @@
-// src/payments/payments.controller.ts
 import { Controller, Post, Body, Get, Param, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { PaymentsService } from './payments.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
-import { PaymentStatus } from './entities/payment.entity';
 
 @Controller('payments')
 export class PaymentsController {
@@ -12,7 +10,7 @@ export class PaymentsController {
   @Post()
   async create(@Req() req: Request, @Body() dto: CreatePaymentDto) {
     const user: any = (req as any).user; // ✅ comes from AuthGuard
-    return this.paymentsService.create(user, user?.wallet, dto);
+    return this.paymentsService.create(user, dto);
   }
 
   @Get()
@@ -21,7 +19,7 @@ export class PaymentsController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {  // ✅ UUID is string
+  async findOne(@Param('id') id: string) {
     return this.paymentsService.findOne(id);
   }
 
@@ -31,9 +29,6 @@ export class PaymentsController {
     @Body() body: any,
   ) {
     const { reference, status } = body;
-    return this.paymentsService.updateStatus(
-      reference,
-      status === 'success' ? PaymentStatus.SUCCESS : PaymentStatus.FAILED,
-    );
+    return this.paymentsService.updateStatus(reference, status);
   }
 }
