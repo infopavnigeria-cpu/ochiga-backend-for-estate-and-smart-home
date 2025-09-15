@@ -11,24 +11,29 @@ import { User } from '../../user/entities/user.entity';
 @Entity()
 export class Visitor {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column()
-  name: string;
+  name!: string;
 
   @Column()
-  status: string; // Pending | Checked-in | Checked-out
+  purpose!: string;
+
+  @Column()
+  time!: string;
+
+  @Column({ default: 'Pending' })
+  status!: string; // Pending | Checked-in | Checked-out
 
   @Column({ unique: true })
-  code: string; // unique visitor code/QR
+  code!: string; // unique visitor code / QR
 
-  // ✅ Always required: a visitor must be tied to a user
-  @ManyToOne(() => User, (user: User) => user.invitedVisitors, { eager: true })
-  invitedBy: User;
+  @ManyToOne(() => User, (user) => user.invitedVisitors, { eager: true })
+  invitedBy!: User;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 }
