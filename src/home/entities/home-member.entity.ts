@@ -1,4 +1,3 @@
-// src/home/entities/home-member.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -16,8 +15,11 @@ export class HomeMember {
   name!: string;
 
   @Column()
-  role!: string; // e.g. Resident, Guest
+  relation!: string; // e.g. spouse, child, tenant
 
-  @ManyToOne(() => User, (user) => user.homeMembers, { onDelete: 'CASCADE' })
+  // 🏠 Many home members belong to one user (the house owner/admin)
+  @ManyToOne(() => User, (user) => user.homeMembers, {
+    onDelete: 'CASCADE',
+  })
   user!: User;
 }
