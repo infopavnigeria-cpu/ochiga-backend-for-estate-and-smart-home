@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { HomeMember } from '../../home/entities/home-member.entity';
 import { UserRole } from '../../enums/user-role.enum';
-import { Visitor } from '../../visitors/visitor.entity';
+import { Visitor } from '../../visitors/visitors.entity';
 import { Wallet } from '../../wallet/entities/wallet.entity';
 
 @Entity()
