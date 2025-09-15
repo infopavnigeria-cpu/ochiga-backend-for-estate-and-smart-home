@@ -7,7 +7,7 @@ import {
   UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
-import { User } from '../user/entities/user.entity';
+import { User } from '../user/entities/user.entity'; // correct path
 
 @Entity('visitors')
 export class Visitor {
@@ -29,13 +29,13 @@ export class Visitor {
   @Column({ unique: true })
   code!: string;
 
-  // ✅ Many visitors invited by one user
+  // ✅ safer relation
   @ManyToOne(() => User, (user) => user.invitedVisitors, { eager: true })
   @JoinColumn({ name: 'invitedById' })
   invitedBy!: User;
 
   @Column()
-  invitedById!: string;
+  invitedById!: string; // keep foreign key
 
   @CreateDateColumn()
   createdAt!: Date;
