@@ -1,3 +1,4 @@
+// src/visitors/visitor.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -22,11 +23,11 @@ export class Visitor {
   @Column()
   time!: string;
 
-  @Column({ default: 'Pending' })
-  status!: string; // Pending | Checked-in | Checked-out
+  @Column({ default: 'Pending' }) // Pending | Checked-in | Checked-out
+  status!: string;
 
   @Column({ unique: true })
-  code!: string; // unique visitor code / QR
+  code!: string; // unique QR/code
 
   @ManyToOne(() => User, (user) => user.invitedVisitors, { eager: true })
   invitedBy!: User;
