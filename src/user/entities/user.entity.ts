@@ -2,7 +2,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { HomeMember } from '../../home/entities/home-member.entity';
 import { UserRole } from '../../enums/user-role.enum';
-import { Visitor } from '../../visitors/visitor.entity';   // ✅ import Visitor
+import { Visitor } from '../../visitors/visitor.entity';  // ✅ added
 
 @Entity()
 export class User {
@@ -27,9 +27,9 @@ export class User {
   @Column({ nullable: true })
   house?: string;
 
-  @OneToMany(() => HomeMember, (homeMember: HomeMember) => homeMember.user, { cascade: true })
+  @OneToMany(() => HomeMember, (homeMember) => homeMember.user, { cascade: true })
   homeMembers!: HomeMember[];
 
-  @OneToMany(() => Visitor, (visitor: Visitor) => visitor.invitedBy, { cascade: true })
-  invitedVisitors!: Visitor[];   // ✅ relation to visitors
+  @OneToMany(() => Visitor, (visitor) => visitor.invitedBy, { cascade: true })  // ✅ new relation
+  invitedVisitors!: Visitor[];
 }
