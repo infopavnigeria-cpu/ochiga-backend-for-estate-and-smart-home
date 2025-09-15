@@ -1,14 +1,28 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
+import { User } from '../../user/entities/user.entity';
 
 @Entity('wallets')
 export class Wallet {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column()
-  userId!: string; // foreign key to User (UUID)
+  // ✅ Relation to User
+  @OneToOne(() => User, (user) => user.wallet, { eager: true })
+  @JoinColumn({ name: 'userId' })
+  user!: User;
 
-  // store as integer (cents / kobo) for accuracy
+  @Column()
+  userId!: string; // still keep foreign key column
+
+  // ✅ store as integer (cents/kobo) for accuracy
   @Column({ type: 'integer', default: 0 })
   balance!: number;
 
@@ -18,9 +32,9 @@ export class Wallet {
   @Column({ default: false })
   isActive!: boolean;
 
-  @CreateDateColumn({ type: 'text' })
+  @CreateDateColumn()
   createdAt!: Date;
 
-  @UpdateDateColumn({ type: 'text' })
+  @UpdateDateColumn()
   updatedAt!: Date;
 }
