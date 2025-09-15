@@ -1,17 +1,18 @@
-// src/user/resident.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Resident } from './entities/resident.entity';
+import { CreateResidentDto } from './dto/create-resident.dto';
+import { UpdateResidentDto } from './dto/update-resident.dto';
 
 @Injectable()
 export class ResidentService {
   constructor(
     @InjectRepository(Resident)
-    private readonly residentRepo: Repository<Resident>,
+    private residentRepo: Repository<Resident>,
   ) {}
 
-  async create(dto: Partial<Resident>): Promise<Resident> {
+  async create(dto: CreateResidentDto): Promise<Resident> {
     const resident = this.residentRepo.create(dto);
     return this.residentRepo.save(resident);
   }
@@ -20,7 +21,7 @@ export class ResidentService {
     return this.residentRepo.find();
   }
 
-  async findOne(id: string): Promise<Resident> {   // 🔑 id must be string (UUID)
+  async findOne(id: string): Promise<Resident> {
     const resident = await this.residentRepo.findOne({ where: { id } });
     if (!resident) {
       throw new NotFoundException(`Resident with ID ${id} not found`);
@@ -28,13 +29,13 @@ export class ResidentService {
     return resident;
   }
 
-  async update(id: string, dto: Partial<Resident>): Promise<Resident> {  // 🔑 also string
+  async update(id: string, dto: UpdateResidentDto): Promise<Resident> {
     const resident = await this.findOne(id);
     Object.assign(resident, dto);
     return this.residentRepo.save(resident);
   }
 
-  async remove(id: string): Promise<{ message: string }> {  // 🔑 also string
+  async remove(id: string): Promise<{ message: string }> {
     const result = await this.residentRepo.delete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Resident with ID ${id} not found`);
