@@ -3,11 +3,9 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  CreateDateColumn,
-  UpdateDateColumn,
   OneToOne,
-  JoinColumn,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Payment } from '../../payments/entities/payment.entity';
@@ -17,29 +15,19 @@ export class Wallet {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @OneToOne(() => User, (user) => user.wallet, { eager: true })
-  @JoinColumn({ name: 'userId' })
-  user!: User;
-
-  @Column()
-  userId!: string; // foreign key
-
-  @Column({ type: 'integer', default: 0 })
+  @Column('decimal', { precision: 12, scale: 2, default: 0 })
   balance!: number;
 
-  @Column({ nullable: true })
-  currency?: string;
+  @Column({ default: 'NGN' })
+  currency!: string;
 
-  @Column({ default: false })
+  @Column({ default: true })
   isActive!: boolean;
 
-  // ✅ One-to-many link to Payments
+  @OneToOne(() => User, (user) => user.wallet, { onDelete: 'CASCADE' })
+  @JoinColumn()
+  user!: User;
+
   @OneToMany(() => Payment, (payment) => payment.wallet)
   payments!: Payment[];
-
-  @CreateDateColumn()
-  createdAt!: Date;
-
-  @UpdateDateColumn()
-  updatedAt!: Date;
 }
