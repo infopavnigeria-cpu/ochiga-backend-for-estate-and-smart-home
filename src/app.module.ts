@@ -9,7 +9,7 @@ import { Room } from './room/entities/room.entity';
 import { User } from './user/entities/user.entity';
 import { HomeMember } from './home/entities/home-member.entity';
 import { Wallet } from './wallet/entities/wallet.entity';
-import { Visitor } from './visitors/visitor.entity';   // ✅ add Visitor entity
+import { Payment } from './payments/entities/payment.entity'; // ✅ add Payment entity
 
 import { AuthModule } from './auth/auth.module';
 import { DashboardModule } from './dashboard/dashboard.module';
@@ -18,7 +18,7 @@ import { EstateModule } from './estate/estate.module';
 import { HomeModule } from './home/home.module';
 import { RoomModule } from './room/room.module';
 import { WalletModule } from './wallet/wallet.module';
-import { VisitorModule } from './visitors/visitor.module'; // ✅ add Visitor module
+import { PaymentsModule } from './payments/payments.module'; // ✅ add PaymentsModule
 
 @Module({
   imports: [
@@ -34,7 +34,7 @@ import { VisitorModule } from './visitors/visitor.module'; // ✅ add Visitor mo
         User,
         HomeMember,
         Wallet,
-        Visitor,   // ✅ include Visitor entity
+        Payment, // ✅ include Payment entity
       ],
       synchronize: true,
     }),
@@ -46,7 +46,7 @@ import { VisitorModule } from './visitors/visitor.module'; // ✅ add Visitor mo
     HomeModule,
     RoomModule,
     WalletModule,
-    VisitorModule, // ✅ register Visitor module
+    PaymentsModule, // ✅ now live
   ],
 })
 export class AppModule {}
