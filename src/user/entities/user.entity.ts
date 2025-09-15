@@ -1,7 +1,8 @@
+// src/user/entities/user.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { HomeMember } from '../../home/entities/home-member.entity';
 import { UserRole } from '../../enums/user-role.enum';
-import { Visitor } from '../../visitors/visitor.entity';
+import { Visitor } from '../../visitors/visitor.entity';   // ✅ import Visitor
 
 @Entity()
 export class User {
@@ -29,7 +30,6 @@ export class User {
   @OneToMany(() => HomeMember, (homeMember: HomeMember) => homeMember.user, { cascade: true })
   homeMembers!: HomeMember[];
 
-  // ✅ Visitors invited by this user
   @OneToMany(() => Visitor, (visitor: Visitor) => visitor.invitedBy, { cascade: true })
-  invitedVisitors!: Visitor[];
+  invitedVisitors!: Visitor[];   // ✅ relation to visitors
 }
