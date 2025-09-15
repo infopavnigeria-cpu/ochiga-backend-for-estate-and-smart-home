@@ -1,3 +1,4 @@
+// src/wallet/entities/wallet.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -6,31 +7,35 @@ import {
   UpdateDateColumn,
   OneToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
+import { Payment } from '../../payments/entities/payment.entity';
 
 @Entity('wallets')
 export class Wallet {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  // Relation to User
   @OneToOne(() => User, (user) => user.wallet, { eager: true })
   @JoinColumn({ name: 'userId' })
   user!: User;
 
   @Column()
-  userId!: string;   // keep foreign key explicitly
+  userId!: string; // foreign key
 
-  // Store balance as integer for accuracy
   @Column({ type: 'integer', default: 0 })
   balance!: number;
 
   @Column({ nullable: true })
-  currency?: string; // NGN, USD, etc.
+  currency?: string;
 
   @Column({ default: false })
   isActive!: boolean;
+
+  // ✅ One-to-many link to Payments
+  @OneToMany(() => Payment, (payment) => payment.wallet)
+  payments!: Payment[];
 
   @CreateDateColumn()
   createdAt!: Date;
