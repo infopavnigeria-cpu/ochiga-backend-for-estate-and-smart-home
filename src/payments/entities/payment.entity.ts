@@ -1,4 +1,3 @@
-// src/payments/entities/payment.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -28,7 +27,7 @@ export class Payment {
   description!: string;
 
   @Column()
-  provider!: string;
+  provider!: string; // e.g. paystack, flutterwave
 
   @Column({ default: 'NGN' })
   currency!: string;
@@ -43,12 +42,19 @@ export class Payment {
   })
   status!: PaymentStatus;
 
+  /** -------- Relations -------- **/
+
+  // 👤 A payment belongs to one user
   @ManyToOne(() => User, (user) => user.payments, { onDelete: 'CASCADE' })
   user!: User;
 
-  @ManyToOne(() => Wallet, (wallet) => wallet.payments, { onDelete: 'CASCADE' })
+  // 💳 A payment is linked to one wallet
+  @ManyToOne(() => Wallet, (wallet) => wallet.payments, {
+    onDelete: 'CASCADE',
+  })
   wallet!: Wallet;
 
+  /** -------- Timestamps -------- **/
   @CreateDateColumn()
   createdAt!: Date;
 
