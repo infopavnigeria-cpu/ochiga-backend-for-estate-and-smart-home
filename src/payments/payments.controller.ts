@@ -1,7 +1,9 @@
+// src/payments/payments.controller.ts
 import { Controller, Post, Body, Get, Param, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { PaymentsService } from './payments.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
+import { User } from '../user/entities/user.entity';
 
 @Controller('payments')
 export class PaymentsController {
@@ -9,8 +11,8 @@ export class PaymentsController {
 
   @Post()
   async create(@Req() req: Request, @Body() dto: CreatePaymentDto) {
-    const user: any = (req as any).user; // ✅ comes from AuthGuard
-    return this.paymentsService.create(user, dto);
+    const user = (req as any).user as User; // ✅ injected by AuthGuard
+    return this.paymentsService.create(user, dto); // ✅ only 2 args
   }
 
   @Get()
