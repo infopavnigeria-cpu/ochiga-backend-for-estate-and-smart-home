@@ -22,8 +22,9 @@ export class Visitor {
   @Column({ unique: true })
   code: string; // unique visitor code/QR
 
-  @ManyToOne(() => User, (user: User) => user.visitors, { eager: true })
-  user: User;
+  // ✅ Always required: a visitor must be tied to a user
+  @ManyToOne(() => User, (user: User) => user.invitedVisitors, { eager: true })
+  invitedBy: User;
 
   @CreateDateColumn()
   createdAt: Date;
