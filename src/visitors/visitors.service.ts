@@ -2,35 +2,24 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Visitor } from './visitors.entity';
-import { User } from '../user/entities/user.entity';
-import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class VisitorsService {
   constructor(
     @InjectRepository(Visitor)
-    private readonly repo: Repository<Visitor>,
+    private readonly visitorsRepo: Repository<Visitor>,
   ) {}
 
-  async create(user: User, data: Partial<Visitor>) {
-    const visitor = this.repo.create({
-      ...data,
-      invitedBy: user,
-      code: uuid(), // generate unique visitor code
-    });
-    return this.repo.save(visitor);
+  async create(visitor: Partial<Visitor>) {
+    const newVisitor = this.visitorsRepo.create(visitor);
+    return this.visitorsRepo.save(newVisitor);
   }
 
   async findAll() {
-    return this.repo.find();
+    return this.visitorsRepo.find();
   }
 
   async findOne(id: string) {
-    return this.repo.findOne({ where: { id } });
-  }
-
-  async remove(id: string) {
-    await this.repo.delete(id);
-    return { deleted: true };
+    return this.visitorsRepo.findOne({ where: { id } });
   }
 }
