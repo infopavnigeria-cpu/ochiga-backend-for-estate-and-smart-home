@@ -1,3 +1,4 @@
+// src/home/entities/home.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
 import { Estate } from '../../estate/entities/estate.entity';
 import { Room } from '../../room/entities/room.entity';
