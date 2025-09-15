@@ -1,34 +1,36 @@
-// src/visitors/visitor.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Visitor } from './visitor.entity';
-import { CreateVisitorDto } from './dto/create-visitor.dto';
+import { Visitor } from './visitors.entity';
 import { User } from '../user/entities/user.entity';
+import { v4 as uuid } from 'uuid';
 
 @Injectable()
-export class VisitorsService {   // ✅ plural
+export class VisitorsService {
   constructor(
     @InjectRepository(Visitor)
-    private repo: Repository<Visitor>,
+    private readonly repo: Repository<Visitor>,
   ) {}
 
-  async create(dto: CreateVisitorDto, user: User): Promise<Visitor> {
-    const code = Math.random().toString().slice(2, 8);
-
+  async create(user: User, data: Partial<Visitor>) {
     const visitor = this.repo.create({
-      ...dto,
-      code,
+      ...data,
       invitedBy: user,
+      code: uuid(), // generate unique visitor code
     });
-
     return this.repo.save(visitor);
   }
 
-  async findByUser(userId: string): Promise<Visitor[]> {
-    return this.repo.find({
-      where: { invitedBy: { id: userId } },
-      order: { createdAt: 'DESC' },
-    });
+  async findAll() {
+    return this.repo.find();
+  }
+
+  async findOne(id: string) {
+    return this.repo.findOne({ where: { id } });
+  }
+
+  async remove(id: string) {
+    await this.repo.delete(id);
+    return { deleted: true };
   }
 }
