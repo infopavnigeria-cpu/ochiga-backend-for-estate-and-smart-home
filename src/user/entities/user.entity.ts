@@ -3,11 +3,18 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  OneToMany,
   OneToOne,
+  OneToMany,
 } from 'typeorm';
 import { Wallet } from '../../wallet/entities/wallet.entity';
 import { Payment } from '../../payments/entities/payment.entity';
+import { Visitor } from '../../visitors/visitors.entity';
+
+export enum UserRole {
+  ADMIN = 'ADMIN',
+  RESIDENT = 'RESIDENT',
+  MANAGER = 'MANAGER',
+}
 
 @Entity('users')
 export class User {
@@ -23,11 +30,15 @@ export class User {
   @Column()
   name!: string;
 
-  // ✅ One-to-one link to Wallet
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.RESIDENT })
+  role!: UserRole;
+
   @OneToOne(() => Wallet, (wallet) => wallet.user)
   wallet!: Wallet;
 
-  // ✅ One-to-many link to Payments
   @OneToMany(() => Payment, (payment) => payment.user)
   payments!: Payment[];
+
+  @OneToMany(() => Visitor, (visitor) => visitor.invitedBy)
+  invitedVisitors!: Visitor[];
 }
