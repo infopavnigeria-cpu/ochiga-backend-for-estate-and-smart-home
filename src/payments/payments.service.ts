@@ -1,4 +1,3 @@
-// src/payments/payments.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -20,7 +19,7 @@ export class PaymentsService {
       ...dto,
       user,
       wallet,
-      reference: uuid(), // unique payment reference
+      reference: uuid(), // unique payment ref
       status: PaymentStatus.PENDING,
     });
     return this.paymentsRepo.save(payment);
@@ -31,11 +30,11 @@ export class PaymentsService {
   }
 
   async findOne(id: string) {
-  return this.paymentsRepo.findOne({
-    where: { id }, // ✅ now id is string (uuid) and matches entity
-    relations: ['user', 'wallet'],
-  });
-}
+    return this.paymentsRepo.findOne({
+      where: { id }, // ✅ keep id as UUID string
+      relations: ['user', 'wallet'],
+    });
+  }
 
   async updateStatus(reference: string, status: PaymentStatus) {
     const payment = await this.paymentsRepo.findOne({ where: { reference } });
