@@ -18,7 +18,7 @@ import { EstateModule } from './estate/estate.module';
 import { HomeModule } from './home/home.module';
 import { RoomModule } from './room/room.module';
 import { WalletModule } from './wallet/wallet.module';
-import { VisitorsModule } from './visitors/visitors.module'; // ✅ correct
+import { VisitorsModule } from './visitors/visitors.module';
 import { PaymentsModule } from './payments/payments.module';
 
 @Module({
