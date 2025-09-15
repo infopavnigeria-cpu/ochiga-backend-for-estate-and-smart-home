@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { User } from '../user/entities/user.entity';
 
-@Entity()
+@Entity('visitors')
 export class Visitor {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
@@ -26,7 +26,7 @@ export class Visitor {
   status!: string;
 
   @Column({ unique: true })
-  code!: string; // QR / unique code
+  code!: string; // unique visitor code/QR
 
   @ManyToOne(() => User, (user) => user.invitedVisitors, { eager: true })
   invitedBy!: User;
