@@ -6,7 +6,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from '../user/entities/user.entity'; // ✅ fixed path
+import { User } from '../user/entities/user.entity';
 
 @Entity()
 export class Visitor {
@@ -22,13 +22,13 @@ export class Visitor {
   @Column()
   time!: string;
 
-  @Column({ default: 'Pending' })
+  @Column({ default: 'Pending' }) // Pending | Checked-in | Checked-out
   status!: string;
 
   @Column({ unique: true })
-  code!: string;
+  code!: string; // QR / unique code
 
-  @ManyToOne(() => User, (user: User) => user.invitedVisitors, { eager: true }) // ✅ explicit type
+  @ManyToOne(() => User, (user) => user.invitedVisitors, { eager: true })
   invitedBy!: User;
 
   @CreateDateColumn()
