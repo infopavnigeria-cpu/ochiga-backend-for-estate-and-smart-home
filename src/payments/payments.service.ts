@@ -32,7 +32,7 @@ export class PaymentsService {
 
   async findOne(id: string) {
   return this.paymentsRepo.findOne({
-    where: { id: id }, // ✅ fix typing issue
+    where: { id }, // ✅ now id is string (uuid) and matches entity
     relations: ['user', 'wallet'],
   });
 }
