@@ -7,10 +7,10 @@ import {
 } from 'typeorm';
 import { HomeMember } from '../../home/entities/home-member.entity';
 import { UserRole } from '../../enums/user-role.enum';
-import { Visitor } from '../../visitors/visitors.entity'; // ✅ correct path
 import { Wallet } from '../../wallet/entities/wallet.entity';
+import { Visitor } from '../../visitors/visitors.entity'; // keep import
 
-@Entity('users')
+@Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
@@ -38,13 +38,12 @@ export class User {
   })
   homeMembers!: HomeMember[];
 
-  // ✅ Relation to visitors
+  // ✅ safer relation
   @OneToMany(() => Visitor, (visitor) => visitor.invitedBy, {
     cascade: true,
   })
   invitedVisitors!: Visitor[];
 
-  // ✅ One-to-one link to Wallet
   @OneToOne(() => Wallet, (wallet) => wallet.user)
   wallet!: Wallet;
 }
