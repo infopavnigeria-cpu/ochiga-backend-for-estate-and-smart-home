@@ -1,26 +1,14 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToMany,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Wallet } from '../../wallet/entities/wallet.entity';
 import { Payment } from '../../payments/entities/payment.entity';
 import { Visitor } from '../../visitors/visitors.entity';
 import { HomeMember } from '../../home/entities/home-member.entity';
-
-export enum UserRole {
-  ADMIN = 'ADMIN',
-  RESIDENT = 'RESIDENT',
-  SECURITY = 'SECURITY',
-}
+import { UserRole } from '../enums/user-role.enum';
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  id!: string;   // ✅ UUID everywhere
 
   @Column({ unique: true })
   email!: string;
@@ -31,35 +19,19 @@ export class User {
   @Column()
   name!: string;
 
-  @Column({
-    type: 'enum',
-    enum: UserRole,
-    default: UserRole.RESIDENT,
-  })
-  role!: UserRole;
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.RESIDENT })
+  role!: UserRole;  // ✅ now recognized
 
-  /** -------- Relations -------- **/
-
-  // 💳 User can have many wallets
-  @OneToMany(() => Wallet, (wallet) => wallet.user)
+  // --- Relations ---
+  @OneToMany(() => Wallet, (wallet) => wallet.user, { cascade: true })
   wallets!: Wallet[];
 
-  // 💸 User can have many payments
-  @OneToMany(() => Payment, (payment) => payment.user)
+  @OneToMany(() => Payment, (payment) => payment.user, { cascade: true })
   payments!: Payment[];
 
-  // 🏠 User can have many home members
-  @OneToMany(() => HomeMember, (member) => member.user)
-  homeMembers!: HomeMember[];
-
-  // 👥 User can invite many visitors
-  @OneToMany(() => Visitor, (visitor) => visitor.user)
+  @OneToMany(() => Visitor, (visitor) => visitor.user, { cascade: true })
   invitedVisitors!: Visitor[];
 
-  /** -------- Timestamps -------- **/
-  @CreateDateColumn()
-  createdAt!: Date;
-
-  @UpdateDateColumn()
-  updatedAt!: Date;
+  @OneToMany(() => HomeMember, (homeMember) => homeMember.user, { cascade: true })
+  homeMembers!: HomeMember[];
 }
