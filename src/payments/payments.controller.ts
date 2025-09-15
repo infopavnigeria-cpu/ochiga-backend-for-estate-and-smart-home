@@ -1,4 +1,6 @@
+// src/payments/payments.controller.ts
 import { Controller, Post, Body, Get, Param, Req } from '@nestjs/common';
+import { Request } from 'express';
 import { PaymentsService } from './payments.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { PaymentStatus } from './entities/payment.entity';
@@ -8,9 +10,10 @@ export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Post()
-  async create(@Req() req, @Body() dto: CreatePaymentDto) {
+  async create(@Req() req: Request, @Body() dto: CreatePaymentDto) {
     // assume req.user is injected via AuthGuard
-    return this.paymentsService.create(req.user, req.user.wallet, dto);
+    const user: any = (req as any).user; // typing override for now
+    return this.paymentsService.create(user, user?.wallet, dto);
   }
 
   @Get()
@@ -20,11 +23,14 @@ export class PaymentsController {
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return this.paymentsService.findOne(+id);
+    return this.paymentsService.findOne(id); // keep id as string, not force +id
   }
 
   @Post('webhook/:provider')
-  async handleWebhook(@Param('provider') provider: string, @Body() body: any) {
+  async handleWebhook(
+    @Param('provider') provider: string,
+    @Body() body: any,
+  ) {
     // TODO: implement Paystack/Flutterwave webhook parsing
     const { reference, status } = body;
     return this.paymentsService.updateStatus(
