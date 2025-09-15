@@ -1,4 +1,3 @@
-// src/app.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
@@ -9,8 +8,8 @@ import { Room } from './room/entities/room.entity';
 import { User } from './user/entities/user.entity';
 import { HomeMember } from './home/entities/home-member.entity';
 import { Wallet } from './wallet/entities/wallet.entity';
-import { Payment } from './payments/entities/payment.entity';
 import { Visitor } from './visitors/visitor.entity';
+import { Payment } from './payments/entities/payment.entity';
 
 import { AuthModule } from './auth/auth.module';
 import { DashboardModule } from './dashboard/dashboard.module';
@@ -19,8 +18,8 @@ import { EstateModule } from './estate/estate.module';
 import { HomeModule } from './home/home.module';
 import { RoomModule } from './room/room.module';
 import { WalletModule } from './wallet/wallet.module';
-import { PaymentsModule } from './payments/payments.module';
 import { VisitorsModule } from './visitors/visitors.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -29,16 +28,7 @@ import { VisitorsModule } from './visitors/visitors.module';
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: 'db.sqlite',
-      entities: [
-        Estate,
-        Home,
-        Room,
-        User,
-        HomeMember,
-        Wallet,
-        Payment,
-        Visitor,
-      ],
+      entities: [Estate, Home, Room, User, HomeMember, Wallet, Visitor, Payment],
       synchronize: true,
     }),
 
@@ -49,8 +39,8 @@ import { VisitorsModule } from './visitors/visitors.module';
     HomeModule,
     RoomModule,
     WalletModule,
-    PaymentsModule,
     VisitorsModule,
+    PaymentsModule,
   ],
 })
 export class AppModule {}
