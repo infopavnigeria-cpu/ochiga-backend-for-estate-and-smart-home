@@ -24,19 +24,15 @@ export class WalletService {
   }
 
   /** Create wallet for user if none exists */
-  async createWallet(userId: string): Promise<Wallet> {
-    const user = await this.userRepo.findOne({ where: { id: userId } });
-    if (!user) throw new NotFoundException('User not found');
+  async createWallet(user: User) {
+  const wallet = this.walletRepo.create({
+    user: user, // relation is now valid
+    balance: 0,
+    currency: 'NGN',
+  });
 
-    const existing = await this.walletRepo.findOne({ where: { user: { id: userId } } });
-    if (existing) throw new BadRequestException('Wallet already exists for this user');
-
-    const wallet = this.walletRepo.create({
-      user: { id: userId } as User, // ✅ pass relation instead of userId
-      balance: 0,
-      currency: 'NGN',
-      isActive: true,
-    });
+  return this.walletRepo.save(wallet);
+}
 
     return this.walletRepo.save(wallet);
   }
