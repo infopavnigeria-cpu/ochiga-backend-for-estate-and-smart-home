@@ -14,7 +14,7 @@ import { HomeMember } from '../../home/entities/home-member.entity';
 export enum UserRole {
   ADMIN = 'ADMIN',
   RESIDENT = 'RESIDENT',
-  FACILITY_MANAGER = 'FACILITY_MANAGER',
+  SECURITY = 'SECURITY',
 }
 
 @Entity()
@@ -40,21 +40,21 @@ export class User {
 
   /** -------- Relations -------- **/
 
-  // 👛 A user can have many wallets
+  // 💳 User can have many wallets
   @OneToMany(() => Wallet, (wallet) => wallet.user)
   wallets!: Wallet[];
 
-  // 💳 A user can make many payments
+  // 💸 User can have many payments
   @OneToMany(() => Payment, (payment) => payment.user)
   payments!: Payment[];
 
-  // 🚪 A user can invite many visitors
+  // 🏠 User can have many home members
+  @OneToMany(() => HomeMember, (member) => member.user)
+  homeMembers!: HomeMember[];
+
+  // 👥 User can invite many visitors
   @OneToMany(() => Visitor, (visitor) => visitor.user)
   invitedVisitors!: Visitor[];
-
-  // 🏠 A user can belong to many homes
-  @OneToMany(() => HomeMember, (homeMember) => homeMember.user)
-  homeMembers!: HomeMember[];
 
   /** -------- Timestamps -------- **/
   @CreateDateColumn()
