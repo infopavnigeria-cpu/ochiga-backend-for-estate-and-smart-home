@@ -4,36 +4,20 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  CreateDateColumn,
-  UpdateDateColumn,
-  JoinColumn,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 
-@Entity('visitors')
+@Entity()
 export class Visitor {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
   @Column()
-  name!: string;
+  fullName!: string;
 
   @Column()
-  purpose!: string;
+  visitDate!: Date;
 
-  @Column({ unique: true })
-  code!: string;
-
-  @Column({ default: 'PENDING' })
-  status!: string;
-
-  @ManyToOne(() => User, (user) => user.invitedVisitors, { eager: true })
-  @JoinColumn({ name: 'invitedById' })
-  invitedBy!: User;
-
-  @CreateDateColumn()
-  createdAt!: Date;
-
-  @UpdateDateColumn()
-  updatedAt!: Date;
+  @ManyToOne(() => User, (user) => user.invitedVisitors, { eager: true, onDelete: 'CASCADE' })
+  user!: User;
 }
