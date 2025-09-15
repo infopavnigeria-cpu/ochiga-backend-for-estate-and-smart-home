@@ -1,15 +1,16 @@
+// src/visitors/dto/create-visitor.dto.ts
 import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateVisitorDto {
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name!: string;
 
   @IsString()
   @IsNotEmpty()
-  purpose: string;
+  purpose!: string;
 
   @IsString()
   @IsNotEmpty()
-  time: string;
+  time!: string;
 }
