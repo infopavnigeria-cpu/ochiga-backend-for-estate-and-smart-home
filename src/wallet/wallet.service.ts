@@ -1,40 +1,49 @@
-// src/wallet/wallet.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
-
-interface Wallet {
-  userId: number;
-  balance: number;
-  history: { type: 'credit' | 'debit'; amount: number; date: Date }[];
-}
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Wallet } from './entities/wallet.entity';
+import { User } from '../user/entities/user.entity';
 
 @Injectable()
 export class WalletService {
-  private wallets: Wallet[] = [];
+  constructor(
+    @InjectRepository(Wallet) private walletRepo: Repository<Wallet>,
+    @InjectRepository(User) private userRepo: Repository<User>,
+  ) {}
 
-  getWallet(userId: number): Wallet {
-    const wallet = this.wallets.find(w => w.userId === userId);
+  async getWallet(userId: string): Promise<Wallet> {
+    const wallet = await this.walletRepo.findOne({
+      where: { userId },
+      relations: ['user'],
+    });
     if (!wallet) throw new NotFoundException('Wallet not found');
     return wallet;
   }
 
-  createWallet(userId: number): Wallet {
-    const wallet: Wallet = { userId, balance: 0, history: [] };
-    this.wallets.push(wallet);
-    return wallet;
+  async createWallet(userId: string): Promise<Wallet> {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    let wallet = await this.walletRepo.findOne({ where: { userId } });
+    if (wallet) throw new BadRequestException('Wallet already exists for this user');
+
+    wallet = this.walletRepo.create({ user, userId, balance: 0, isActive: true });
+    return this.walletRepo.save(wallet);
   }
 
-  fundWallet(userId: number, amount: number): Wallet {
-    const wallet = this.getWallet(userId);
+  async fundWallet(userId: string, amount: number): Promise<Wallet> {
+    if (amount <= 0) throw new BadRequestException('Invalid amount');
+    const wallet = await this.getWallet(userId);
     wallet.balance += amount;
-    wallet.history.push({ type: 'credit', amount, date: new Date() });
-    return wallet;
+    return this.walletRepo.save(wallet);
   }
 
-  debitWallet(userId: number, amount: number): Wallet {
-    const wallet = this.getWallet(userId);
-    if (wallet.balance < amount) throw new Error('Insufficient funds');
+  async debitWallet(userId: string, amount: number): Promise<Wallet> {
+    if (amount <= 0) throw new BadRequestException('Invalid amount');
+    const wallet = await this.getWallet(userId);
+    if (wallet.balance < amount) throw new BadRequestException('Insufficient funds');
+
     wallet.balance -= amount;
-    wallet.history.push({ type: 'debit', amount, date: new Date() });
-    return wallet;
+    return this.walletRepo.save(wallet);
   }
 }
