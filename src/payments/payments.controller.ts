@@ -11,8 +11,7 @@ export class PaymentsController {
 
   @Post()
   async create(@Req() req: Request, @Body() dto: CreatePaymentDto) {
-    // assume req.user is injected via AuthGuard
-    const user: any = (req as any).user; // typing override for now
+    const user: any = (req as any).user; // ✅ comes from AuthGuard
     return this.paymentsService.create(user, user?.wallet, dto);
   }
 
@@ -22,8 +21,8 @@ export class PaymentsController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return this.paymentsService.findOne(id); // keep id as string, not force +id
+  async findOne(@Param('id') id: string) {  // ✅ UUID is string
+    return this.paymentsService.findOne(id);
   }
 
   @Post('webhook/:provider')
@@ -31,7 +30,6 @@ export class PaymentsController {
     @Param('provider') provider: string,
     @Body() body: any,
   ) {
-    // TODO: implement Paystack/Flutterwave webhook parsing
     const { reference, status } = body;
     return this.paymentsService.updateStatus(
       reference,
