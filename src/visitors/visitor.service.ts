@@ -1,34 +1,35 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Visitor } from './visitor.entity';
+import { User } from '../user/entities/user.entity';
 import { CreateVisitorDto } from './dto/create-visitor.dto';
 
 @Injectable()
 export class VisitorService {
-  constructor(@InjectRepository(Visitor) private repo: Repository<Visitor>) {}
+  constructor(
+    @InjectRepository(Visitor)
+    private readonly visitorRepo: Repository<Visitor>,
 
-  async create(dto: CreateVisitorDto, userId: number) {
-    const code = Math.random().toString().slice(2, 8); // 6-digit code
-    const visitor = this.repo.create({
-      ...dto,
-      code,
-      invitedBy: { id: userId } as any,
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
+  ) {}
+
+  async createVisitor(userId: string, dto: CreateVisitorDto) {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) throw new Error('User not found');
+
+    const visitor = this.visitorRepo.create({
+      name: dto.name,
+      status: 'Pending',
+      code: dto.code,
+      invitedBy: user,
     });
-    return this.repo.save(visitor);
+
+    return this.visitorRepo.save(visitor);
   }
 
-  async findAllByUser(userId: number) {
-    return this.repo.find({
-      where: { invitedBy: { id: userId } },
-      order: { createdAt: 'DESC' },
-    });
-  }
-
-  async updateStatus(code: string, status: string) {
-    const visitor = await this.repo.findOne({ where: { code } });
-    if (!visitor) throw new NotFoundException('Visitor not found');
-    visitor.status = status;
-    return this.repo.save(visitor);
+  async findByUser(userId: string) {
+    return this.visitorRepo.find({ where: { invitedBy: { id: userId } } });
   }
 }
