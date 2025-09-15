@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+// src/payments/payments.service.ts
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Payment, PaymentStatus } from './entities/payment.entity';
@@ -12,16 +13,31 @@ export class PaymentsService {
   constructor(
     @InjectRepository(Payment)
     private paymentsRepo: Repository<Payment>,
+
+    @InjectRepository(Wallet)
+    private walletRepo: Repository<Wallet>,
   ) {}
 
-  async create(user: User, wallet: Wallet, dto: CreatePaymentDto) {
+  /** Create a new payment */
+  async create(user: User, dto: CreatePaymentDto) {
+    // 🧠 Smart cashier: find wallet automatically
+    const wallet = await this.walletRepo.findOne({
+      where: { user: { id: user.id } },
+    });
+
+    if (!wallet) {
+      throw new NotFoundException('Wallet not found for this user');
+    }
+
     const payment = this.paymentsRepo.create({
       amount: dto.amount,
-      reference: uuid(), // ✅ always generated on server
+      description: dto.description,
+      provider: dto.provider,
+      currency: dto.currency ?? 'NGN', // ✅ default currency
+      reference: uuid(), // ✅ always generated server-side
       status: PaymentStatus.PENDING,
       user,
       wallet,
-      // extra fields that aren’t in entity should be saved in metadata column (if needed)
     });
 
     return this.paymentsRepo.save(payment);
@@ -40,7 +56,7 @@ export class PaymentsService {
 
   async updateStatus(reference: string, status: PaymentStatus) {
     const payment = await this.paymentsRepo.findOne({ where: { reference } });
-    if (!payment) throw new Error('Payment not found');
+    if (!payment) throw new NotFoundException('Payment not found');
 
     payment.status = status;
     return this.paymentsRepo.save(payment);
