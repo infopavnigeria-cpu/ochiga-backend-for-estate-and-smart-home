@@ -7,14 +7,14 @@ import { CreateVisitorDto } from './dto/create-visitor.dto';
 import { User } from '../user/entities/user.entity';
 
 @Injectable()
-export class VisitorsService {
+export class VisitorsService {   // ✅ plural
   constructor(
     @InjectRepository(Visitor)
     private repo: Repository<Visitor>,
   ) {}
 
   async create(dto: CreateVisitorDto, user: User): Promise<Visitor> {
-    const code = Math.random().toString().slice(2, 8); // 6-digit code
+    const code = Math.random().toString().slice(2, 8);
 
     const visitor = this.repo.create({
       ...dto,
