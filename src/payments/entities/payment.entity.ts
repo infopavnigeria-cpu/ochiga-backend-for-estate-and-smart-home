@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Wallet } from '../../wallet/entities/wallet.entity';
 
@@ -10,34 +17,27 @@ export enum PaymentStatus {
 
 @Entity()
 export class Payment {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @ManyToOne(() => User, (user) => user.id)
-  user: User;
-
-  @ManyToOne(() => Wallet, (wallet) => wallet.id)
-  wallet: Wallet;
+  @PrimaryGeneratedColumn('uuid') // ✅ use uuid instead of default int
+  id!: string;
 
   @Column()
-  amount: number;
-
-  @Column({ default: 'NGN' })
-  currency: string;
+  amount!: number;
 
   @Column()
-  reference: string; // e.g. Paystack/Flutterwave reference
+  reference!: string;
 
-  @Column({
-    type: 'enum',
-    enum: PaymentStatus,
-    default: PaymentStatus.PENDING,
-  })
-  status: PaymentStatus;
+  @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })
+  status!: PaymentStatus;
 
-  @Column({ nullable: true })
-  description: string;
+  @ManyToOne(() => User, { eager: true })
+  user!: User;
+
+  @ManyToOne(() => Wallet, { eager: true })
+  wallet!: Wallet;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
+
+  @UpdateDateColumn()
+  updatedAt!: Date;
 }
