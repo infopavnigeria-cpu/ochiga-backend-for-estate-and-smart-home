@@ -30,12 +30,12 @@ export class PaymentsService {
     return this.paymentsRepo.find({ relations: ['user', 'wallet'] });
   }
 
-  async findOne(id: string) {   // ✅ switched from number → string
-    return this.paymentsRepo.findOne({
-      where: { id },
-      relations: ['user', 'wallet'],
-    });
-  }
+  async findOne(id: string) {
+  return this.paymentsRepo.findOne({
+    where: { id: id }, // ✅ fix typing issue
+    relations: ['user', 'wallet'],
+  });
+}
 
   async updateStatus(reference: string, status: PaymentStatus) {
     const payment = await this.paymentsRepo.findOne({ where: { reference } });
