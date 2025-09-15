@@ -27,7 +27,7 @@ export class Visitor {
   status!: string;
 
   @Column({ unique: true })
-  code!: string; // unique QR/code
+  code!: string; // unique visitor code / QR
 
   @ManyToOne(() => User, (user) => user.invitedVisitors, { eager: true })
   invitedBy!: User;
