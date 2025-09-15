@@ -1,3 +1,4 @@
+// src/visitors/visitors.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -6,7 +7,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from '../user/entities/user.entity';
+import { User } from '../user/entities/user.entity';  // ✅ correct path
 
 @Entity('visitors')
 export class Visitor {
@@ -22,13 +23,14 @@ export class Visitor {
   @Column()
   time!: string;
 
-  @Column({ default: 'Pending' }) // Pending | Checked-in | Checked-out
+  @Column({ default: 'Pending' })
   status!: string;
 
   @Column({ unique: true })
-  code!: string; // unique visitor code/QR
+  code!: string;
 
-  @ManyToOne(() => User, (user) => user.invitedVisitors, { eager: true })
+  // ✅ Relation back to User
+  @ManyToOne(() => User, (user: User) => user.invitedVisitors, { eager: true })
   invitedBy!: User;
 
   @CreateDateColumn()
