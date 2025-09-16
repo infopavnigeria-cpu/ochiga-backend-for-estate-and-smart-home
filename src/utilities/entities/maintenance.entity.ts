@@ -1,17 +1,23 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+// src/utilities/entities/maintenance.entity.ts
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
-@Entity()
+@Entity('maintenance_requests')
 export class Maintenance {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
 
   @Column()
   issue!: string;
 
-  @Column({
-    type: 'enum',
-    enum: ['Pending', 'Resolved'],
-    default: 'Pending',
-  })
-  status!: 'Pending' | 'Resolved';
+  @Column({ default: 'PENDING' })
+  status!: string; // PENDING, IN_PROGRESS, RESOLVED
+
+  @Column({ nullable: true })
+  notes?: string;
+
+  @CreateDateColumn()
+  createdAt!: Date;
+
+  @UpdateDateColumn()
+  updatedAt!: Date;
 }
