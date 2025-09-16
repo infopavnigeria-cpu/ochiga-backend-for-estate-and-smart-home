@@ -1,5 +1,4 @@
 // src/home/home.controller.ts
-
 import {
   Controller,
   Post,
@@ -21,13 +20,15 @@ import { Request } from 'express';
 export class HomeController {
   constructor(private readonly homeService: HomeService) {}
 
+  /** Manager creates a home and assigns a resident */
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Req() req: Request, @Body() dto: CreateHomeDto) {
-    const userId = (req as any).user?.id ?? '1'; // ✅ keep as string (UUID or fallback)
-    return this.homeService.create(userId, dto);
+    const managerId = (req as any).user?.id ?? '1'; // ✅ manager ID from auth
+    return this.homeService.create(managerId, dto);
   }
 
+  /** Resident fetches all their homes */
   @Get()
   findAll(@Req() req: Request) {
     const userId = (req as any).user?.id ?? '1';
@@ -37,7 +38,7 @@ export class HomeController {
   @Get(':id')
   findOne(@Req() req: Request, @Param('id') id: string) {
     const userId = (req as any).user?.id ?? '1';
-    return this.homeService.findOne(userId, id); // ✅ removed +id
+    return this.homeService.findOne(userId, id);
   }
 
   @Patch(':id')
@@ -47,12 +48,12 @@ export class HomeController {
     @Body() dto: UpdateHomeDto,
   ) {
     const userId = (req as any).user?.id ?? '1';
-    return this.homeService.update(userId, id, dto); // ✅ removed +id
+    return this.homeService.update(userId, id, dto);
   }
 
   @Delete(':id')
   remove(@Req() req: Request, @Param('id') id: string) {
     const userId = (req as any).user?.id ?? '1';
-    return this.homeService.remove(userId, id); // ✅ removed +id
+    return this.homeService.remove(userId, id);
   }
 }
