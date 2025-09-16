@@ -1,17 +1,20 @@
+// src/user/entities/user.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
   OneToOne,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 import { Wallet } from '../../wallet/entities/wallet.entity';
 import { Payment } from '../../payments/entities/payment.entity';
-import { Visitor } from '../../visitors/visitors.entity'; // corrected
+import { Visitor } from '../../visitors/visitors.entity';
 import { HomeMember } from '../../home/entities/home-member.entity';
-import { UserRole } from '../../enums/user-role.enum'; // corrected
+import { Resident } from './resident.entity';
+import { UserRole } from '../../enums/user-role.enum';
 
-@Entity()
+@Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
@@ -28,15 +31,23 @@ export class User {
   @Column({ type: 'enum', enum: UserRole, default: UserRole.RESIDENT })
   role!: UserRole;
 
-  @OneToOne(() => Wallet, (wallet) => wallet.user, { cascade: true })
+  // One user has one wallet
+  @OneToOne(() => Wallet, (wallet) => wallet.user, { cascade: true, eager: true })
   wallet!: Wallet;
 
-  @OneToMany(() => Payment, (payment) => payment.user, { cascade: true })
+  // Payments by this user
+  @OneToMany(() => Payment, (payment) => payment.user)
   payments!: Payment[];
 
-  @OneToMany(() => Visitor, (visitor) => visitor.user, { cascade: true })
+  // Visitors invited by this user
+  @OneToMany(() => Visitor, (visitor) => visitor.invitedBy, { cascade: true })
   invitedVisitors!: Visitor[];
 
-  @OneToMany(() => HomeMember, (homeMember) => homeMember.user, { cascade: true })
+  // Memberships in homes
+  @OneToMany(() => HomeMember, (member) => member.user)
   homeMembers!: HomeMember[];
+
+  // For resident model if used
+  @OneToMany(() => Resident, (r) => r.user)
+  residentRecords!: Resident[];
 }
