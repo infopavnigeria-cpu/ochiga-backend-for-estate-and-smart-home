@@ -1,48 +1,35 @@
+// src/wallet/entities/wallet.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  OneToOne,
-  OneToMany,
-  JoinColumn,
+  ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from '../../user/entities/user.entity';
-import { Payment } from '../../payments/entities/payment.entity';
+import { User } from 'src/user/entities/user.entity';
 
 @Entity()
 export class Wallet {
   @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  id: string;
 
-  // Balance is stored as DECIMAL in DB, but handled as number in code
-  @Column('decimal', {
-    precision: 12,
-    scale: 2,
-    default: 0,
-    transformer: {
-      to: (value: number) => value, // JS → DB
-      from: (value: string) => parseFloat(value), // DB → JS
-    },
-  })
-  balance!: number;
+  // Every wallet belongs to one resident (user)
+  @ManyToOne(() => User, (user) => user.wallets, { eager: true })
+  user: User;
 
-  @Column({ default: 'NGN' })
-  currency!: string;
+  // Wallet balance starts at 0
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  balance: number;
 
-  // A user has exactly one wallet
-  @OneToOne(() => User, (user) => user.wallet, { onDelete: 'CASCADE' })
-  @JoinColumn()
-  user!: User;
+  // Mark wallet active/inactive
+  @Column({ default: true })
+  isActive: boolean;
 
-  // A wallet can have many payments
-  @OneToMany(() => Payment, (payment) => payment.wallet)
-  payments!: Payment[];
-
+  // Auto timestamps
   @CreateDateColumn()
-  createdAt!: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updatedAt!: Date;
+  updatedAt: Date;
 }
