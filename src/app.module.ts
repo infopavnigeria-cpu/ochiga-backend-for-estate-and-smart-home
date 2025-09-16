@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { Estate } from './estate/entities/estate.entity';
 import { Home } from './home/entities/home.entity';
@@ -8,7 +8,7 @@ import { Room } from './room/entities/room.entity';
 import { User } from './user/entities/user.entity';
 import { HomeMember } from './home/entities/home-member.entity';
 import { Wallet } from './wallet/entities/wallet.entity';
-import { Visitor } from './visitors/visitors.entity';   // ✅ fixed (plural file)
+import { Visitor } from './visitors/visitors.entity';
 import { Payment } from './payments/entities/payment.entity';
 
 import { AuthModule } from './auth/auth.module';
@@ -25,20 +25,24 @@ import { PaymentsModule } from './payments/payments.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
 
-    TypeOrmModule.forRoot({
-      type: 'sqlite',
-      database: 'db.sqlite',
-      entities: [
-        Estate,
-        Home,
-        Room,
-        User,
-        HomeMember,
-        Wallet,
-        Visitor,   // ✅ entity points to correct file
-        Payment,
-      ],
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => {
+        const isSQLite = config.get<string>('DB_TYPE') === 'sqlite';
+
+        return {
+          type: isSQLite ? 'sqlite' : 'postgres',
+          database: config.get<string>('DB_DATABASE'),
+          host: isSQLite ? undefined : config.get<string>('DB_HOST'),
+          port: isSQLite ? undefined : parseInt(config.get<string>('DB_PORT'), 10),
+          username: isSQLite ? undefined : config.get<string>('DB_USERNAME'),
+          password: isSQLite ? undefined : config.get<string>('DB_PASSWORD'),
+          entities: [Estate, Home, Room, User, HomeMember, Wallet, Visitor, Payment],
+          synchronize: true, // ⚠️ safe in dev, but disable in production!
+          autoLoadEntities: true,
+        };
+      },
     }),
 
     AuthModule,
@@ -48,7 +52,7 @@ import { PaymentsModule } from './payments/payments.module';
     HomeModule,
     RoomModule,
     WalletModule,
-    VisitorsModule,   // ✅ module name matches
+    VisitorsModule,
     PaymentsModule,
   ],
 })
