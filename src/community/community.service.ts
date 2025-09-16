@@ -1,3 +1,4 @@
+// src/community/community.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -15,7 +16,7 @@ export class CommunityService {
     @InjectRepository(Message) private messageRepo: Repository<Message>,
   ) {}
 
-  // 📝 Posts
+  // Posts
   createPost(data: Partial<Post>) {
     const post = this.postRepo.create(data);
     return this.postRepo.save(post);
@@ -25,22 +26,22 @@ export class CommunityService {
     return this.postRepo.find({ relations: ['comments'], order: { createdAt: 'DESC' } });
   }
 
-  async likePost(id: number) {
+  async likePost(id: string) {
     const post = await this.postRepo.findOneBy({ id });
     if (!post) return null;
-    post.likes += 1;
+    post.likes = (post.likes || 0) + 1;
     return this.postRepo.save(post);
   }
 
-  // 💬 Comments
-  async addComment(postId: number, data: Partial<Comment>) {
+  // Comments
+  async addComment(postId: string, data: Partial<Comment>) {
     const post = await this.postRepo.findOneBy({ id: postId });
     if (!post) return null;
     const comment = this.commentRepo.create({ ...data, post });
     return this.commentRepo.save(comment);
   }
 
-  // 👥 Groups
+  // Groups
   createGroup(data: Partial<Group>) {
     const group = this.groupRepo.create(data);
     return this.groupRepo.save(group);
@@ -50,15 +51,15 @@ export class CommunityService {
     return this.groupRepo.find();
   }
 
-  async toggleJoinGroup(id: number) {
+  async toggleJoinGroup(id: string) {
     const group = await this.groupRepo.findOneBy({ id });
     if (!group) return null;
     group.joined = !group.joined;
-    group.members += group.joined ? 1 : -1;
+    group.members = Math.max(0, (group.members || 0) + (group.joined ? 1 : -1));
     return this.groupRepo.save(group);
   }
 
-  // 📩 Direct Messages
+  // Messages
   createMessage(data: Partial<Message>) {
     const msg = this.messageRepo.create(data);
     return this.messageRepo.save(msg);
