@@ -7,9 +7,9 @@ import {
 } from 'typeorm';
 import { Wallet } from '../../wallet/entities/wallet.entity';
 import { Payment } from '../../payments/entities/payment.entity';
-import { Visitor } from '../../visitors/visitor.entity'; // 🔥 fix path
+import { Visitor } from '../../visitors/visitors.entity'; // corrected
 import { HomeMember } from '../../home/entities/home-member.entity';
-import { UserRole } from '../../enums/user-role.enum'; // 🔥 fix path
+import { UserRole } from '../../enums/user-role.enum'; // corrected
 
 @Entity()
 export class User {
@@ -28,9 +28,8 @@ export class User {
   @Column({ type: 'enum', enum: UserRole, default: UserRole.RESIDENT })
   role!: UserRole;
 
-  // --- Relations ---
   @OneToOne(() => Wallet, (wallet) => wallet.user, { cascade: true })
-  wallet!: Wallet; // ✅ one user → one wallet
+  wallet!: Wallet;
 
   @OneToMany(() => Payment, (payment) => payment.user, { cascade: true })
   payments!: Payment[];
