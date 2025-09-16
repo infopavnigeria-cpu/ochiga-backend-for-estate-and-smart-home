@@ -1,3 +1,4 @@
+// src/community/community.controller.ts
 import { Controller, Get, Post as HttpPost, Body, Param, Patch, Query } from '@nestjs/common';
 import { CommunityService } from './community.service';
 import { Post as PostEntity } from './entities/post.entity';
@@ -9,7 +10,7 @@ import { Message } from './entities/message.entity';
 export class CommunityController {
   constructor(private readonly communityService: CommunityService) {}
 
-  // 📝 Posts
+  // Posts
   @HttpPost('posts')
   createPost(@Body() data: Partial<PostEntity>) {
     return this.communityService.createPost(data);
@@ -21,17 +22,17 @@ export class CommunityController {
   }
 
   @Patch('posts/:id/like')
-  likePost(@Param('id') id: number) {
+  likePost(@Param('id') id: string) {
     return this.communityService.likePost(id);
   }
 
-  // 💬 Comments
+  // Comments
   @HttpPost('posts/:id/comments')
-  addComment(@Param('id') id: number, @Body() data: Partial<Comment>) {
-    return this.communityService.addComment(+id, data);
+  addComment(@Param('id') id: string, @Body() data: Partial<Comment>) {
+    return this.communityService.addComment(id, data);
   }
 
-  // 👥 Groups
+  // Groups
   @HttpPost('groups')
   createGroup(@Body() data: Partial<Group>) {
     return this.communityService.createGroup(data);
@@ -43,11 +44,11 @@ export class CommunityController {
   }
 
   @Patch('groups/:id/toggle')
-  toggleJoinGroup(@Param('id') id: number) {
-    return this.communityService.toggleJoinGroup(+id);
+  toggleJoinGroup(@Param('id') id: string) {
+    return this.communityService.toggleJoinGroup(id);
   }
 
-  // 📩 Direct Messages
+  // Messages
   @HttpPost('messages')
   createMessage(@Body() data: Partial<Message>) {
     return this.communityService.createMessage(data);
