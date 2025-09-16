@@ -1,24 +1,19 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  CreateDateColumn,
-} from 'typeorm';
+// src/community/entities/message.entity.ts
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
-@Entity()
+@Entity('messages')
 export class Message {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
 
   @Column()
-  sender!: string; // Later, this could be a User relation
+  sender!: string; // string id or username
 
   @Column()
-  recipient!: string; // Later, this could also be a User relation
+  recipient!: string; // string id or username
 
   @Column('text')
-  content!: string;
+  body!: string;
 
   @CreateDateColumn()
   createdAt!: Date;
