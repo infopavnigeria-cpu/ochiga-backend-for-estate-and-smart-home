@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Post } from './entities/post.entity';
 import { Group } from './entities/group.entity';
 import { Comment } from './entities/comment.entity';
+import { Message } from './entities/message.entity';
 
 @Injectable()
 export class CommunityService {
@@ -11,9 +12,10 @@ export class CommunityService {
     @InjectRepository(Post) private postRepo: Repository<Post>,
     @InjectRepository(Group) private groupRepo: Repository<Group>,
     @InjectRepository(Comment) private commentRepo: Repository<Comment>,
+    @InjectRepository(Message) private messageRepo: Repository<Message>,
   ) {}
 
-  // Posts
+  // 📝 Posts
   createPost(data: Partial<Post>) {
     const post = this.postRepo.create(data);
     return this.postRepo.save(post);
@@ -30,7 +32,7 @@ export class CommunityService {
     return this.postRepo.save(post);
   }
 
-  // Comments
+  // 💬 Comments
   async addComment(postId: number, data: Partial<Comment>) {
     const post = await this.postRepo.findOneBy({ id: postId });
     if (!post) return null;
@@ -38,7 +40,7 @@ export class CommunityService {
     return this.commentRepo.save(comment);
   }
 
-  // Groups
+  // 👥 Groups
   createGroup(data: Partial<Group>) {
     const group = this.groupRepo.create(data);
     return this.groupRepo.save(group);
@@ -54,5 +56,21 @@ export class CommunityService {
     group.joined = !group.joined;
     group.members += group.joined ? 1 : -1;
     return this.groupRepo.save(group);
+  }
+
+  // 📩 Direct Messages
+  createMessage(data: Partial<Message>) {
+    const msg = this.messageRepo.create(data);
+    return this.messageRepo.save(msg);
+  }
+
+  getConversation(user1: string, user2: string) {
+    return this.messageRepo.find({
+      where: [
+        { sender: user1, recipient: user2 },
+        { sender: user2, recipient: user1 },
+      ],
+      order: { createdAt: 'ASC' },
+    });
   }
 }
