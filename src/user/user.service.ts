@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { UserRole } from '../enums/user-role.enum';
+import { UserRole } from './enums/user-role.enum';
 
 @Injectable()
 export class UserService {
@@ -11,6 +11,7 @@ export class UserService {
     private userRepo: Repository<User>,
   ) {}
 
+  // Create user
   async create(data: Partial<User>): Promise<User> {
     const newUser = this.userRepo.create({
       ...data,
@@ -19,6 +20,12 @@ export class UserService {
     return this.userRepo.save(newUser);
   }
 
+  // Alias for controller (createUser)
+  async createUser(data: Partial<User>): Promise<User> {
+    return this.create(data);
+  }
+
+  // Get one user
   async findOne(id: string): Promise<User> {
     const user = await this.userRepo.findOne({
       where: { id },
@@ -29,14 +36,21 @@ export class UserService {
     return user;
   }
 
-  // ✅ alias for findOne so controller works
+  // Alias for controller (getUserById)
   async getUserById(id: string): Promise<User> {
     return this.findOne(id);
   }
 
-  // ✅ update user
+  // ✅ NEW: get all users
+  async getAllUsers(): Promise<User[]> {
+    return this.userRepo.find({
+      relations: ['wallet', 'payments', 'invitedVisitors', 'homeMembers'],
+    });
+  }
+
+  // Update user
   async updateUser(id: string, updateData: Partial<User>): Promise<User> {
-    const user = await this.findOne(id); // throws if not found
+    const user = await this.findOne(id);
     Object.assign(user, updateData);
     return this.userRepo.save(user);
   }
