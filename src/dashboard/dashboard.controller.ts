@@ -3,14 +3,11 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { UserRole } from '../enums/user-role.enum';
+import { Request as ExpressRequest } from 'express';
+import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 
-// Better: Extend Express Request for typing
-interface AuthenticatedRequest extends Request {
-  user: {
-    id: string;   // UUID
-    email: string;
-    role: UserRole;
-  };
+interface AuthenticatedRequest extends ExpressRequest {
+  user: JwtPayload;
 }
 
 @Controller('dashboard')
