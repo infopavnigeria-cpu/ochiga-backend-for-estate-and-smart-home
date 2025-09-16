@@ -1,4 +1,3 @@
-// src/user/resident.controller.ts
 import {
   Controller,
   Get,
@@ -18,37 +17,29 @@ import { UpdateResidentDto } from './dto/update-resident.dto';
 export class ResidentController {
   constructor(private readonly residentService: ResidentService) {}
 
-  // 🏡 Add a new resident
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  createResident(@Body() dto: CreateResidentDto) {
+  create(@Body() dto: CreateResidentDto) {
     return this.residentService.createResident(dto);
   }
 
-  // 📋 Get list of all residents
   @Get()
-  getAllResidents() {
+  findAll() {
     return this.residentService.getAllResidents();
   }
 
-  // 🔍 Get details of a specific resident
   @Get(':id')
-  getResidentById(@Param('id') id: string) {
+  findOne(@Param('id') id: string) {
     return this.residentService.getResidentById(id);
   }
 
-  // 🛠 Update resident details
   @Patch(':id')
-  updateResident(
-    @Param('id') id: string,
-    @Body() dto: UpdateResidentDto,
-  ) {
+  update(@Param('id') id: string, @Body() dto: UpdateResidentDto) {
     return this.residentService.updateResident(id, dto);
   }
 
-  // ❌ Remove a resident
   @Delete(':id')
-  removeResident(@Param('id') id: string) {
+  remove(@Param('id') id: string) {
     return this.residentService.removeResident(id);
   }
 }
