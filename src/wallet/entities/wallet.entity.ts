@@ -16,9 +16,17 @@ export class Wallet {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  // Store as string to avoid float precision issues
-  @Column('decimal', { precision: 12, scale: 2, default: 0 })
-  balance!: string;
+  // Balance is stored as DECIMAL in DB, but handled as number in code
+  @Column('decimal', {
+    precision: 12,
+    scale: 2,
+    default: 0,
+    transformer: {
+      to: (value: number) => value, // JS → DB
+      from: (value: string) => parseFloat(value), // DB → JS
+    },
+  })
+  balance!: number;
 
   @Column({ default: 'NGN' })
   currency!: string;
