@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Resident } from './entities/resident.entity';
-import { CreateResidentDto } from './dto/create-resident.dto';
-import { UpdateResidentDto } from './dto/update-resident.dto';
+import { CreateResidentDto } from '../dto/create-resident.dto';   // ✅ fixed
+import { UpdateResidentDto } from '../dto/update-resident.dto';   // ✅ fixed
 
 @Injectable()
 export class ResidentService {
