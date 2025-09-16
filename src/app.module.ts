@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import * as path from 'path';
 
 import { Estate } from './estate/entities/estate.entity';
 import { Home } from './home/entities/home.entity';
@@ -37,23 +38,30 @@ import { RolesGuard } from './auth/roles.guard';
       useFactory: async (config: ConfigService) => {
         const dbType = config.get<string>('DB_TYPE', 'sqlite');
 
-        return dbType === 'postgres'
-          ? {
-              type: 'postgres' as const,
-              host: config.get<string>('DB_HOST', 'localhost'),
-              port: parseInt(config.get<string>('DB_PORT', '5432'), 10),
-              username: config.get<string>('DB_USERNAME', 'postgres'),
-              password: config.get<string>('DB_PASSWORD', 'postgres'),
-              database: config.get<string>('DB_DATABASE', 'estate_app'),
-              entities: [Estate, Home, Room, User, HomeMember, Wallet, Visitor, Payment],
-              synchronize: true,
-            }
-          : {
-              type: 'sqlite' as const,
-              database: config.get<string>('DB_DATABASE', 'db.sqlite'),
-              entities: [Estate, Home, Room, User, HomeMember, Wallet, Visitor, Payment],
-              synchronize: true,
-            };
+        if (dbType === 'postgres') {
+          return {
+            type: 'postgres' as const,
+            host: config.get<string>('DB_HOST', 'localhost'),
+            port: parseInt(config.get<string>('DB_PORT', '5432'), 10),
+            username: config.get<string>('DB_USERNAME', 'postgres'),
+            password: config.get<string>('DB_PASSWORD', 'postgres'),
+            database: config.get<string>('DB_DATABASE', 'estate_app'),
+            entities: [Estate, Home, Room, User, HomeMember, Wallet, Visitor, Payment],
+            synchronize: true,
+          };
+        }
+
+        // Default to SQLite
+        return {
+          type: 'sqlite' as const,
+          database: path.resolve(
+            __dirname,
+            '..',
+            config.get<string>('DB_DATABASE', 'db.sqlite'),
+          ),
+          entities: [Estate, Home, Room, User, HomeMember, Wallet, Visitor, Payment],
+          synchronize: true,
+        };
       },
     }),
 
