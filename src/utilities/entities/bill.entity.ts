@@ -1,20 +1,26 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+// src/utilities/entities/bill.entity.ts
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
-@Entity()
+@Entity('bills')
 export class Bill {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
 
   @Column()
-  name!: string;
+  name!: string; // Electricity, Water, Security levy
 
-  @Column()
-  amount!: string;
+  @Column('decimal', { precision: 12, scale: 2, default: 0 })
+  amount!: number;
 
-  @Column({
-    type: 'enum',
-    enum: ['Paid', 'Unpaid'],
-    default: 'Unpaid',
-  })
-  status!: 'Paid' | 'Unpaid';
+  @Column({ default: 'UNPAID' })
+  status!: string; // PAID / UNPAID
+
+  @Column({ nullable: true })
+  dueDate?: string;
+
+  @CreateDateColumn()
+  createdAt!: Date;
+
+  @UpdateDateColumn()
+  updatedAt!: Date;
 }
