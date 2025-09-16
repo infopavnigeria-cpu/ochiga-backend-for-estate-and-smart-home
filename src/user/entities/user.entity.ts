@@ -1,9 +1,15 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToOne,
+  OneToMany,
+} from 'typeorm';
 import { Wallet } from '../../wallet/entities/wallet.entity';
 import { Payment } from '../../payments/entities/payment.entity';
-import { Visitor } from '../../visitors/visitors.entity';
+import { Visitor } from '../../visitors/visitor.entity'; // 🔥 fix path
 import { HomeMember } from '../../home/entities/home-member.entity';
-import { UserRole } from '../enums/user-role.enum';
+import { UserRole } from '../../enums/user-role.enum'; // 🔥 fix path
 
 @Entity()
 export class User {
@@ -24,7 +30,7 @@ export class User {
 
   // --- Relations ---
   @OneToOne(() => Wallet, (wallet) => wallet.user, { cascade: true })
-  wallet!: Wallet;   // ✅ FIXED → only one wallet per user
+  wallet!: Wallet; // ✅ one user → one wallet
 
   @OneToMany(() => Payment, (payment) => payment.user, { cascade: true })
   payments!: Payment[];
