@@ -1,7 +1,8 @@
+// src/room/entities/room.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Home } from '../../home/entities/home.entity';
 
-@Entity()
+@Entity('rooms')
 export class Room {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
@@ -9,6 +10,6 @@ export class Room {
   @Column()
   name!: string;
 
-  @ManyToOne(() => Home, (home: Home) => home.rooms, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Home, (home) => home.rooms, { onDelete: 'CASCADE' })
   home!: Home;
 }
