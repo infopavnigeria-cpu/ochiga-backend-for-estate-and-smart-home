@@ -2,6 +2,7 @@ import { Controller, Get, Post as HttpPost, Body, Param, Patch } from '@nestjs/c
 import { CommunityService } from './community.service';
 import { Post as PostEntity } from './entities/post.entity';
 import { Group } from './entities/group.entity';
+import { Comment } from './entities/comment.entity';
 
 @Controller('community')
 export class CommunityController {
@@ -23,6 +24,12 @@ export class CommunityController {
     return this.communityService.likePost(id);
   }
 
+  // Comments
+  @HttpPost('posts/:id/comments')
+  addComment(@Param('id') id: number, @Body() data: Partial<Comment>) {
+    return this.communityService.addComment(+id, data);
+  }
+
   // Groups
   @HttpPost('groups')
   createGroup(@Body() data: Partial<Group>) {
@@ -36,6 +43,6 @@ export class CommunityController {
 
   @Patch('groups/:id/toggle')
   toggleJoinGroup(@Param('id') id: number) {
-    return this.communityService.toggleJoinGroup(id);
+    return this.communityService.toggleJoinGroup(+id);
   }
 }
