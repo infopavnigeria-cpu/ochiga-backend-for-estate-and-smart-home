@@ -24,9 +24,12 @@ export class WalletService {
   }
 
   /** Create wallet for user if none exists */
-  async createWallet(user: User): Promise<Wallet> {
+  async createWallet(userId: string): Promise<Wallet> {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
     const wallet = this.walletRepo.create({
-      user: user,
+      user,
       balance: 0,
       currency: 'NGN',
     });
@@ -39,7 +42,7 @@ export class WalletService {
     if (amount <= 0) throw new BadRequestException('Invalid amount');
 
     const wallet = await this.getWallet(userId);
-    wallet.balance += amount;
+    wallet.balance = Number(wallet.balance) + amount;
 
     return this.walletRepo.save(wallet);
   }
@@ -49,19 +52,25 @@ export class WalletService {
     if (amount <= 0) throw new BadRequestException('Invalid amount');
 
     const wallet = await this.getWallet(userId);
-    if (wallet.balance < amount) throw new BadRequestException('Insufficient funds');
+    if (Number(wallet.balance) < amount) throw new BadRequestException('Insufficient funds');
 
-    wallet.balance -= amount;
+    wallet.balance = Number(wallet.balance) - amount;
     return this.walletRepo.save(wallet);
   }
 
   /** Smart: get wallet if exists, else auto-create */
   async getOrCreateWallet(userId: string): Promise<Wallet> {
-    let wallet = await this.walletRepo.findOne({ where: { user: { id: userId } } });
+    let wallet = await this.walletRepo.findOne({
+      where: { user: { id: userId } },
+      relations: ['user'],
+    });
 
     if (!wallet) {
+      const user = await this.userRepo.findOne({ where: { id: userId } });
+      if (!user) throw new NotFoundException('User not found');
+
       wallet = this.walletRepo.create({
-        user: { id: userId } as User,
+        user,
         balance: 0,
         currency: 'NGN',
       });
