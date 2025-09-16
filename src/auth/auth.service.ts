@@ -1,4 +1,3 @@
-// src/auth/auth.service.ts
 import {
   Injectable,
   UnauthorizedException,
@@ -12,6 +11,7 @@ import { LoginDto } from './dto/login.dto';
 import { UserRole } from '../enums/user-role.enum';
 import * as jwt from 'jsonwebtoken';
 import * as bcrypt from 'bcrypt';
+import { AuthResponseDto } from './dto/auth-response.dto'; // ✅ import new DTO
 
 @Injectable()
 export class AuthService {
@@ -35,8 +35,8 @@ export class AuthService {
     return safeUser;
   }
 
-  // ✅ Secure register
-  async register(registerDto: RegisterDto): Promise<{ user: Omit<User, 'password'>; token: string }> {
+  // ✅ Register
+  async register(registerDto: RegisterDto): Promise<AuthResponseDto> {
     try {
       const hashedPassword = await bcrypt.hash(registerDto.password, 10);
 
@@ -62,11 +62,8 @@ export class AuthService {
     }
   }
 
-  // ✅ Resident registration via invite
-  async registerResident(
-    inviteToken: string,
-    password: string,
-  ): Promise<{ user: Omit<User, 'password'>; token: string }> {
+  // ✅ Register Resident via Invite
+  async registerResident(inviteToken: string, password: string): Promise<AuthResponseDto> {
     try {
       if (!inviteToken || inviteToken !== 'VALID_INVITE') {
         throw new UnauthorizedException('Invalid invite token');
@@ -93,8 +90,8 @@ export class AuthService {
     }
   }
 
-  // ✅ Login with bcrypt password check
-  async login(loginDto: LoginDto): Promise<{ user: Omit<User, 'password'>; token: string }> {
+  // ✅ Login
+  async login(loginDto: LoginDto): Promise<AuthResponseDto> {
     try {
       const user = await this.userService.findByEmail(loginDto.email);
 
@@ -113,9 +110,7 @@ export class AuthService {
       console.error('❌ AuthService.login error:', err);
 
       const error = err as { message?: string };
-      throw new InternalServerErrorException(
-        error.message || 'Login failed',
-      );
+      throw new InternalServerErrorException(error.message || 'Login failed');
     }
   }
 }
