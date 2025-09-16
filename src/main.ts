@@ -7,26 +7,20 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // ✅ Enable validation globally
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, // strip properties not in DTO
-      forbidNonWhitelisted: true, // throw error for unexpected properties
-      transform: true, // auto-transform payloads to DTO instances
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
     }),
   );
 
-  // ✅ Swagger configuration
   const config = new DocumentBuilder()
     .setTitle('Ochiga Smart Home & Estate API')
     .setDescription('API documentation for Ochiga backend services')
     .setVersion('1.0')
     .addBearerAuth(
-      {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-      },
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
       'access-token',
     )
     .build();
@@ -34,7 +28,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  // ✅ Use Codespaces PORT if available
+  // ✅ Works both locally & in Codespaces
   const port = process.env.PORT || 3000;
   await app.listen(port, '0.0.0.0');
 
