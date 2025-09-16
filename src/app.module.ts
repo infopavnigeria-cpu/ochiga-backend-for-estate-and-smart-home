@@ -28,19 +28,18 @@ import { PaymentsModule } from './payments/payments.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => {
-        const isSQLite = config.get<string>('DB_TYPE') === 'sqlite';
+      useFactory: async (config: ConfigService) => {
+        const dbType = config.get<string>('DB_TYPE', 'sqlite'); // default sqlite
 
         return {
-          type: isSQLite ? 'sqlite' : 'postgres',
-          database: config.get<string>('DB_DATABASE'),
-          host: isSQLite ? undefined : config.get<string>('DB_HOST'),
-          port: isSQLite ? undefined : parseInt(config.get<string>('DB_PORT'), 10),
-          username: isSQLite ? undefined : config.get<string>('DB_USERNAME'),
-          password: isSQLite ? undefined : config.get<string>('DB_PASSWORD'),
+          type: dbType as any,
+          host: dbType === 'postgres' ? config.get<string>('DB_HOST', 'localhost') : undefined,
+          port: dbType === 'postgres' ? parseInt(config.get<string>('DB_PORT', '5432'), 10) : undefined,
+          username: dbType === 'postgres' ? config.get<string>('DB_USERNAME', 'postgres') : undefined,
+          password: dbType === 'postgres' ? config.get<string>('DB_PASSWORD', 'postgres') : undefined,
+          database: config.get<string>('DB_DATABASE', 'db.sqlite'),
           entities: [Estate, Home, Room, User, HomeMember, Wallet, Visitor, Payment],
-          synchronize: true, // ⚠️ safe in dev, but disable in production!
-          autoLoadEntities: true,
+          synchronize: true,
         };
       },
     }),
