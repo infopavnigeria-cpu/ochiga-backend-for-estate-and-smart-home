@@ -1,3 +1,4 @@
+// src/app.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -20,6 +21,8 @@ import { RoomModule } from './room/room.module';
 import { WalletModule } from './wallet/wallet.module';
 import { VisitorsModule } from './visitors/visitors.module';
 import { PaymentsModule } from './payments/payments.module';
+import { UtilitiesModule } from './utilities/utilities.module';
+import { CommunityModule } from './community/community.module';
 
 @Module({
   imports: [
@@ -33,7 +36,7 @@ import { PaymentsModule } from './payments/payments.module';
 
         if (dbType === 'postgres') {
           return {
-            type: 'postgres',
+            type: 'postgres' as const,
             host: config.get<string>('DB_HOST', 'localhost'),
             port: parseInt(config.get<string>('DB_PORT', '5432'), 10),
             username: config.get<string>('DB_USERNAME', 'postgres'),
@@ -46,7 +49,7 @@ import { PaymentsModule } from './payments/payments.module';
 
         // Default: SQLite
         return {
-          type: 'sqlite',
+          type: 'sqlite' as const,
           database: config.get<string>('DB_DATABASE', 'db.sqlite'),
           entities: [Estate, Home, Room, User, HomeMember, Wallet, Visitor, Payment],
           synchronize: true,
@@ -63,6 +66,8 @@ import { PaymentsModule } from './payments/payments.module';
     WalletModule,
     VisitorsModule,
     PaymentsModule,
+    UtilitiesModule,
+    CommunityModule,
   ],
 })
 export class AppModule {}
