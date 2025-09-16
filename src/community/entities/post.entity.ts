@@ -1,16 +1,18 @@
+// src/community/entities/post.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  CreateDateColumn,
   OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Comment } from './comment.entity';
 
-@Entity()
+@Entity('posts')
 export class Post {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
 
   @Column()
   author!: string;
@@ -18,21 +20,21 @@ export class Post {
   @Column('text')
   content!: string;
 
-  @Column({ nullable: true })
-  image?: string;
-
-  @Column({ nullable: true })
-  video?: string;
-
-  @Column({ default: 0 })
+  @Column({ type: 'int', default: 0 })
   likes!: number;
 
   @Column({ default: false })
   pinned!: boolean;
 
+  @OneToMany(() => Comment, (c) => c.post, { cascade: true })
+  comments!: Comment[];
+
+  @Column({ type: 'json', nullable: true })
+  media?: any; // image/video metadata if needed
+
   @CreateDateColumn()
   createdAt!: Date;
 
-  @OneToMany(() => Comment, (comment) => comment.post, { cascade: true })
-  comments!: Comment[];
+  @UpdateDateColumn()
+  updatedAt!: Date;
 }
