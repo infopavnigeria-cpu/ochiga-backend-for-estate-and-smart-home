@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, OneToMany } from 'typeorm';
 import { Wallet } from '../../wallet/entities/wallet.entity';
 import { Payment } from '../../payments/entities/payment.entity';
 import { Visitor } from '../../visitors/visitors.entity';
@@ -8,7 +8,7 @@ import { UserRole } from '../enums/user-role.enum';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  id!: string;   // ✅ UUID everywhere
+  id!: string;
 
   @Column({ unique: true })
   email!: string;
@@ -20,11 +20,11 @@ export class User {
   name!: string;
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.RESIDENT })
-  role!: UserRole;  // ✅ now recognized
+  role!: UserRole;
 
   // --- Relations ---
-  @OneToMany(() => Wallet, (wallet) => wallet.user, { cascade: true })
-  wallets!: Wallet[];
+  @OneToOne(() => Wallet, (wallet) => wallet.user, { cascade: true })
+  wallet!: Wallet;   // ✅ FIXED → only one wallet per user
 
   @OneToMany(() => Payment, (payment) => payment.user, { cascade: true })
   payments!: Payment[];
