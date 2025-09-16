@@ -29,14 +29,24 @@ import { PaymentsModule } from './payments/payments.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => {
-        const dbType = config.get<string>('DB_TYPE', 'sqlite'); // default sqlite
+        const dbType = config.get<string>('DB_TYPE', 'sqlite');
 
+        if (dbType === 'postgres') {
+          return {
+            type: 'postgres',
+            host: config.get<string>('DB_HOST', 'localhost'),
+            port: parseInt(config.get<string>('DB_PORT', '5432'), 10),
+            username: config.get<string>('DB_USERNAME', 'postgres'),
+            password: config.get<string>('DB_PASSWORD', 'postgres'),
+            database: config.get<string>('DB_DATABASE', 'estate_app'),
+            entities: [Estate, Home, Room, User, HomeMember, Wallet, Visitor, Payment],
+            synchronize: true,
+          };
+        }
+
+        // Default: SQLite
         return {
-          type: dbType as any,
-          host: dbType === 'postgres' ? config.get<string>('DB_HOST', 'localhost') : undefined,
-          port: dbType === 'postgres' ? parseInt(config.get<string>('DB_PORT', '5432'), 10) : undefined,
-          username: dbType === 'postgres' ? config.get<string>('DB_USERNAME', 'postgres') : undefined,
-          password: dbType === 'postgres' ? config.get<string>('DB_PASSWORD', 'postgres') : undefined,
+          type: 'sqlite',
           database: config.get<string>('DB_DATABASE', 'db.sqlite'),
           entities: [Estate, Home, Room, User, HomeMember, Wallet, Visitor, Payment],
           synchronize: true,
