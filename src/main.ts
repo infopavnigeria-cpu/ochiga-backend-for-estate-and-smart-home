@@ -27,15 +27,19 @@ async function bootstrap() {
         scheme: 'bearer',
         bearerFormat: 'JWT',
       },
-      'access-token', // you’ll reference this name in Swagger UI
+      'access-token',
     )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  await app.listen(3000);
-  console.log(`🚀 Ochiga Backend running on: http://localhost:3000`);
-  console.log(`📖 Swagger Docs available at: http://localhost:3000/api`);
+  // ✅ Use Codespaces PORT if available
+  const port = process.env.PORT || 3000;
+  await app.listen(port, '0.0.0.0');
+
+  const url = await app.getUrl();
+  console.log(`🚀 Ochiga Backend running on: ${url}`);
+  console.log(`📖 Swagger Docs available at: ${url}/api`);
 }
 bootstrap();
