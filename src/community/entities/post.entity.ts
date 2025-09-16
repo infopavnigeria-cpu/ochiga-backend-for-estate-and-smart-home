@@ -3,7 +3,9 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { Comment } from './comment.entity';
 
 @Entity()
 export class Post {
@@ -30,4 +32,7 @@ export class Post {
 
   @CreateDateColumn()
   createdAt!: Date;
+
+  @OneToMany(() => Comment, (comment) => comment.post, { cascade: true })
+  comments!: Comment[];
 }
