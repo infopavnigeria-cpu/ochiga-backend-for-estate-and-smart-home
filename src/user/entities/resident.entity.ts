@@ -1,6 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+// src/user/entities/resident.entity.ts
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { User } from './user.entity';
 
-@Entity()
+@Entity('residents')
 export class Resident {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
@@ -14,10 +16,14 @@ export class Resident {
   @Column()
   house!: string;
 
-  // Stored as comma-separated text in SQLite
+  // optional JSON/text fields
   @Column('text', { nullable: true })
-  records?: string; // convert manually to array
+  records?: string;
 
   @Column('text', { nullable: true })
-  history?: string; // convert manually to array
+  history?: string;
+
+  // optional link back to user account (if resident is a user)
+  @ManyToOne(() => User, (user) => user.residentRecords, { nullable: true })
+  user?: User;
 }
