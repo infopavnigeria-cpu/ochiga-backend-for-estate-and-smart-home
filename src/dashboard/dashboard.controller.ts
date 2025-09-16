@@ -1,20 +1,20 @@
+// src/dashboard/dashboard.controller.ts
 import { Controller, Get, UseGuards, Request } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
-import { UserRole } from '../enums/user-role.enum';
-import { Request as ExpressRequest } from 'express';
-import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
+import { TokenUser } from '../types/token-user.interface';
 
-interface AuthenticatedRequest extends ExpressRequest {
-  user: JwtPayload;
+// Better: Extend Express Request for typing
+interface AuthenticatedRequest extends Request {
+  user: TokenUser;
 }
 
 @Controller('dashboard')
 export class DashboardController {
   @Get('manager')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.MANAGER)
+  @Roles('manager')
   getManagerDashboard(@Request() req: AuthenticatedRequest) {
     return {
       message: 'Welcome Manager!',
@@ -24,7 +24,7 @@ export class DashboardController {
 
   @Get('resident')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.RESIDENT)
+  @Roles('resident')
   getResidentDashboard(@Request() req: AuthenticatedRequest) {
     return {
       message: 'Welcome Resident!',
