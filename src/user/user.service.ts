@@ -1,8 +1,9 @@
+// src/user/user.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { UserRole } from '../enums/user-role.enum';   // ✅ fixed
+import { UserRole } from '../enums/user-role.enum';
 
 @Injectable()
 export class UserService {
@@ -41,7 +42,7 @@ export class UserService {
     return this.findOne(id);
   }
 
-  // ✅ NEW: get all users
+  // ✅ Get all users
   async getAllUsers(): Promise<User[]> {
     return this.userRepo.find({
       relations: ['wallet', 'payments', 'invitedVisitors', 'homeMembers'],
@@ -53,5 +54,13 @@ export class UserService {
     const user = await this.findOne(id);
     Object.assign(user, updateData);
     return this.userRepo.save(user);
+  }
+
+  // ✅ NEW: Find user by email (used in AuthService)
+  async findByEmail(email: string): Promise<User | null> {
+    return this.userRepo.findOne({
+      where: { email },
+      relations: ['wallet', 'payments'],
+    });
   }
 }
