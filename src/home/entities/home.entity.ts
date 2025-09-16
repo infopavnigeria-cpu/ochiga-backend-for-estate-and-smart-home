@@ -4,7 +4,7 @@ import { Estate } from '../../estate/entities/estate.entity';
 import { Room } from '../../room/entities/room.entity';
 import { HomeMember } from './home-member.entity';
 
-@Entity()
+@Entity('homes')
 export class Home {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
@@ -12,8 +12,12 @@ export class Home {
   @Column()
   name!: string;
 
-  @ManyToOne(() => Estate, (estate) => estate.homes, { onDelete: 'CASCADE' })
-  estate!: Estate;
+  // optional address field or link to estate:
+  @Column({ nullable: true })
+  address?: string;
+
+  @ManyToOne(() => Estate, (estate) => estate.homes, { onDelete: 'CASCADE', nullable: true })
+  estate?: Estate;
 
   @OneToMany(() => Room, (room) => room.home, { cascade: true })
   rooms!: Room[];
