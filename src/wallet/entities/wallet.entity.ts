@@ -1,24 +1,35 @@
+// src/wallet/entities/wallet.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  ManyToOne,
+  OneToOne,
   OneToMany,
+  JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  ValueTransformer,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Payment } from '../../payments/entities/payment.entity';
 
-@Entity()
+// transformer to store decimal as string in DB but use number in code
+const decimalTransformer: ValueTransformer = {
+  to: (value: number) => value,
+  from: (value: string) => parseFloat(value),
+};
+
+@Entity('wallets')
 export class Wallet {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @ManyToOne(() => User, (user) => user.wallet, { eager: true })
-  user!: User;
-
-  @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
+  @Column('decimal', {
+    precision: 12,
+    scale: 2,
+    default: 0,
+    transformer: decimalTransformer,
+  })
   balance!: number;
 
   @Column({ type: 'varchar', length: 10, default: 'NGN' })
@@ -27,7 +38,12 @@ export class Wallet {
   @Column({ default: true })
   isActive!: boolean;
 
-  // 🔥 Add this relation so wallet.payments exists
+  // Link to user
+  @OneToOne(() => User, (user) => user.wallet, { onDelete: 'CASCADE' })
+  @JoinColumn()
+  user!: User;
+
+  // Payments from this wallet
   @OneToMany(() => Payment, (payment) => payment.wallet)
   payments!: Payment[];
 
