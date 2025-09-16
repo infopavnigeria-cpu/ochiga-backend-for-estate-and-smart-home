@@ -4,7 +4,7 @@ import {
   Column,
   ManyToOne,
 } from 'typeorm';
-import { User } from '../../user/entities/user.entity';
+import { User } from '../user/entities/user.entity'; // corrected path
 
 @Entity()
 export class Visitor {
@@ -14,7 +14,7 @@ export class Visitor {
   @Column()
   name!: string;
 
-  @ManyToOne(() => User, (user) => user.invitedVisitors, {
+  @ManyToOne(() => User, (user: User) => user.invitedVisitors, {
     eager: true,
     onDelete: 'CASCADE',
   })
