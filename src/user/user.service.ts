@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { UserRole } from './enums/user-role.enum';
+import { UserRole } from '../enums/user-role.enum';
 
 @Injectable()
 export class UserService {
@@ -19,10 +19,10 @@ export class UserService {
     return this.userRepo.save(newUser);
   }
 
-  async findOne(id: string): Promise<User> {   // ✅ id is string now
+  async findOne(id: string): Promise<User> {
     const user = await this.userRepo.findOne({
       where: { id },
-      relations: ['wallets', 'payments', 'invitedVisitors', 'homeMembers'],
+      relations: ['wallet', 'payments', 'invitedVisitors', 'homeMembers'], // ✅ fixed
     });
 
     if (!user) throw new NotFoundException(`User with ID ${id} not found`);
