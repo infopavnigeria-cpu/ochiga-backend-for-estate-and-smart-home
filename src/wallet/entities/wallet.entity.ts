@@ -1,3 +1,4 @@
+// src/wallet/entities/wallet.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -11,23 +12,23 @@ import { User } from '../../user/entities/user.entity';
 @Entity()
 export class Wallet {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
-  @ManyToOne(() => User, (user) => user.wallets, { onDelete: 'CASCADE' })
-  user: User;
+  @ManyToOne(() => User, (user) => user.wallet, { eager: true })
+  user!: User;
 
   @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
-  balance: number;
+  balance!: number;
 
   @Column({ type: 'varchar', length: 10, default: 'NGN' })
-  currency: string;
+  currency!: string;
 
   @Column({ default: true })
-  isActive: boolean;
+  isActive!: boolean;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 }
