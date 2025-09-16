@@ -1,13 +1,17 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity('maintenance_requests')
+@Entity()
 export class Maintenance {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  issue: string;
+  issue!: string;
 
-  @Column({ default: 'Pending' })
-  status: 'Pending' | 'Resolved';
+  @Column({
+    type: 'enum',
+    enum: ['Pending', 'Resolved'],
+    default: 'Pending',
+  })
+  status!: 'Pending' | 'Resolved';
 }
