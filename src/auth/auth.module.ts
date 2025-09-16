@@ -14,18 +14,13 @@ import { RolesGuard } from './roles.guard';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       global: true,
-      secret: process.env.JWT_SECRET || 'supersecret', // ✅ consistent secret
+      secret: process.env.JWT_SECRET || 'supersecret',
       signOptions: { expiresIn: '1d' },
     }),
     UserModule,
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    JwtStrategy,
-    JwtAuthGuard, // ✅ now registered
-    RolesGuard,   // ✅ now registered
-  ],
-  exports: [AuthService, JwtModule, JwtAuthGuard, RolesGuard], // ✅ export guards if needed
+  providers: [AuthService, JwtStrategy], // ✅ only real providers
+  exports: [AuthService, JwtModule],     // ✅ remove guards from exports
 })
 export class AuthModule {}
