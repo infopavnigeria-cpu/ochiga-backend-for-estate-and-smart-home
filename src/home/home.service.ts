@@ -24,26 +24,40 @@ export class HomeService {
 
     @InjectRepository(Wallet)
     private readonly walletRepo: Repository<Wallet>,
+
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
   ) {}
 
-  /** Create a home and add creator as OWNER (auto-creates wallet if missing) */
-  async create(userId: string, dto: CreateHomeDto) {
+  /** Manager creates a home and assigns a resident as OWNER */
+  async create(managerId: string, dto: CreateHomeDto) {
+    const manager = await this.userRepo.findOne({ where: { id: managerId } });
+    if (!manager || manager.role !== 'MANAGER') {
+      throw new ForbiddenException('Only managers can create homes');
+    }
+
+    // 1. Create home
     const home = this.homeRepo.create(dto);
     const savedHome = await this.homeRepo.save(home);
 
-    // create membership
+    // 2. Assign resident (from DTO) as OWNER
+    const resident = await this.userRepo.findOne({ where: { id: dto.residentId } });
+    if (!resident) {
+      throw new NotFoundException('Resident not found');
+    }
+
     const member = this.memberRepo.create({
       home: savedHome,
-      user: { id: userId } as User,
+      user: resident,
       role: HomeRole.OWNER,
     });
     await this.memberRepo.save(member);
 
-    // auto-create wallet if missing
-    let wallet = await this.walletRepo.findOne({ where: { user: { id: userId } } });
+    // 3. Auto-create wallet if missing
+    let wallet = await this.walletRepo.findOne({ where: { user: { id: resident.id } } });
     if (!wallet) {
       wallet = this.walletRepo.create({
-        user: { id: userId } as User,
+        user: resident,
         balance: 0,
         currency: 'NGN',
         isActive: true,
@@ -51,7 +65,7 @@ export class HomeService {
       await this.walletRepo.save(wallet);
     }
 
-    return { ...savedHome, wallet };
+    return { ...savedHome, owner: resident, wallet };
   }
 
   /** Get all homes a user belongs to */
@@ -63,7 +77,7 @@ export class HomeService {
     return memberships.map((m) => m.home);
   }
 
-  /** Helper: check if user is a member of a home */
+  /** Helper: check membership */
   private async ensureMembership(userId: string, homeId: string) {
     const member = await this.memberRepo.findOne({
       where: { user: { id: userId }, home: { id: homeId } },
