@@ -1,9 +1,5 @@
 // src/home/home.service.ts
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Home } from './entities/home.entity';
@@ -30,21 +26,17 @@ export class HomeService {
   ) {}
 
   /** Manager creates a home and assigns a resident as OWNER */
-  async create(managerId: string, dto: CreateHomeDto) {
+  async create(managerId: string, dto: CreateHomeDto & { residentId: string }) {
     const manager = await this.userRepo.findOne({ where: { id: managerId } });
     if (!manager || manager.role !== 'MANAGER') {
       throw new ForbiddenException('Only managers can create homes');
     }
 
-    // 1. Create home
-    const home = this.homeRepo.create(dto);
+    const home = this.homeRepo.create({ name: dto.name, address: dto.address });
     const savedHome = await this.homeRepo.save(home);
 
-    // 2. Assign resident (from DTO) as OWNER
     const resident = await this.userRepo.findOne({ where: { id: dto.residentId } });
-    if (!resident) {
-      throw new NotFoundException('Resident not found');
-    }
+    if (!resident) throw new NotFoundException('Resident not found');
 
     const member = this.memberRepo.create({
       home: savedHome,
@@ -53,7 +45,6 @@ export class HomeService {
     });
     await this.memberRepo.save(member);
 
-    // 3. Auto-create wallet if missing
     let wallet = await this.walletRepo.findOne({ where: { user: { id: resident.id } } });
     if (!wallet) {
       wallet = this.walletRepo.create({
@@ -77,7 +68,6 @@ export class HomeService {
     return memberships.map((m) => m.home);
   }
 
-  /** Helper: check membership */
   private async ensureMembership(userId: string, homeId: string) {
     const member = await this.memberRepo.findOne({
       where: { user: { id: userId }, home: { id: homeId } },
@@ -90,7 +80,6 @@ export class HomeService {
     return member;
   }
 
-  /** Get one home */
   async findOne(userId: string, id: string) {
     await this.ensureMembership(userId, id);
 
@@ -102,7 +91,6 @@ export class HomeService {
     return home;
   }
 
-  /** Update a home (only OWNER or ADMIN allowed) */
   async update(userId: string, id: string, dto: UpdateHomeDto) {
     const member = await this.ensureMembership(userId, id);
     if (![HomeRole.OWNER, HomeRole.ADMIN].includes(member.role)) {
@@ -113,7 +101,6 @@ export class HomeService {
     return this.homeRepo.save(member.home);
   }
 
-  /** Remove a home (only OWNER allowed) */
   async remove(userId: string, id: string) {
     const member = await this.ensureMembership(userId, id);
     if (member.role !== HomeRole.OWNER) {
