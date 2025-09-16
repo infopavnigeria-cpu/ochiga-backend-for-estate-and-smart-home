@@ -6,7 +6,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from '../user/user.entity';
+import { User } from '../../user/entities/user.entity';
 
 @Entity()
 export class Wallet {
@@ -19,12 +19,11 @@ export class Wallet {
   @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
   balance: number;
 
-  @Column({ default: true })
-  isActive: boolean;
-
-  // ✅ Add currency with default value NGN
   @Column({ type: 'varchar', length: 10, default: 'NGN' })
   currency: string;
+
+  @Column({ default: true })
+  isActive: boolean;
 
   @CreateDateColumn()
   createdAt: Date;
