@@ -22,11 +22,22 @@ export class UserService {
   async findOne(id: string): Promise<User> {
     const user = await this.userRepo.findOne({
       where: { id },
-      relations: ['wallet', 'payments', 'invitedVisitors', 'homeMembers'], // ✅ fixed
+      relations: ['wallet', 'payments', 'invitedVisitors', 'homeMembers'],
     });
 
     if (!user) throw new NotFoundException(`User with ID ${id} not found`);
-
     return user;
+  }
+
+  // ✅ alias for findOne so controller works
+  async getUserById(id: string): Promise<User> {
+    return this.findOne(id);
+  }
+
+  // ✅ update user
+  async updateUser(id: string, updateData: Partial<User>): Promise<User> {
+    const user = await this.findOne(id); // throws if not found
+    Object.assign(user, updateData);
+    return this.userRepo.save(user);
   }
 }
