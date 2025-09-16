@@ -1,3 +1,4 @@
+// src/room/room.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -14,7 +15,7 @@ export class RoomService {
     private readonly homesRepo: Repository<Home>,
   ) {}
 
-  async createRoom(homeId: string, name: string) {   // 👈 use string
+  async createRoom(homeId: string, name: string) {
     const home = await this.homesRepo.findOne({ where: { id: homeId } });
     if (!home) throw new NotFoundException('Home not found');
 
@@ -22,7 +23,7 @@ export class RoomService {
     return this.roomsRepo.save(room);
   }
 
-  async findAllByHome(homeId: string) {   // 👈 use string
+  async findAllByHome(homeId: string) {
     return this.roomsRepo.find({
       where: { home: { id: homeId } },
       relations: ['home'],
