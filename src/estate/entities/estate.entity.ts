@@ -1,3 +1,4 @@
+// src/estate/entities/estate.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -43,9 +44,9 @@ export class Estate {
   @OneToMany(() => Home, (home) => home.estate)
   homes!: Home[];
 
-  @CreateDateColumn({ type: 'text' })
+  @CreateDateColumn()
   createdAt!: Date;
 
-  @UpdateDateColumn({ type: 'text' })
+  @UpdateDateColumn()
   updatedAt!: Date;
 }
