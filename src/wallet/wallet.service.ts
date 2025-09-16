@@ -15,7 +15,7 @@ export class WalletService {
   /** Get wallet by user ID */
   async getWallet(userId: string): Promise<Wallet> {
     const wallet = await this.walletRepo.findOne({
-      where: { user: { id: userId } }, // ✅ correct relation lookup
+      where: { user: { id: userId } },
       relations: ['user'],
     });
 
@@ -24,15 +24,12 @@ export class WalletService {
   }
 
   /** Create wallet for user if none exists */
-  async createWallet(user: User) {
-  const wallet = this.walletRepo.create({
-    user: user, // relation is now valid
-    balance: 0,
-    currency: 'NGN',
-  });
-
-  return this.walletRepo.save(wallet);
-}
+  async createWallet(user: User): Promise<Wallet> {
+    const wallet = this.walletRepo.create({
+      user: user,
+      balance: 0,
+      currency: 'NGN',
+    });
 
     return this.walletRepo.save(wallet);
   }
@@ -67,7 +64,6 @@ export class WalletService {
         user: { id: userId } as User,
         balance: 0,
         currency: 'NGN',
-        isActive: true,
       });
       wallet = await this.walletRepo.save(wallet);
     }
