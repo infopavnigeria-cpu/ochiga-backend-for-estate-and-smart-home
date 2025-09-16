@@ -11,35 +11,44 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ResidentService } from './resident.service';
-import { Resident } from './entities/resident.entity';
+import { CreateResidentDto } from './dto/create-resident.dto';
+import { UpdateResidentDto } from './dto/update-resident.dto';
 
 @Controller('residents')
 export class ResidentController {
   constructor(private readonly residentService: ResidentService) {}
 
+  // 🏡 Add a new resident
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() dto: Partial<Resident>) {
-    return this.residentService.create(dto);
+  createResident(@Body() dto: CreateResidentDto) {
+    return this.residentService.createResident(dto);
   }
 
+  // 📋 Get list of all residents
   @Get()
-  findAll() {
-    return this.residentService.findAll();
+  getAllResidents() {
+    return this.residentService.getAllResidents();
   }
 
+  // 🔍 Get details of a specific resident
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.residentService.findOne(id); // ✅ keep as string
+  getResidentById(@Param('id') id: string) {
+    return this.residentService.getResidentById(id);
   }
 
+  // 🛠 Update resident details
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: Partial<Resident>) {
-    return this.residentService.update(id, dto); // ✅ keep as string
+  updateResident(
+    @Param('id') id: string,
+    @Body() dto: UpdateResidentDto,
+  ) {
+    return this.residentService.updateResident(id, dto);
   }
 
+  // ❌ Remove a resident
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.residentService.remove(id); // ✅ keep as string
+  removeResident(@Param('id') id: string) {
+    return this.residentService.removeResident(id);
   }
 }
