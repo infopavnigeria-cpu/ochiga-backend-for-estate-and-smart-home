@@ -1,13 +1,14 @@
-// src/wallet/entities/wallet.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
+  OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
+import { Payment } from '../../payments/entities/payment.entity';
 
 @Entity()
 export class Wallet {
@@ -25,6 +26,10 @@ export class Wallet {
 
   @Column({ default: true })
   isActive!: boolean;
+
+  // 🔥 Add this relation so wallet.payments exists
+  @OneToMany(() => Payment, (payment) => payment.wallet)
+  payments!: Payment[];
 
   @CreateDateColumn()
   createdAt!: Date;
