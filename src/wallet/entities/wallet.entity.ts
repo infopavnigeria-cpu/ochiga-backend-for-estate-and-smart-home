@@ -1,4 +1,3 @@
-// src/wallet/entities/wallet.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -7,26 +6,26 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from 'src/user/entities/user.entity';
+import { User } from '../user/user.entity';
 
 @Entity()
 export class Wallet {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  // Every wallet belongs to one resident (user)
-  @ManyToOne(() => User, (user) => user.wallets, { eager: true })
+  @ManyToOne(() => User, (user) => user.wallets, { onDelete: 'CASCADE' })
   user: User;
 
-  // Wallet balance starts at 0
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
   balance: number;
 
-  // Mark wallet active/inactive
   @Column({ default: true })
   isActive: boolean;
 
-  // Auto timestamps
+  // ✅ Add currency with default value NGN
+  @Column({ type: 'varchar', length: 10, default: 'NGN' })
+  currency: string;
+
   @CreateDateColumn()
   createdAt: Date;
 
