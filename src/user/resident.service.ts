@@ -1,5 +1,3 @@
-// src/user/resident.service.ts
-
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -14,40 +12,39 @@ export class ResidentService {
     private residentRepo: Repository<Resident>,
   ) {}
 
-  // 🏡 Add a new resident to the estate register
-  async addResident(data: CreateResidentDto): Promise<Resident> {
-    const resident = this.residentRepo.create(data); // prepare the resident's "file"
-    return this.residentRepo.save(resident); // save the record in the estate register
+  // Add a new resident
+  async createResident(dto: CreateResidentDto): Promise<Resident> {
+    const resident = this.residentRepo.create(dto);
+    return this.residentRepo.save(resident);
   }
 
-  // 📋 Get the full list of residents in the estate
+  // View all residents in the estate
   async getAllResidents(): Promise<Resident[]> {
-    return this.residentRepo.find(); // return everyone's file
+    return this.residentRepo.find();
   }
 
-  // 🔍 Find one specific resident by ID (like searching their house file)
+  // View details of a single resident
   async getResidentById(id: string): Promise<Resident> {
     const resident = await this.residentRepo.findOne({ where: { id } });
-
     if (!resident) {
-      throw new NotFoundException(`Resident with ID ${id} not found in the estate records`);
+      throw new NotFoundException(`Resident with ID ${id} not found`);
     }
-    return resident; // return that one resident's file
+    return resident;
   }
 
-  // 📝 Update a resident's details (e.g., name, house number, estate info)
-  async updateResident(id: string, data: UpdateResidentDto): Promise<Resident> {
-    const resident = await this.getResidentById(id); // fetch their existing file
-    Object.assign(resident, data); // update their info
-    return this.residentRepo.save(resident); // save back into the register
+  // Update a resident’s details
+  async updateResident(id: string, dto: UpdateResidentDto): Promise<Resident> {
+    const resident = await this.getResidentById(id);
+    Object.assign(resident, dto);
+    return this.residentRepo.save(resident);
   }
 
-  // 🗑️ Remove a resident when they move out of the estate
+  // Remove a resident
   async removeResident(id: string): Promise<{ message: string }> {
     const result = await this.residentRepo.delete(id);
     if (result.affected === 0) {
-      throw new NotFoundException(`Resident with ID ${id} not found in the estate records`);
+      throw new NotFoundException(`Resident with ID ${id} not found`);
     }
-    return { message: 'Resident deleted successfully from the estate register' };
+    return { message: 'Resident deleted successfully' };
   }
 }
