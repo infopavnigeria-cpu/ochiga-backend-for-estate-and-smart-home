@@ -1,7 +1,7 @@
-// src/app.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 
 import { Estate } from './estate/entities/estate.entity';
 import { Home } from './home/entities/home.entity';
@@ -24,6 +24,9 @@ import { PaymentsModule } from './payments/payments.module';
 import { UtilitiesModule } from './utilities/utilities.module';
 import { CommunityModule } from './community/community.module';
 
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { RolesGuard } from './auth/roles.guard';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -42,7 +45,16 @@ import { CommunityModule } from './community/community.module';
             username: config.get<string>('DB_USERNAME', 'postgres'),
             password: config.get<string>('DB_PASSWORD', 'postgres'),
             database: config.get<string>('DB_DATABASE', 'estate_app'),
-            entities: [Estate, Home, Room, User, HomeMember, Wallet, Visitor, Payment],
+            entities: [
+              Estate,
+              Home,
+              Room,
+              User,
+              HomeMember,
+              Wallet,
+              Visitor,
+              Payment,
+            ],
             synchronize: true,
           };
         }
@@ -51,7 +63,16 @@ import { CommunityModule } from './community/community.module';
         return {
           type: 'sqlite' as const,
           database: config.get<string>('DB_DATABASE', 'db.sqlite'),
-          entities: [Estate, Home, Room, User, HomeMember, Wallet, Visitor, Payment],
+          entities: [
+            Estate,
+            Home,
+            Room,
+            User,
+            HomeMember,
+            Wallet,
+            Visitor,
+            Payment,
+          ],
           synchronize: true,
         };
       },
@@ -68,6 +89,16 @@ import { CommunityModule } from './community/community.module';
     PaymentsModule,
     UtilitiesModule,
     CommunityModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard, // ✅ global JWT guard
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard, // ✅ global Roles guard
+    },
   ],
 })
 export class AppModule {}
