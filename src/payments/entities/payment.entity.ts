@@ -43,7 +43,8 @@ export class Payment {
   @Column({ unique: true })
   reference!: string;
 
-  @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })
+  // ✅ Use TEXT instead of ENUM for SQLite compatibility
+  @Column({ type: 'text', default: PaymentStatus.PENDING })
   status!: PaymentStatus;
 
   @ManyToOne(() => User, (user) => user.payments, { onDelete: 'CASCADE', eager: true })
