@@ -3,14 +3,17 @@ import {
   CanActivate,
   ExecutionContext,
   UnauthorizedException,
-  Reflector,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { Reflector } from '@nestjs/core'; // ✅ FIXED
 import { IS_PUBLIC_KEY } from './decorators/public.decorator';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService, private reflector: Reflector) {}
+  constructor(
+    private jwtService: JwtService,
+    private reflector: Reflector,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     // ✅ Check if route is marked as @Public
