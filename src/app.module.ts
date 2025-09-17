@@ -37,7 +37,7 @@ import { RolesGuard } from './auth/roles.guard';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => {
-        const dbType = config.get<string>('DB_TYPE', 'sqlite');
+        const dbType = config.get<string>('DB_TYPE', 'better-sqlite3');
 
         if (dbType === 'postgres') {
           return {
@@ -62,9 +62,9 @@ import { RolesGuard } from './auth/roles.guard';
           };
         }
 
-        // Default to SQLite
+        // Default: better-sqlite3 for dev/local
         return {
-          type: 'sqlite' as const,
+          type: 'better-sqlite3' as const,
           database: path.resolve(
             __dirname,
             '..',
