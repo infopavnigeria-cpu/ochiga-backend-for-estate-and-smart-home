@@ -1,3 +1,15 @@
+// src/visitors/entities/visitors.entity.ts
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
+  JoinColumn,   // 👈 must be here
+} from 'typeorm';
+import { User } from '../../user/entities/user.entity';  // 👈 make sure this path is correct
+
 @Entity('visitors')
 export class Visitor {
   @PrimaryGeneratedColumn('uuid')
