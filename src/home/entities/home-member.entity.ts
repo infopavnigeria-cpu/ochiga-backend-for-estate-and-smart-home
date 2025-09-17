@@ -20,8 +20,8 @@ export class HomeMember {
   @ManyToOne(() => Home, (home) => home.members, { onDelete: 'CASCADE' })
   home!: Home;
 
-  @Column({ type: 'enum', enum: HomeRole, default: HomeRole.MEMBER })
-  role!: HomeRole;
+  @Column({ type: 'text', default: HomeRole.MEMBER })
+role!: HomeRole;
 
   @CreateDateColumn()
   joinedAt!: Date;
