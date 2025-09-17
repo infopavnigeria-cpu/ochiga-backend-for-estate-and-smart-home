@@ -28,8 +28,8 @@ export class User {
   @Column()
   name!: string;
 
-  @Column({ type: 'enum', enum: UserRole, default: UserRole.RESIDENT })
-  role!: UserRole;
+  @Column({ type: 'text', default: UserRole.RESIDENT })
+role!: UserRole;
 
   // One user has one wallet
   @OneToOne(() => Wallet, (wallet) => wallet.user, { cascade: true, eager: true })
