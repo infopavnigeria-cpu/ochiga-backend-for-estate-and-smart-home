@@ -8,9 +8,10 @@ import { Estate } from './estate/entities/estate.entity';
 import { Home } from './home/entities/home.entity';
 import { Room } from './room/entities/room.entity';
 import { User } from './user/entities/user.entity';
+import { Resident } from './user/entities/resident.entity';
 import { HomeMember } from './home/entities/home-member.entity';
 import { Wallet } from './wallet/entities/wallet.entity';
-import { Visitor } from './visitors/entities/visitors.entity'; // ✅ fixed path
+import { Visitor } from './visitors/entities/visitors.entity';
 import { Payment } from './payments/entities/payment.entity';
 
 import { AuthModule } from './auth/auth.module';
@@ -46,7 +47,17 @@ import { RolesGuard } from './auth/roles.guard';
             username: config.get<string>('DB_USERNAME', 'postgres'),
             password: config.get<string>('DB_PASSWORD', 'postgres'),
             database: config.get<string>('DB_DATABASE', 'estate_app'),
-            entities: [Estate, Home, Room, User, HomeMember, Wallet, Visitor, Payment],
+            entities: [
+              User,
+              Resident,
+              Estate,
+              Home,
+              Room,
+              HomeMember,
+              Wallet,
+              Visitor,
+              Payment,
+            ],
             synchronize: true,
           };
         }
@@ -59,7 +70,17 @@ import { RolesGuard } from './auth/roles.guard';
             '..',
             config.get<string>('DB_DATABASE', 'db.sqlite'),
           ),
-          entities: [Estate, Home, Room, User, HomeMember, Wallet, Visitor, Payment],
+          entities: [
+            User,
+            Resident,
+            Estate,
+            Home,
+            Room,
+            HomeMember,
+            Wallet,
+            Visitor,
+            Payment,
+          ],
           synchronize: true,
         };
       },
@@ -81,11 +102,11 @@ import { RolesGuard } from './auth/roles.guard';
   providers: [
     {
       provide: APP_GUARD,
-      useClass: JwtAuthGuard, // ✅ global JWT guard
+      useClass: JwtAuthGuard,
     },
     {
       provide: APP_GUARD,
-      useClass: RolesGuard, // ✅ global Roles guard
+      useClass: RolesGuard,
     },
   ],
 })
