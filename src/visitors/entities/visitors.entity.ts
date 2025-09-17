@@ -18,9 +18,16 @@ export class Visitor {
   @Column({ unique: true })
   code!: string;
 
-  @ManyToOne(() => User, (user) => user.invitedVisitors, { eager: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.invitedVisitors, {
+    eager: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'invitedById' })
   invitedBy!: User;
+
+  // ✅ Add this back
+  @Column({ nullable: true })
+  invitedById?: string;
 
   @CreateDateColumn()
   createdAt!: Date;
