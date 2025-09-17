@@ -1,4 +1,4 @@
-// src/visitors/visitors.entity.ts
+// src/visitors/entities/visitors.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
