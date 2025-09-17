@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, IsBoolean, IsJSON } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsBoolean } from 'class-validator';
 
 export class CreatePostDto {
   @IsString()
@@ -14,6 +14,5 @@ export class CreatePostDto {
   pinned?: boolean;
 
   @IsOptional()
-  @IsJSON()
-  media?: any;
+  media?: any; // keep flexible for images/videos
 }
