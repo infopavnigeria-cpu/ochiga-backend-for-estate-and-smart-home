@@ -1,61 +1,28 @@
-// src/community/community.controller.ts
-import { Controller, Get, Post as HttpPost, Body, Param, Patch, Query } from '@nestjs/common';
-import { CommunityService } from './community.service';
-import { Post as PostEntity } from './entities/post.entity';
-import { Group } from './entities/group.entity';
-import { Comment } from './entities/comment.entity';
-import { Message } from './entities/message.entity';
+import { CreatePostDto } from './dto/create-post.dto';
+import { CreateCommentDto } from './dto/create-comment.dto';
+import { CreateGroupDto } from './dto/create-group.dto';
+import { CreateMessageDto } from './dto/create-message.dto';
 
-@Controller('community')
-export class CommunityController {
-  constructor(private readonly communityService: CommunityService) {}
+// Posts
+@HttpPost('posts')
+createPost(@Body() data: CreatePostDto) {
+  return this.communityService.createPost(data);
+}
 
-  // Posts
-  @HttpPost('posts')
-  createPost(@Body() data: Partial<PostEntity>) {
-    return this.communityService.createPost(data);
-  }
+// Comments
+@HttpPost('posts/:id/comments')
+addComment(@Param('id') id: string, @Body() data: CreateCommentDto) {
+  return this.communityService.addComment(id, data);
+}
 
-  @Get('posts')
-  getPosts() {
-    return this.communityService.findAllPosts();
-  }
+// Groups
+@HttpPost('groups')
+createGroup(@Body() data: CreateGroupDto) {
+  return this.communityService.createGroup(data);
+}
 
-  @Patch('posts/:id/like')
-  likePost(@Param('id') id: string) {
-    return this.communityService.likePost(id);
-  }
-
-  // Comments
-  @HttpPost('posts/:id/comments')
-  addComment(@Param('id') id: string, @Body() data: Partial<Comment>) {
-    return this.communityService.addComment(id, data);
-  }
-
-  // Groups
-  @HttpPost('groups')
-  createGroup(@Body() data: Partial<Group>) {
-    return this.communityService.createGroup(data);
-  }
-
-  @Get('groups')
-  getGroups() {
-    return this.communityService.findAllGroups();
-  }
-
-  @Patch('groups/:id/toggle')
-  toggleJoinGroup(@Param('id') id: string) {
-    return this.communityService.toggleJoinGroup(id);
-  }
-
-  // Messages
-  @HttpPost('messages')
-  createMessage(@Body() data: Partial<Message>) {
-    return this.communityService.createMessage(data);
-  }
-
-  @Get('messages/conversation')
-  getConversation(@Query('user1') user1: string, @Query('user2') user2: string) {
-    return this.communityService.getConversation(user1, user2);
-  }
+// Messages
+@HttpPost('messages')
+createMessage(@Body() data: CreateMessageDto) {
+  return this.communityService.createMessage(data);
 }
