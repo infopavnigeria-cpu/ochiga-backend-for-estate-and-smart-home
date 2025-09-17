@@ -1,5 +1,8 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { WalletService } from './wallet.service';
+import { CreateWalletDto } from './dto/create-wallet.dto';
+import { FundWalletDto } from './dto/fund-wallet.dto';
+import { DebitWalletDto } from './dto/debit-wallet.dto';
 
 @Controller('wallet')
 export class WalletController {
@@ -16,12 +19,12 @@ export class WalletController {
   }
 
   @Post(':userId/fund')
-  fundWallet(@Param('userId') userId: string, @Body('amount') amount: number) {
-    return this.walletService.fundWallet(userId, amount);
+  fundWallet(@Param('userId') userId: string, @Body() dto: FundWalletDto) {
+    return this.walletService.fundWallet(userId, dto.amount);
   }
 
   @Post(':userId/debit')
-  debitWallet(@Param('userId') userId: string, @Body('amount') amount: number) {
-    return this.walletService.debitWallet(userId, amount);
+  debitWallet(@Param('userId') userId: string, @Body() dto: DebitWalletDto) {
+    return this.walletService.debitWallet(userId, dto.amount);
   }
 }
