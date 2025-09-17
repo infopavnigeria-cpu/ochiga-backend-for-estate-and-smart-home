@@ -10,7 +10,7 @@ import { Room } from './room/entities/room.entity';
 import { User } from './user/entities/user.entity';
 import { HomeMember } from './home/entities/home-member.entity';
 import { Wallet } from './wallet/entities/wallet.entity';
-import { Visitor } from './visitors/visitors.entity';
+import { Visitor } from './visitors/entities/visitor.entity';
 import { Payment } from './payments/entities/payment.entity';
 
 import { AuthModule } from './auth/auth.module';
