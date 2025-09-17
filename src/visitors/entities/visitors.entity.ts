@@ -1,15 +1,3 @@
-// src/visitors/entities/visitors.entity.ts
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  CreateDateColumn,
-  UpdateDateColumn,
-  JoinColumn,
-} from 'typeorm';
-import { User } from '../../user/entities/user.entity';
-
 @Entity('visitors')
 export class Visitor {
   @PrimaryGeneratedColumn('uuid')
@@ -25,18 +13,14 @@ export class Visitor {
   time?: string;
 
   @Column({ type: 'text', default: 'Pending' })
-  status!: string; // Pending | Checked-in | Checked-out
+  status!: string;
 
   @Column({ unique: true })
-  code!: string; // unique QR/code
+  code!: string;
 
-  // relation to user who invited the visitor
   @ManyToOne(() => User, (user) => user.invitedVisitors, { eager: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'invitedById' })
   invitedBy!: User;
-
-  @Column({ nullable: true })
-  invitedById?: string;
 
   @CreateDateColumn()
   createdAt!: Date;
