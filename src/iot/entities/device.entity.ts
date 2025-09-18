@@ -18,8 +18,8 @@ export class Device {
   @Column({ nullable: true })
   metadata!: string; // JSON config
 
-  @ManyToOne(() => User, (user) => user.devices, { nullable: true, onDelete: 'CASCADE' })
-  owner?: User; // null if estate-level device
+  @OneToMany(() => DeviceLog, (log) => log.device)
+logs: DeviceLog[];
 
   @Column({ default: false })
   isEstateLevel!: boolean; // true = shared infrastructure
