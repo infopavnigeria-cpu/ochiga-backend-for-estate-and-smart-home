@@ -7,7 +7,7 @@ import {
   OneToMany,
   CreateDateColumn,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
+import { User } from '../../user/entities/user.entity'; // ✅ fixed path (no extra "s")
 import { DeviceLog } from './device-log.entity';
 
 @Entity()
@@ -27,7 +27,7 @@ export class Device {
   @Column({ nullable: true })
   metadata!: string; // JSON config (stringified)
 
-  @ManyToOne(() => User, (user) => user.devices, {
+  @ManyToOne(() => User, (user: User) => user.devices, { // ✅ added type
     nullable: true,
     onDelete: 'CASCADE',
   })
