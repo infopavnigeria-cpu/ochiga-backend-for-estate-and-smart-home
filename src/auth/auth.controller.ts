@@ -1,15 +1,17 @@
 import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
-import { Public } from './decorators/public.decorator'; // 👈 Import our Public decorator
+import { Public } from './decorators/public.decorator';
 
+@ApiTags('Auth') // 👈 Groups endpoints under "Auth" in Swagger
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Public() // 👈 No token needed
+  @Public()
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() registerDto: RegisterDto): Promise<AuthResponseDto> {
@@ -32,7 +34,8 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
-  // 👇 Logout still requires a token (user must be logged in first)
+  // 👇 Logout requires JWT
+  @ApiBearerAuth('access-token') // 👈 Swagger button will add JWT automatically
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   async logout(): Promise<{ message: string }> {
