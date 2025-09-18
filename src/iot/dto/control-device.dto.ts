@@ -1,5 +1,10 @@
-// src/iot/dto/control-device.dto.ts
+import { IsString, IsOptional, IsIn } from 'class-validator';
+
 export class ControlDeviceDto {
-  action: string;   // "on", "off", "set-temp", etc.
+  @IsString()
+  @IsIn(['on', 'off', 'set-temp'])
+  action!: string;   // "on", "off", "set-temp"
+
+  @IsOptional()
   value?: any;
 }
