@@ -11,17 +11,17 @@ import { Device } from './device.entity';
 @Entity()
 export class DeviceLog {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @ManyToOne(() => Device, (device) => device.logs, { onDelete: 'CASCADE' })
-  device: Device;
+  device!: Device;
 
   @Column()
-  action: string; // e.g. "on", "off", "set-temp"
+  action!: string; // "on", "off", "set-temp"
 
   @Column({ nullable: true })
   details?: string; // extra info e.g. temp=22
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 }
