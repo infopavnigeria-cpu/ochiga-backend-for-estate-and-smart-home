@@ -1,4 +1,19 @@
-import { Notification } from '../../notifications/entities/notification.entity'; // ⬅️ add this import
+// src/user/entities/user.entity.ts
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToOne,
+  OneToMany,
+} from 'typeorm';
+import { Wallet } from '../../wallet/entities/wallet.entity';
+import { Payment } from '../../payments/entities/payment.entity';
+import { Visitor } from '../../visitors/entities/visitor.entity';
+import { HomeMember } from '../../home/entities/home-member.entity';
+import { Resident } from './resident.entity';
+import { UserRole } from '../../enums/user-role.enum';
+import { Device } from '../../iot/entities/device.entity';
+import { Notification } from '../../notifications/entities/notification.entity';
 
 @Entity('users')
 export class User {
@@ -17,13 +32,18 @@ export class User {
   @Column({ type: 'text', default: UserRole.RESIDENT })
   role!: UserRole;
 
-  @OneToOne(() => Wallet, (wallet) => wallet.user, { cascade: true, eager: true })
+  @OneToOne(() => Wallet, (wallet) => wallet.user, {
+    cascade: true,
+    eager: true,
+  })
   wallet!: Wallet;
 
   @OneToMany(() => Payment, (payment) => payment.user)
   payments!: Payment[];
 
-  @OneToMany(() => Visitor, (visitor) => visitor.invitedBy, { cascade: true })
+  @OneToMany(() => Visitor, (visitor) => visitor.invitedBy, {
+    cascade: true,
+  })
   invitedVisitors!: Visitor[];
 
   @OneToMany(() => HomeMember, (member) => member.user)
@@ -37,6 +57,8 @@ export class User {
   devices!: Device[];
 
   // 🔔 Notifications for this user
-  @OneToMany(() => Notification, (notification) => notification.user)
+  @OneToMany(() => Notification, (notification) => notification.user, {
+    cascade: true,
+  })
   notifications!: Notification[];
 }
