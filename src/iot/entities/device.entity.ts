@@ -24,21 +24,21 @@ export class Device {
   @Column({ default: false })
   isOn!: boolean;
 
-  // ✅ Use simple-json for SQLite (auto stringifies/parses)
-  @Column({ type: 'simple-json', nullable: true })
-  metadata?: Record<string, any>; // e.g. { brightness: 80, temp: 22 }
+  // ✅ Reverted: store as plain string
+  @Column({ nullable: true })
+  metadata!: string; // JSON string, manual parse/stringify in service
 
   @ManyToOne(() => User, (user: User) => user.devices, {
     nullable: true,
     onDelete: 'CASCADE',
   })
-  owner?: User; // null if estate-level device
+  owner?: User;
 
   @OneToMany(() => DeviceLog, (log) => log.device, { cascade: true })
   logs!: DeviceLog[];
 
   @Column({ default: false })
-  isEstateLevel!: boolean; // true = shared infrastructure
+  isEstateLevel!: boolean;
 
   @CreateDateColumn()
   createdAt!: Date;
