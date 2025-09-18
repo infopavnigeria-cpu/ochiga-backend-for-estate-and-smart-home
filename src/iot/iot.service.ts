@@ -37,7 +37,9 @@ export class IotService {
 
   async createDevice(userId: string, role: UserRole, dto: CreateDeviceDto) {
     if (dto.isEstateLevel && role !== UserRole.MANAGER) {
-      throw new ForbiddenException('Only managers can create estate-level devices');
+      throw new ForbiddenException(
+        'Only managers can create estate-level devices',
+      );
     }
 
     const device = this.deviceRepo.create({
@@ -64,7 +66,9 @@ export class IotService {
     }
 
     if (device.isEstateLevel && role !== UserRole.MANAGER) {
-      throw new ForbiddenException('Only managers can control estate-level devices');
+      throw new ForbiddenException(
+        'Only managers can control estate-level devices',
+      );
     }
     if (!device.isEstateLevel && (!device.owner || device.owner.id !== userId)) {
       throw new ForbiddenException('You can only control your own devices');
@@ -104,7 +108,9 @@ export class IotService {
     if (!device) throw new NotFoundException('Device not found');
 
     if (device.isEstateLevel && role !== UserRole.MANAGER) {
-      throw new ForbiddenException('Only managers can view estate-level device logs');
+      throw new ForbiddenException(
+        'Only managers can view estate-level device logs',
+      );
     }
     if (!device.isEstateLevel && (!device.owner || device.owner.id !== userId)) {
       throw new ForbiddenException('You can only view your own device logs');
@@ -112,7 +118,7 @@ export class IotService {
 
     return this.logRepo.find({
       where: { device: { id: deviceId } },
-      order: { timestamp: 'DESC' },
+      order: { createdAt: 'DESC' }, // ✅ fixed (was "timestamp")
     });
   }
 }
