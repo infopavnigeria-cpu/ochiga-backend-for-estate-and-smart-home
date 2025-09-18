@@ -27,13 +27,26 @@ async function bootstrap() {
     .setDescription('API documentation for Ochiga backend services')
     .setVersion('1.0')
     .addBearerAuth(
-      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        in: 'header',
+        name: 'Authorization',
+        description: 'Enter JWT token as: Bearer <your-token>',
+      },
       'access-token',
     )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+
+  // ✅ Setup Swagger
+  SwaggerModule.setup('api', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true, // 🔑 Keeps token after refresh
+    },
+  });
 
   // ✅ Works locally & in Codespaces
   const port = process.env.PORT || 3000;
