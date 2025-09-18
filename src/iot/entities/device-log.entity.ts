@@ -1,0 +1,21 @@
+// src/iot/entities/device-log.entity.ts
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
+import { Device } from './device.entity';
+
+@Entity()
+export class DeviceLog {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @ManyToOne(() => Device, (device) => device.logs, { onDelete: 'CASCADE' })
+  device: Device;
+
+  @Column({ nullable: true })
+  status: string; // e.g. 'online', 'offline', 'error'
+
+  @Column({ type: 'text', nullable: true })
+  message: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
+}
