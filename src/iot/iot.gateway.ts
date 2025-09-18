@@ -9,7 +9,7 @@ import { Device } from './entities/device.entity';
 @WebSocketGateway()
 export class IotGateway {
   @WebSocketServer()
-  server: Server;
+  server!: Server; // ✅ Fix: definite assignment
 
   // Call this method whenever a device is updated
   notifyDeviceUpdate(device: Device) {
