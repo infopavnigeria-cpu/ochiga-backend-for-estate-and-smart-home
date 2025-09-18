@@ -1,6 +1,12 @@
-// src/iot/dto/register-device.dto.ts
+import { IsString, IsOptional } from 'class-validator';
+
 export class RegisterDeviceDto {
-  name: string;
-  type: string;
+  @IsString()
+  name!: string;
+
+  @IsString()
+  type!: string;
+
+  @IsOptional()
   metadata?: any;
 }
