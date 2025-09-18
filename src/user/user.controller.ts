@@ -1,4 +1,3 @@
-// src/user/user.controller.ts
 import {
   Body,
   Controller,
@@ -9,12 +8,14 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserService } from './user.service';
 import { User } from './entities/user.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Request } from 'express';
 
+@ApiTags('Users') // 👈 Groups endpoints under "Users" in Swagger
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -42,10 +43,11 @@ export class UserController {
     return this.userService.updateUser(id, updateData);
   }
 
-  // 🔥 New endpoint: /user/me
+  // 🔥 /user/me requires JWT
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token') // 👈 enables Swagger JWT
   @Get('me')
   getMe(@Req() req: Request) {
-    return req.user; // 👈 comes from jwt.strategy.ts validate()
+    return req.user;
   }
 }
