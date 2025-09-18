@@ -1,5 +1,6 @@
-import { 
-  Controller, Get, Post, Param, Body, UseGuards, Request 
+// src/iot/iot.controller.ts
+import {
+  Controller, Get, Post, Param, Body, UseGuards, Request
 } from '@nestjs/common';
 import { IotService } from './iot.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -19,28 +20,24 @@ interface AuthenticatedRequest extends Request {
 export class IotController {
   constructor(private readonly iotService: IotService) {}
 
-  // 📍 Residents can see their own devices
   @Get('my-devices')
   @Roles(UserRole.RESIDENT)
   getMyDevices(@Request() req: AuthenticatedRequest) {
-    return this.iotService.findUserDevices(req.user.userId);
+    return this.iotService.findUserDevices(req.user.id);
   }
 
-  // 📍 Managers see estate-level devices
   @Get('estate-devices')
   @Roles(UserRole.MANAGER)
   getEstateDevices() {
     return this.iotService.findEstateDevices();
   }
 
-  // 📍 Add new device (resident OR estate)
   @Post('devices')
   @Roles(UserRole.RESIDENT, UserRole.MANAGER)
   createDevice(@Request() req: AuthenticatedRequest, @Body() dto: CreateDeviceDto) {
-    return this.iotService.createDevice(req.user.userId, req.user.role, dto);
+    return this.iotService.createDevice(req.user.id, req.user.role, dto);
   }
 
-  // 📍 Control device (with scope restrictions)
   @Post('devices/:id/control')
   @Roles(UserRole.RESIDENT, UserRole.MANAGER)
   controlDevice(
@@ -48,13 +45,12 @@ export class IotController {
     @Param('id') id: string,
     @Body() dto: ControlDeviceDto,
   ) {
-    return this.iotService.controlDevice(req.user.userId, req.user.role, id, dto);
+    return this.iotService.controlDevice(req.user.id, req.user.role, id, dto);
   }
 
-  // 📍 Get device logs
   @Get('devices/:id/logs')
   @Roles(UserRole.RESIDENT, UserRole.MANAGER)
   getDeviceLogs(@Request() req: AuthenticatedRequest, @Param('id') id: string) {
-    return this.iotService.getDeviceLogs(req.user.userId, req.user.role, id);
+    return this.iotService.getDeviceLogs(req.user.id, req.user.role, id);
   }
 }
