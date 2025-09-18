@@ -1,18 +1,4 @@
-// src/user/entities/user.entity.ts
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToOne,
-  OneToMany,
-} from 'typeorm';
-import { Wallet } from '../../wallet/entities/wallet.entity';
-import { Payment } from '../../payments/entities/payment.entity';
-import { Visitor } from '../../visitors/entities/visitors.entity';
-import { HomeMember } from '../../home/entities/home-member.entity';
-import { Resident } from './resident.entity';
-import { UserRole } from '../../enums/user-role.enum';
-import { Device } from '../../iot/entities/device.entity';
+import { Notification } from '../../notifications/entities/notification.entity'; // ⬅️ add this import
 
 @Entity('users')
 export class User {
@@ -49,4 +35,8 @@ export class User {
   // 🔑 Devices owned by this user
   @OneToMany(() => Device, (device) => device.owner)
   devices!: Device[];
+
+  // 🔔 Notifications for this user
+  @OneToMany(() => Notification, (notification) => notification.user)
+  notifications!: Notification[];
 }
