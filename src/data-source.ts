@@ -10,6 +10,8 @@ import { HomeMember } from "./home/entities/home-member.entity";
 import { Wallet } from "./wallet/entities/wallet.entity";
 import { Visitor } from "./visitors/entities/visitors.entity";
 import { Payment } from "./payments/entities/payment.entity";
+import { Device } from "./iot/entities/device.entity";
+import { DeviceLog } from "./iot/entities/device-log.entity";
 
 export const AppDataSource = new DataSource({
   type: "sqlite",
@@ -24,6 +26,8 @@ export const AppDataSource = new DataSource({
     Wallet,
     Visitor,
     Payment,
+    Device,      // 👈 add Device
+    DeviceLog,   // 👈 add DeviceLog
   ],
   migrations: ["src/migrations/*.ts"],
   synchronize: false, // keep false for migrations
