@@ -1,3 +1,4 @@
+// src/app.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -15,6 +16,7 @@ import { VisitorsModule } from './visitors/visitors.module';
 import { PaymentsModule } from './payments/payments.module';
 import { UtilitiesModule } from './utilities/utilities.module';
 import { CommunityModule } from './community/community.module';
+import { NotificationsModule } from './notifications/notifications.module'; // ✅ new import
 
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { RolesGuard } from './auth/roles.guard';
@@ -68,6 +70,7 @@ import { RolesGuard } from './auth/roles.guard';
     PaymentsModule,
     UtilitiesModule,
     CommunityModule,
+    NotificationsModule, // ✅ now wired in
   ],
   providers: [
     {
