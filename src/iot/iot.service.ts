@@ -1,6 +1,10 @@
 import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { UserRole } from '../enums/user-role.enum';
 import { ControlDeviceDto } from './dto/control-device.dto';
+import { Device } from './entities/device.entity';
+import { DeviceLog } from './entities/device-log.entity';
 
 @Injectable()
 export class IotService {
