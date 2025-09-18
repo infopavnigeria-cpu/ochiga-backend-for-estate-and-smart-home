@@ -1,4 +1,9 @@
-import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+// src/iot/iot.service.ts
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserRole } from '../enums/user-role.enum';
@@ -9,8 +14,11 @@ import { DeviceLog } from './entities/device-log.entity';
 @Injectable()
 export class IotService {
   constructor(
-    @InjectRepository(Device) private readonly deviceRepo: Repository<Device>,
-    @InjectRepository(DeviceLog) private readonly logRepo: Repository<DeviceLog>,
+    @InjectRepository(Device)
+    private readonly deviceRepo: Repository<Device>,
+
+    @InjectRepository(DeviceLog)
+    private readonly logRepo: Repository<DeviceLog>,
   ) {}
 
   async controlDevice(
@@ -24,14 +32,20 @@ export class IotService {
       relations: ['owner'],
     });
 
-    if (!device) throw new NotFoundException('Device not found');
+    if (!device) {
+      throw new NotFoundException('Device not found');
+    }
 
     // 🔒 Security checks
     if (device.isEstateLevel && role !== UserRole.MANAGER) {
-      throw new ForbiddenException('Only managers can control estate devices');
+      throw new ForbiddenException(
+        'Only managers can control estate-level devices',
+      );
     }
     if (!device.isEstateLevel && (!device.owner || device.owner.id !== userId)) {
-      throw new ForbiddenException('You can only control your own devices');
+      throw new ForbiddenException(
+        'You can only control your own devices',
+      );
     }
 
     // ✅ Apply control
@@ -45,7 +59,7 @@ export class IotService {
 
     await this.deviceRepo.save(device);
 
-    // 📜 Log action
+    // 📜 Save log
     const log = this.logRepo.create({
       device,
       action: dto.action,
@@ -53,6 +67,7 @@ export class IotService {
     });
     await this.logRepo.save(log);
 
+    // 🎯 Return safe response
     return {
       id: device.id,
       name: device.name,
