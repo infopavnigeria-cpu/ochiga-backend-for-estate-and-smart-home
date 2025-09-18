@@ -1,6 +1,12 @@
-// src/iot/dto/notification.dto.ts
+import { IsString, IsIn } from 'class-validator';
+
 export class NotificationDto {
-  deviceId: string;
-  message: string;
-  severity: 'info' | 'warning' | 'critical';
+  @IsString()
+  deviceId!: string;
+
+  @IsString()
+  message!: string;
+
+  @IsIn(['info', 'warning', 'critical'])
+  severity!: 'info' | 'warning' | 'critical';
 }
