@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { Wallet } from '../../wallet/entities/wallet.entity';
 import { Payment } from '../../payments/entities/payment.entity';
-import { Visitor } from '../../visitors/entities/visitor.entity';
+import { Visitor } from '../../visitors/entities/visitors.entity';
 import { HomeMember } from '../../home/entities/home-member.entity';
 import { Resident } from './resident.entity';
 import { UserRole } from '../../enums/user-role.enum';
