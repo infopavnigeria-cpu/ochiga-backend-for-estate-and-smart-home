@@ -59,11 +59,11 @@ export class IotService {
 
     await this.deviceRepo.save(device);
 
-    // 📜 Save log
+    // 📜 Save log (✅ fixed typing)
     const log = this.logRepo.create({
-      device,
+      device: { id: device.id } as Device, // pass reference only
       action: dto.action,
-      details: dto.value ? JSON.stringify(dto.value) : null,
+      details: dto.value !== undefined ? JSON.stringify(dto.value) : undefined,
     });
     await this.logRepo.save(log);
 
