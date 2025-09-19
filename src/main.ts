@@ -49,7 +49,7 @@ async function bootstrap() {
   });
 
   // ✅ Works locally & in Codespaces
-  const port = process.env.PORT || 3000;
+  const port = process.env.PORT || 4000;
   await app.listen(port, '0.0.0.0');
 
   logger.log(`🚀 Ochiga Backend running on: ${await app.getUrl()}`);
