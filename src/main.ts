@@ -9,12 +9,20 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   const logger = new Logger('Bootstrap');
 
+  // ✅ Enable CORS for frontend
+  app.enableCors({
+    origin: [
+      "https://ideal-space-enigma-q57px96qp7j3x7pr-3000.app.github.dev", // frontend
+    ],
+    credentials: true,
+  });
+
   // ✅ Global validation rules
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, // remove extra fields
-      forbidNonWhitelisted: true, // block unknown fields
-      transform: true, // auto-transform types
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
     }),
   );
 
@@ -40,12 +48,8 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-
-  // ✅ Setup Swagger
   SwaggerModule.setup('api', app, document, {
-    swaggerOptions: {
-      persistAuthorization: true, // 🔑 Keeps token after refresh
-    },
+    swaggerOptions: { persistAuthorization: true },
   });
 
   // ✅ Works locally & in Codespaces
