@@ -1,15 +1,30 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  Res,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { Public } from './decorators/public.decorator';
+import { TokenService } from './token.service';
+import { Response, Request } from 'express';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
-@ApiTags('Auth') // 👈 Groups endpoints under "Auth" in Swagger
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly tokenService: TokenService,
+  ) {}
 
   @Public()
   @Post('register')
@@ -19,26 +34,66 @@ export class AuthController {
   }
 
   @Public()
-  @Post('register-resident')
-  @HttpCode(HttpStatus.CREATED)
-  async registerResident(
-    @Body() body: { inviteToken: string; password: string },
-  ): Promise<AuthResponseDto> {
-    return this.authService.registerResident(body.inviteToken, body.password);
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) res: Response) {
+    const auth = await this.authService.login(loginDto);
+
+    const refresh = await this.tokenService.generateRefreshToken(auth.user.id, 'web');
+
+    res.cookie('refreshToken', refresh, {
+      httpOnly: true,
+      secure: process.env.COOKIE_SECURE === 'true',
+      sameSite: (process.env.COOKIE_SAME_SITE as any) || 'lax',
+      maxAge: 1000 * 60 * 60 * 24 * 30,
+    });
+
+    return { token: auth.token, user: auth.user };
   }
 
   @Public()
-  @Post('login')
+  @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() loginDto: LoginDto): Promise<AuthResponseDto> {
-    return this.authService.login(loginDto);
+  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const raw = req.cookies?.refreshToken;
+    if (!raw) return res.status(401).json({ message: 'No refresh token' });
+
+    const row = await this.tokenService.validateRefreshTokenByRaw(raw);
+    if (!row) return res.status(401).json({ message: 'Invalid refresh token' });
+
+    const user = await this.authService.findById(row.userId);
+    if (!user) {
+      await this.tokenService.revoke(row);
+      res.clearCookie('refreshToken');
+      return res.status(401).json({ message: 'Invalid token' });
+    }
+
+    const accessToken = this.authService.generateJwt(user);
+
+    await this.tokenService.revoke(row);
+    const newRaw = await this.tokenService.generateRefreshToken(user.id, 'web');
+
+    res.cookie('refreshToken', newRaw, {
+      httpOnly: true,
+      secure: process.env.COOKIE_SECURE === 'true',
+      sameSite: (process.env.COOKIE_SAME_SITE as any) || 'lax',
+      maxAge: 1000 * 60 * 60 * 24 * 30,
+    });
+
+    return { token: accessToken, user: { id: user.id, email: user.email, role: user.role } };
   }
 
-  // 👇 Logout requires JWT
-  @ApiBearerAuth('access-token') // 👈 Swagger button will add JWT automatically
+  @ApiBearerAuth('access-token')
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(): Promise<{ message: string }> {
-    return { message: 'Logout successful.' };
+  @UseGuards(JwtAuthGuard)
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const raw = req.cookies?.refreshToken;
+    if (raw) {
+      const row = await this.tokenService.validateRefreshTokenByRaw(raw);
+      if (row) await this.tokenService.revoke(row);
+    }
+    res.clearCookie('refreshToken');
+    return { message: 'Logout successful' };
   }
 }
