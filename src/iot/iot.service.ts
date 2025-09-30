@@ -1,3 +1,4 @@
+// src/iot/iot.service.ts
 import {
   Injectable,
   ForbiddenException,
@@ -83,24 +84,47 @@ export class IotService {
       throw new ForbiddenException('You can only control your own devices');
     }
 
-    // ✅ Apply status
-    device.isOn = dto.status;
+    // ✅ Handle actions
+    const metadata = device.metadata ? JSON.parse(device.metadata) : {};
 
-    // ✅ Handle temperature if provided
-    if (dto.temp !== undefined) {
-      const metadata = device.metadata ? JSON.parse(device.metadata) : {};
-      metadata.temp = dto.temp;
-      device.metadata = JSON.stringify(metadata);
+    switch (dto.action) {
+      case 'on':
+        device.isOn = true;
+        break;
+      case 'off':
+        device.isOn = false;
+        break;
+      case 'set-temp':
+        metadata.temp = dto.value;
+        break;
+      case 'set-brightness':
+        metadata.brightness = dto.value;
+        break;
+      case 'set-speed':
+        metadata.speed = dto.value;
+        break;
+      case 'set-mode':
+        metadata.mode = dto.mode ?? dto.value;
+        break;
+      case 'custom':
+        Object.assign(metadata, dto.payload);
+        break;
+      default:
+        throw new ForbiddenException(`Unsupported action: ${dto.action}`);
     }
 
+    device.metadata = JSON.stringify(metadata);
     await this.deviceRepo.save(device);
 
     // ✅ Save log
     const log = this.logRepo.create({
       device: { id: device.id } as Device,
-      action: dto.temp !== undefined ? 'set-temp' : dto.status ? 'on' : 'off',
-      details:
-        dto.temp !== undefined ? JSON.stringify(dto.temp) : String(dto.status),
+      action: dto.action,
+      details: dto.value
+        ? JSON.stringify(dto.value)
+        : dto.payload
+        ? JSON.stringify(dto.payload)
+        : undefined,
     });
     await this.logRepo.save(log);
 
@@ -108,7 +132,7 @@ export class IotService {
       id: device.id,
       name: device.name,
       isOn: device.isOn,
-      metadata: device.metadata ? JSON.parse(device.metadata) : {},
+      metadata,
     };
 
     // ✅ Broadcast updates
