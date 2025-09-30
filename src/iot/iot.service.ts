@@ -11,6 +11,8 @@ import { ControlDeviceDto } from './dto/control-device.dto';
 import { CreateDeviceDto } from './dto/create-device.dto';
 import { Device } from './entities/device.entity';
 import { DeviceLog } from './entities/device-log.entity';
+import { IotGateway } from './iot.gateway';           // ✅ WebSocket gateway
+import { IotMqttService } from './iot.mqtt.service';  // ✅ MQTT service
 
 @Injectable()
 export class IotService {
@@ -20,6 +22,9 @@ export class IotService {
 
     @InjectRepository(DeviceLog)
     private readonly logRepo: Repository<DeviceLog>,
+
+    private readonly gateway: IotGateway,
+    private readonly mqtt: IotMqttService,
   ) {}
 
   async findUserDevices(userId: string) {
@@ -47,7 +52,13 @@ export class IotService {
       owner: dto.isEstateLevel ? null : ({ id: userId } as any),
     });
 
-    return this.deviceRepo.save(device);
+    const saved = await this.deviceRepo.save(device);
+
+    // ✅ Notify via WebSocket & MQTT
+    this.gateway.broadcast('deviceCreated', saved);
+    this.mqtt.publish(`estate/devices/${saved.id}/created`, saved);
+
+    return saved;
   }
 
   async controlDevice(
@@ -91,12 +102,18 @@ export class IotService {
     });
     await this.logRepo.save(log);
 
-    return {
+    const payload = {
       id: device.id,
       name: device.name,
       isOn: device.isOn,
       metadata: device.metadata ? JSON.parse(device.metadata) : {},
     };
+
+    // ✅ Broadcast updates
+    this.gateway.broadcast('deviceUpdated', payload);
+    this.mqtt.publish(`estate/devices/${device.id}/control`, dto);
+
+    return payload;
   }
 
   async getDeviceLogs(userId: string, role: UserRole, deviceId: string) {
@@ -118,7 +135,7 @@ export class IotService {
 
     return this.logRepo.find({
       where: { device: { id: deviceId } },
-      order: { createdAt: 'DESC' }, // ✅ fixed (was "timestamp")
+      order: { createdAt: 'DESC' },
     });
   }
 }
