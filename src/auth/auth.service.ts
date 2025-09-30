@@ -1,3 +1,4 @@
+// src/auth/auth.service.ts
 import {
   Injectable,
   UnauthorizedException,
@@ -58,13 +59,21 @@ export class AuthService {
 
   /** Generate access token */
   public generateJwt(user: User) {
-    return this.jwtService.sign(
-      { id: user.id, email: user.email, role: user.role },
-      {
-        secret: process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET,
-        expiresIn: process.env.JWT_ACCESS_EXPIRY || '15m',
-      },
-    );
+    // include estate & house claims if available for easier RBAC downstream
+    const payload: any = {
+      sub: user.id,
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    };
+
+    if ((user as any).estate) payload.estate = (user as any).estate;
+    if ((user as any).house) payload.house = (user as any).house;
+
+    return this.jwtService.sign(payload, {
+      secret: process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET,
+      expiresIn: process.env.JWT_ACCESS_EXPIRY || '15m',
+    });
   }
 
   /** Find user by id (used for refresh) */
