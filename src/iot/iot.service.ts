@@ -1,4 +1,3 @@
-// src/iot/iot.service.ts
 import {
   Injectable,
   ForbiddenException,
@@ -11,8 +10,8 @@ import { ControlDeviceDto } from './dto/control-device.dto';
 import { CreateDeviceDto } from './dto/create-device.dto';
 import { Device } from './entities/device.entity';
 import { DeviceLog } from './entities/device-log.entity';
-import { IotGateway } from './iot.gateway';           // ✅ WebSocket gateway
-import { IotMqttService } from './iot.mqtt';          // ✅ MQTT service
+import { IotGateway } from './iot.gateway';
+import { IotMqttService } from './iot.mqtt';
 
 @Injectable()
 export class IotService {
@@ -50,6 +49,7 @@ export class IotService {
     const device = this.deviceRepo.create({
       ...dto,
       owner: dto.isEstateLevel ? null : ({ id: userId } as any),
+      isOn: false,
     });
 
     const saved = await this.deviceRepo.save(device);
@@ -72,9 +72,7 @@ export class IotService {
       relations: ['owner'],
     });
 
-    if (!device) {
-      throw new NotFoundException('Device not found');
-    }
+    if (!device) throw new NotFoundException('Device not found');
 
     if (device.isEstateLevel && role !== UserRole.MANAGER) {
       throw new ForbiddenException(
@@ -85,20 +83,24 @@ export class IotService {
       throw new ForbiddenException('You can only control your own devices');
     }
 
-    if (dto.action === 'on') device.isOn = true;
-    if (dto.action === 'off') device.isOn = false;
-    if (dto.action === 'set-temp') {
+    // ✅ Apply status
+    device.isOn = dto.status;
+
+    // ✅ Handle temperature if provided
+    if (dto.temp !== undefined) {
       const metadata = device.metadata ? JSON.parse(device.metadata) : {};
-      metadata.temp = dto.value;
+      metadata.temp = dto.temp;
       device.metadata = JSON.stringify(metadata);
     }
 
     await this.deviceRepo.save(device);
 
+    // ✅ Save log
     const log = this.logRepo.create({
       device: { id: device.id } as Device,
-      action: dto.action,
-      details: dto.value !== undefined ? JSON.stringify(dto.value) : undefined,
+      action: dto.temp !== undefined ? 'set-temp' : dto.status ? 'on' : 'off',
+      details:
+        dto.temp !== undefined ? JSON.stringify(dto.temp) : String(dto.status),
     });
     await this.logRepo.save(log);
 
