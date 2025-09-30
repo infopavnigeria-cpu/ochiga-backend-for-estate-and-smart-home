@@ -12,7 +12,7 @@ import { CreateDeviceDto } from './dto/create-device.dto';
 import { Device } from './entities/device.entity';
 import { DeviceLog } from './entities/device-log.entity';
 import { IotGateway } from './iot.gateway';           // ✅ WebSocket gateway
-import { IotMqttService } from './iot.mqtt.service';  // ✅ MQTT service
+import { IotMqttService } from './iot.mqtt';          // ✅ MQTT service
 
 @Injectable()
 export class IotService {
@@ -56,7 +56,7 @@ export class IotService {
 
     // ✅ Notify via WebSocket & MQTT
     this.gateway.broadcast('deviceCreated', saved);
-    this.mqtt.publish(`estate/devices/${saved.id}/created`, saved);
+    this.mqtt.publishToggle(saved.id, saved.isOn);
 
     return saved;
   }
@@ -111,7 +111,7 @@ export class IotService {
 
     // ✅ Broadcast updates
     this.gateway.broadcast('deviceUpdated', payload);
-    this.mqtt.publish(`estate/devices/${device.id}/control`, dto);
+    this.mqtt.publishToggle(device.id, device.isOn);
 
     return payload;
   }
