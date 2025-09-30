@@ -1,4 +1,3 @@
-// src/iot/iot.mqtt.ts
 import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { connect, MqttClient } from 'mqtt';
 import { IotGateway } from './iot.gateway';
@@ -17,10 +16,14 @@ export class IotMqttService implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    this.client = connect('mqtt://broker.hivemq.com:1883'); // or your broker
+    this.client = connect('mqtt://broker.hivemq.com:1883'); // or env var
     this.client.on('connect', () => {
       this.logger.log('✅ Connected to MQTT broker');
-      this.client.subscribe('estate/devices/+/status');
+      this.client.subscribe('estate/devices/+/status', (err) => {
+        if (err) {
+          this.logger.error('❌ Failed to subscribe', err.message);
+        }
+      });
     });
 
     this.client.on('message', async (topic, payload) => {
@@ -35,15 +38,21 @@ export class IotMqttService implements OnModuleInit {
           this.gateway.notifyDeviceUpdate(device);
         }
       } catch (err) {
-        this.logger.error('MQTT parse error', err);
+        this.logger.error('❌ MQTT parse error', err.message);
       }
     });
   }
 
   publishToggle(deviceId: string, status: boolean) {
+    if (!this.client?.connected) {
+      this.logger.warn('⚠️ MQTT client not connected, skipping publish');
+      return;
+    }
+
     this.client.publish(
       `estate/devices/${deviceId}/toggle`,
       JSON.stringify({ status }),
     );
+    this.logger.log(`📡 Published toggle for ${deviceId} => ${status}`);
   }
 }
