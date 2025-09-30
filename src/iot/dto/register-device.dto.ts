@@ -1,10 +1,15 @@
-import { IsBoolean, IsOptional, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsObject } from 'class-validator';
 
-export class ControlDeviceDto {
-  @IsBoolean()
-  status!: boolean;   // true = ON, false = OFF
+export class RegisterDeviceDto {
+  @IsNotEmpty()
+  @IsString()
+  name!: string;
+
+  @IsNotEmpty()
+  @IsString()
+  type!: string;
 
   @IsOptional()
-  @IsNumber()
-  temp?: number;      // optional, for set-temp
+  @IsObject()
+  metadata?: Record<string, any>;
 }
