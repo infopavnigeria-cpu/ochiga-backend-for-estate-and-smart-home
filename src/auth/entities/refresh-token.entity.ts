@@ -1,25 +1,38 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
+// src/auth/entities/refresh-token.entity.ts
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  Index,
+} from 'typeorm';
 
 @Entity({ name: 'refresh_token' })
 export class RefreshToken {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column({ name: 'user_id' })
-  userId: string;
+  userId!: string;
 
+  // bcrypt hash of the raw token (legacy / existing)
   @Column({ name: 'token_hash', type: 'text' })
-  tokenHash: string;
+  tokenHash!: string;
+
+  // New: store sha256(rawToken) for fast, indexed lookup (nullable for compatibility)
+  @Index()
+  @Column({ name: 'token_sha256', type: 'varchar', length: 128, nullable: true })
+  tokenSha256?: string | null;
 
   @Column({ name: 'device_info', nullable: true })
   deviceInfo?: string;
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  createdAt!: Date;
 
   @Column({ name: 'expires_at', type: 'timestamptz', nullable: true })
-  expiresAt: Date;
+  expiresAt?: Date | null;
 
   @Column({ default: false })
-  revoked: boolean;
+  revoked!: boolean;
 }
