@@ -1,26 +1,22 @@
-// src/iot/iot.gateway.ts
-import {
-  WebSocketGateway,
-  WebSocketServer,
-} from '@nestjs/websockets';
+import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { Device } from './entities/device.entity';
 
-@WebSocketGateway()
+@WebSocketGateway({ cors: true })
 export class IotGateway {
   @WebSocketServer()
-  server!: Server; // ✅ Fix: definite assignment
+  server!: Server;
 
-  // Call this method whenever a device is updated
-  notifyDeviceUpdate(device: Device) {
-    if (device.owner) {
-      // Resident-only notification
-      this.server.to(device.owner.id).emit('deviceUpdated', device);
-    }
+  // Generic broadcaster
+  broadcast(event: string, payload: any) {
+    this.server.emit(event, payload);
+  }
 
-    if (device.isEstateLevel) {
-      // Estate-wide notification to all managers
-      this.server.to('managers').emit('estateDeviceUpdated', device);
-    }
+  // Specialized notifiers
+  notifyDeviceUpdate(device: any) {
+    this.broadcast('deviceUpdate', device);
+  }
+
+  notifyLog(log: any) {
+    this.broadcast('deviceLog', log);
   }
 }
