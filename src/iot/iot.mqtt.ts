@@ -15,11 +15,29 @@ export class IotMqttService {
     });
 
     this.client.on('error', (err) => {
-      this.logger.error('❌ MQTT error', err);
+      this.logger.error('❌ MQTT error: ' + err.message);
     });
   }
 
+  /** Generic publisher */
   publish(topic: string, message: any) {
+    if (!this.client.connected) {
+      this.logger.warn(`⚠️ MQTT not connected, skipping publish to ${topic}`);
+      return;
+    }
     this.client.publish(topic, JSON.stringify(message));
+  }
+
+  /** Specialized publisher for toggling devices */
+  publishToggle(deviceId: string, isOn: boolean) {
+    const topic = `devices/${deviceId}/toggle`;
+    const message = { isOn };
+    this.publish(topic, message);
+  }
+
+  /** Example: publish metadata updates */
+  publishMetadata(deviceId: string, metadata: Record<string, any>) {
+    const topic = `devices/${deviceId}/metadata`;
+    this.publish(topic, metadata);
   }
 }
