@@ -12,8 +12,8 @@ import { DeviceLog } from './device-log.entity';
 
 @Entity()
 export class Device {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn('uuid')
+  id!: string; // ✅ using uuid since service expects string ids
 
   @Column()
   name!: string;
@@ -24,11 +24,18 @@ export class Device {
   @Column({ default: false })
   isOn!: boolean;
 
+  // 👇 Needed for estate-level devices
+  @Column({ default: false })
+  isEstateLevel!: boolean;
+
   @Column('jsonb', { nullable: true })
   metadata!: Record<string, any>;
 
-  @ManyToOne(() => User, (user) => user.devices, { onDelete: 'CASCADE' })
-  owner!: User;
+  @ManyToOne(() => User, (user) => user.devices, {
+    onDelete: 'CASCADE',
+    nullable: true, // ✅ estate-level devices may not have an owner
+  })
+  owner!: User | null;
 
   @OneToMany(() => DeviceLog, (log) => log.device, { cascade: true })
   logs!: DeviceLog[];
