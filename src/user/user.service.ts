@@ -21,6 +21,11 @@ export class UserService {
     return this.userRepo.save(newUser);
   }
 
+  /** 🔄 Alias for controller compatibility */
+  async createUser(data: Partial<User>): Promise<User> {
+    return this.create(data);
+  }
+
   /** ✅ Get user by ID */
   async findById(id: string): Promise<User> {
     const user = await this.userRepo.findOne({
@@ -37,6 +42,11 @@ export class UserService {
     });
     if (!user) throw new NotFoundException(`User with ID ${id} not found`);
     return user;
+  }
+
+  /** 🔄 Alias for controller compatibility */
+  async getUserById(id: string): Promise<User> {
+    return this.findById(id);
   }
 
   /** ✅ Get user by email (for login/register) */
@@ -67,6 +77,11 @@ export class UserService {
     const user = await this.findById(id);
     Object.assign(user, updateData);
     return this.userRepo.save(user);
+  }
+
+  /** 🔄 Alias for controller compatibility */
+  async updateUser(id: string, updateData: Partial<User>): Promise<User> {
+    return this.update(id, updateData);
   }
 
   /** ✅ Delete user */
