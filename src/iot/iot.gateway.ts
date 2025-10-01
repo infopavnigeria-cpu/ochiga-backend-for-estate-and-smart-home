@@ -1,3 +1,4 @@
+// src/iot/iot.gateway.ts
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 
@@ -6,16 +7,19 @@ export class IotGateway {
   @WebSocketServer()
   server!: Server;
 
-  // Generic broadcaster
+  /** Generic broadcaster */
   broadcast(event: string, payload: any) {
-    this.server.emit(event, payload);
+    if (this.server) {
+      this.server.emit(event, payload);
+    }
   }
 
-  // Specialized notifiers
+  /** Notify device updates */
   notifyDeviceUpdate(device: any) {
     this.broadcast('deviceUpdate', device);
   }
 
+  /** Notify device log */
   notifyLog(log: any) {
     this.broadcast('deviceLog', log);
   }
