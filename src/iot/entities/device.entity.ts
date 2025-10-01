@@ -1,5 +1,4 @@
 // src/iot/entities/device.entity.ts
-
 import {
   Entity,
   Column,
@@ -28,14 +27,12 @@ export class Device {
   @Column('jsonb', { nullable: true })
   metadata!: Record<string, any>;
 
-  @CreateDateColumn()
-  createdAt!: Date;
-
-  // ✅ Relation: a device belongs to one user
   @ManyToOne(() => User, (user) => user.devices, { onDelete: 'CASCADE' })
   owner!: User;
 
-  // ✅ Relation: a device can have many logs
   @OneToMany(() => DeviceLog, (log) => log.device, { cascade: true })
   logs!: DeviceLog[];
+
+  @CreateDateColumn()
+  createdAt!: Date;
 }
