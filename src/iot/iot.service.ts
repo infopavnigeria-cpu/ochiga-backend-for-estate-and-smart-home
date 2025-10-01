@@ -27,6 +27,7 @@ export class IotService {
     private readonly mqtt: IotMqttService,
   ) {}
 
+  /** ✅ Get all devices owned by a user */
   async findUserDevices(userId: string) {
     return this.deviceRepo.find({
       where: { owner: { id: userId } },
@@ -34,12 +35,14 @@ export class IotService {
     });
   }
 
+  /** ✅ Get estate-level devices */
   async findEstateDevices() {
     return this.deviceRepo.find({
       where: { isEstateLevel: true },
     });
   }
 
+  /** ✅ Create a device */
   async createDevice(userId: string, role: UserRole, dto: CreateDeviceDto) {
     if (dto.isEstateLevel && role !== UserRole.MANAGER) {
       throw new ForbiddenException(
@@ -51,17 +54,19 @@ export class IotService {
       ...dto,
       owner: dto.isEstateLevel ? null : ({ id: userId } as any),
       isOn: false,
+      metadata: {}, // start with empty metadata object
     });
 
     const saved = await this.deviceRepo.save(device);
 
-    // ✅ Notify via WebSocket & MQTT
+    // Notify via WebSocket & MQTT
     this.gateway.broadcast('deviceCreated', saved);
-    this.mqtt.publishToggle(saved.id, saved.isOn);
+    this.mqtt.publishToggle(saved.id.toString(), saved.isOn);
 
     return saved;
   }
 
+  /** ✅ Control device actions */
   async controlDevice(
     userId: string,
     role: UserRole,
@@ -69,12 +74,13 @@ export class IotService {
     dto: ControlDeviceDto,
   ) {
     const device = await this.deviceRepo.findOne({
-      where: { id: deviceId },
+      where: { id: deviceId as any },
       relations: ['owner'],
     });
 
     if (!device) throw new NotFoundException('Device not found');
 
+    // Permission checks
     if (device.isEstateLevel && role !== UserRole.MANAGER) {
       throw new ForbiddenException(
         'Only managers can control estate-level devices',
@@ -84,8 +90,8 @@ export class IotService {
       throw new ForbiddenException('You can only control your own devices');
     }
 
-    // ✅ Handle actions
-    const metadata = device.metadata ? JSON.parse(device.metadata) : {};
+    // Handle actions
+    const metadata: Record<string, any> = device.metadata || {};
 
     switch (dto.action) {
       case 'on':
@@ -113,10 +119,10 @@ export class IotService {
         throw new ForbiddenException(`Unsupported action: ${dto.action}`);
     }
 
-    device.metadata = JSON.stringify(metadata);
+    device.metadata = metadata;
     await this.deviceRepo.save(device);
 
-    // ✅ Save log
+    // Save log
     const log = this.logRepo.create({
       device: { id: device.id } as Device,
       action: dto.action,
@@ -135,16 +141,18 @@ export class IotService {
       metadata,
     };
 
-    // ✅ Broadcast updates
+    // Broadcast updates
     this.gateway.broadcast('deviceUpdated', payload);
-    this.mqtt.publishToggle(device.id, device.isOn);
+    this.mqtt.publishToggle(device.id.toString(), device.isOn);
+    this.mqtt.publishMetadata(device.id.toString(), metadata);
 
     return payload;
   }
 
+  /** ✅ Get device logs */
   async getDeviceLogs(userId: string, role: UserRole, deviceId: string) {
     const device = await this.deviceRepo.findOne({
-      where: { id: deviceId },
+      where: { id: deviceId as any },
       relations: ['owner'],
     });
 
