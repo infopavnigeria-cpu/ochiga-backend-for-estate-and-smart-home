@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Wallet } from './entities/wallet.entity';
 import { User } from '../user/entities/user.entity';
-import { Transaction } from './entities/transaction.entity';
+import { Transaction, TransactionType } from './entities/transaction.entity';
 
 @Injectable()
 export class WalletService {
@@ -50,10 +50,10 @@ export class WalletService {
     wallet.balance = Number(wallet.balance) + amount;
 
     const tx = this.txRepo.create({
-      type: 'fund',
+      type: TransactionType.FUND, // ✅ enum
       amount,
       description: 'Wallet funded',
-      wallet, // ✅ attach to wallet instead of userId
+      wallet,
     });
 
     await this.walletRepo.save(wallet);
@@ -72,10 +72,10 @@ export class WalletService {
     wallet.balance = Number(wallet.balance) - amount;
 
     const tx = this.txRepo.create({
-      type: 'debit',
+      type: TransactionType.DEBIT, // ✅ enum
       amount,
       description: 'Wallet debited',
-      wallet, // ✅ attach to wallet
+      wallet,
     });
 
     await this.walletRepo.save(wallet);
