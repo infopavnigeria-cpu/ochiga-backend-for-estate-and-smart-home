@@ -1,7 +1,15 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+// src/wallet/entities/transaction.entity.ts
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Wallet } from './wallet.entity';
 
-@Entity()
+@Entity('transactions')
 export class Transaction {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -12,11 +20,8 @@ export class Transaction {
   @Column('decimal', { precision: 10, scale: 2 })
   amount: number;
 
-  @Column()
-  userId: string;
-
   @Column({ nullable: true })
-  description: string;  // ✅ human-readable reason
+  description: string;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -27,4 +32,7 @@ export class Transaction {
 
   @Column()
   walletId: string;
+
+  @Column()
+  userId: string;
 }
