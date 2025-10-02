@@ -72,6 +72,11 @@ export class UserService {
     });
   }
 
+  /** 🔄 Alias for controller compatibility */
+  async getAllUsers(): Promise<User[]> {
+    return this.findAll();
+  }
+
   /** ✅ Update user */
   async update(id: string, updateData: Partial<User>): Promise<User> {
     const user = await this.findById(id);
@@ -88,5 +93,10 @@ export class UserService {
   async remove(id: string): Promise<void> {
     const user = await this.findById(id);
     await this.userRepo.remove(user);
+  }
+
+  /** 🔄 Alias for controller compatibility */
+  async deleteUser(id: string): Promise<void> {
+    return this.remove(id);
   }
 }
