@@ -4,12 +4,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Wallet } from './entities/wallet.entity';
 import { User } from '../user/entities/user.entity';
+import { Transaction } from './entities/transaction.entity';
 
 @Injectable()
 export class WalletService {
   constructor(
     @InjectRepository(Wallet) private walletRepo: Repository<Wallet>,
     @InjectRepository(User) private userRepo: Repository<User>,
+    @InjectRepository(Transaction) private txRepo: Repository<Transaction>,
   ) {}
 
   /** Get wallet by user ID */
@@ -37,25 +39,46 @@ export class WalletService {
     return this.walletRepo.save(wallet);
   }
 
-  /** Fund wallet (increase balance) */
-  async fundWallet(userId: string, amount: number): Promise<Wallet> {
+  /** Fund wallet (increase balance + log transaction) */
+  async fundWallet(userId: string, amount: number, description?: string): Promise<Wallet> {
     if (amount <= 0) throw new BadRequestException('Invalid amount');
 
     const wallet = await this.getWallet(userId);
     wallet.balance = Number(wallet.balance) + amount;
+    await this.walletRepo.save(wallet);
 
-    return this.walletRepo.save(wallet);
+    const tx = this.txRepo.create({
+      type: 'fund',
+      amount,
+      userId,
+      description: description || 'Wallet funded',
+      wallet,
+    });
+    await this.txRepo.save(tx);
+
+    return wallet;
   }
 
-  /** Debit wallet (reduce balance) */
-  async debitWallet(userId: string, amount: number): Promise<Wallet> {
+  /** Debit wallet (reduce balance + log transaction) */
+  async debitWallet(userId: string, amount: number, description?: string): Promise<Wallet> {
     if (amount <= 0) throw new BadRequestException('Invalid amount');
 
     const wallet = await this.getWallet(userId);
     if (Number(wallet.balance) < amount) throw new BadRequestException('Insufficient funds');
 
     wallet.balance = Number(wallet.balance) - amount;
-    return this.walletRepo.save(wallet);
+    await this.walletRepo.save(wallet);
+
+    const tx = this.txRepo.create({
+      type: 'debit',
+      amount,
+      userId,
+      description: description || 'Wallet debited',
+      wallet,
+    });
+    await this.txRepo.save(tx);
+
+    return wallet;
   }
 
   /** Smart: get wallet if exists, else auto-create */
@@ -78,5 +101,13 @@ export class WalletService {
     }
 
     return wallet;
+  }
+
+  /** Get all transactions for a user */
+  async getTransactions(userId: string): Promise<Transaction[]> {
+    return this.txRepo.find({
+      where: { userId },
+      order: { createdAt: 'DESC' },
+    });
   }
 }
