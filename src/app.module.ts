@@ -17,6 +17,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { UtilitiesModule } from './utilities/utilities.module';
 import { CommunityModule } from './community/community.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { HealthModule } from './health/health.module'; // ✅ Added
 
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { RolesGuard } from './auth/roles.guard';
@@ -71,7 +72,7 @@ import { RolesGuard } from './auth/roles.guard';
       },
     }),
 
-    // Feature modules
+    // ✅ Feature modules
     AuthModule,
     DashboardModule,
     UserModule,
@@ -84,6 +85,7 @@ import { RolesGuard } from './auth/roles.guard';
     UtilitiesModule,
     CommunityModule,
     NotificationsModule,
+    HealthModule, // ✅ Registered here
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },
