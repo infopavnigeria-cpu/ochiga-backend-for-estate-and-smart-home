@@ -12,6 +12,7 @@ import {
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Payment } from '../../payments/entities/payment.entity';
+import { Transaction } from './transaction.entity';
 
 // transformer to store decimal as string in DB but use number in code
 const decimalTransformer: ValueTransformer = {
@@ -38,14 +39,18 @@ export class Wallet {
   @Column({ default: true })
   isActive!: boolean;
 
-  // Link to user
+  // ✅ Link to user
   @OneToOne(() => User, (user) => user.wallet, { onDelete: 'CASCADE' })
   @JoinColumn()
   user!: User;
 
-  // Payments from this wallet
+  // ✅ Payments made from this wallet
   @OneToMany(() => Payment, (payment) => payment.wallet)
   payments!: Payment[];
+
+  // ✅ Transactions history (fund/debit records)
+  @OneToMany(() => Transaction, (tx) => tx.wallet)
+  transactions!: Transaction[];
 
   @CreateDateColumn()
   createdAt!: Date;
