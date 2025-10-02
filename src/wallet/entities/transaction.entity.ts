@@ -1,4 +1,3 @@
-// src/wallet/entities/transaction.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -18,7 +17,8 @@ export class Transaction {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ type: 'enum', enum: TransactionType })
+  // ❌ SQLite doesn't support enum, so use varchar
+  @Column({ type: 'varchar', length: 10 })
   type!: TransactionType;
 
   @Column({ type: 'decimal', precision: 12, scale: 2 })
@@ -31,6 +31,8 @@ export class Transaction {
   createdAt!: Date;
 
   // ✅ Each transaction belongs to one wallet
-  @ManyToOne(() => Wallet, (wallet) => wallet.transactions, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Wallet, (wallet) => wallet.transactions, {
+    onDelete: 'CASCADE',
+  })
   wallet!: Wallet;
 }
