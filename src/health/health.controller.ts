@@ -16,11 +16,10 @@ export class HealthController {
   ) {}
 
   @Get()
-  @Public() // ✅ Allow health check without token
+  @Public() // ✅ This must be here
   @HealthCheck()
   check() {
     return this.health.check([
-      // Example checks — you can adjust
       () => this.http.pingCheck('nestjs-docs', 'https://docs.nestjs.com'),
       () => this.db.pingCheck('database'),
     ]);
