@@ -1,9 +1,11 @@
+// src/health/health.controller.ts
 import { Controller, Get } from '@nestjs/common';
 import {
   HealthCheck,
   HealthCheckService,
-  HttpHealthIndicator,
   TypeOrmHealthIndicator,
+  MemoryHealthIndicator,
+  HttpHealthIndicator,
 } from '@nestjs/terminus';
 import { Public } from '../auth/decorators/public.decorator';
 
@@ -11,17 +13,24 @@ import { Public } from '../auth/decorators/public.decorator';
 export class HealthController {
   constructor(
     private health: HealthCheckService,
-    private http: HttpHealthIndicator,
     private db: TypeOrmHealthIndicator,
+    private memory: MemoryHealthIndicator,
+    private http: HttpHealthIndicator,
   ) {}
 
   @Get()
-  @Public() // ✅ This must be here
+  @Public() // ✅ no JWT needed
   @HealthCheck()
   check() {
     return this.health.check([
-      () => this.http.pingCheck('nestjs-docs', 'https://docs.nestjs.com'),
-      () => this.db.pingCheck('database'),
+      // ✅ DB check (timeout after 300ms)
+      () => this.db.pingCheck('database', { timeout: 300 }),
+
+      // ✅ Memory heap check (limit 300MB)
+      () => this.memory.checkHeap('memory_heap', 300 * 1024 * 1024),
+
+      // ✅ Ping google.com to confirm external internet
+      () => this.http.pingCheck('google', 'https://www.google.com'),
     ]);
   }
 }
