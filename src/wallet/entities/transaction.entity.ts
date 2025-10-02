@@ -15,7 +15,6 @@ export enum TransactionType {
   DEBIT = 'DEBIT',
 }
 
-// transformer so decimal is number in TS but string in DB
 const decimalTransformer: ValueTransformer = {
   to: (value: number) => value,
   from: (value: string) => parseFloat(value),
@@ -26,15 +25,10 @@ export class Transaction {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  // ✅ store enum as string (SQLite safe)
   @Column({ type: 'varchar', length: 10 })
   type!: TransactionType;
 
-  @Column('decimal', {
-    precision: 12,
-    scale: 2,
-    transformer: decimalTransformer,
-  })
+  @Column('decimal', { precision: 12, scale: 2, transformer: decimalTransformer })
   amount!: number;
 
   @ManyToOne(() => Wallet, (wallet) => wallet.payments, { onDelete: 'CASCADE' })
