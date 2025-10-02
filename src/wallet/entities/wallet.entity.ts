@@ -1,60 +1,36 @@
-// src/wallet/entities/wallet.entity.ts
+// src/wallet/entities/transaction.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  OneToOne,
-  OneToMany,
-  JoinColumn,
+  ManyToOne,
   CreateDateColumn,
-  UpdateDateColumn,
-  ValueTransformer,
 } from 'typeorm';
-import { User } from '../../user/entities/user.entity';
-import { Payment } from '../../payments/entities/payment.entity';
-import { Transaction } from './transaction.entity';
+import { Wallet } from './wallet.entity';
 
-// transformer to store decimal as string in DB but use number in code
-const decimalTransformer: ValueTransformer = {
-  to: (value: number) => value,
-  from: (value: string) => parseFloat(value),
-};
+export enum TransactionType {
+  FUND = 'fund',
+  DEBIT = 'debit',
+}
 
-@Entity('wallets')
-export class Wallet {
+@Entity('transactions')
+export class Transaction {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column('decimal', {
-    precision: 12,
-    scale: 2,
-    default: 0,
-    transformer: decimalTransformer,
-  })
-  balance!: number;
+  @Column({ type: 'enum', enum: TransactionType })
+  type!: TransactionType;
 
-  @Column({ type: 'varchar', length: 10, default: 'NGN' })
-  currency!: string;
+  @Column({ type: 'decimal', precision: 12, scale: 2 })
+  amount!: number;
 
-  @Column({ default: true })
-  isActive!: boolean;
-
-  // ✅ Link to user
-  @OneToOne(() => User, (user) => user.wallet, { onDelete: 'CASCADE' })
-  @JoinColumn()
-  user!: User;
-
-  // ✅ Payments made from this wallet
-  @OneToMany(() => Payment, (payment) => payment.wallet)
-  payments!: Payment[];
-
-  // ✅ Transactions history (fund/debit records)
-  @OneToMany(() => Transaction, (tx) => tx.wallet)
-  transactions!: Transaction[];
+  @Column({ nullable: true })
+  description?: string;
 
   @CreateDateColumn()
   createdAt!: Date;
 
-  @UpdateDateColumn()
-  updatedAt!: Date;
+  // ✅ belongs to a wallet
+  @ManyToOne(() => Wallet, (wallet) => wallet.transactions, { onDelete: 'CASCADE' })
+  wallet!: Wallet;
 }
