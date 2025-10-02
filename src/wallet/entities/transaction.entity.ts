@@ -5,38 +5,32 @@ import {
   Column,
   ManyToOne,
   CreateDateColumn,
-  ValueTransformer,
 } from 'typeorm';
 import { Wallet } from './wallet.entity';
-import { User } from '../../user/entities/user.entity';
 
 export enum TransactionType {
-  CREDIT = 'CREDIT',
-  DEBIT = 'DEBIT',
+  FUND = 'fund',
+  DEBIT = 'debit',
 }
-
-const decimalTransformer: ValueTransformer = {
-  to: (value: number) => value,
-  from: (value: string) => parseFloat(value),
-};
 
 @Entity('transactions')
 export class Transaction {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ type: 'varchar', length: 10 })
+  @Column({ type: 'enum', enum: TransactionType })
   type!: TransactionType;
 
-  @Column('decimal', { precision: 12, scale: 2, transformer: decimalTransformer })
+  @Column({ type: 'decimal', precision: 12, scale: 2 })
   amount!: number;
 
-  @ManyToOne(() => Wallet, (wallet) => wallet.payments, { onDelete: 'CASCADE' })
-  wallet!: Wallet;
-
-  @ManyToOne(() => User, (user) => user.transactions, { onDelete: 'CASCADE' })
-  user!: User;
+  @Column({ nullable: true })
+  description?: string;
 
   @CreateDateColumn()
   createdAt!: Date;
+
+  // ✅ Each transaction belongs to one wallet
+  @ManyToOne(() => Wallet, (wallet) => wallet.transactions, { onDelete: 'CASCADE' })
+  wallet!: Wallet;
 }
