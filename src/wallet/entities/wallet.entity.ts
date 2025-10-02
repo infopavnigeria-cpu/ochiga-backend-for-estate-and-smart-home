@@ -1,36 +1,60 @@
-// src/wallet/entities/transaction.entity.ts
+// src/wallet/entities/wallet.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  ManyToOne,
+  OneToOne,
+  OneToMany,
+  JoinColumn,
   CreateDateColumn,
+  UpdateDateColumn,
+  ValueTransformer,
 } from 'typeorm';
-import { Wallet } from './wallet.entity';
+import { User } from '../../user/entities/user.entity';
+import { Payment } from '../../payments/entities/payment.entity';
+import { Transaction } from './transaction.entity';
 
-export enum TransactionType {
-  FUND = 'fund',
-  DEBIT = 'debit',
-}
+// transformer to store decimal as string in DB but use number in code
+const decimalTransformer: ValueTransformer = {
+  to: (value: number) => value,
+  from: (value: string) => parseFloat(value),
+};
 
-@Entity('transactions')
-export class Transaction {
+@Entity('wallets')
+export class Wallet {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ type: 'enum', enum: TransactionType })
-  type!: TransactionType;
+  @Column('decimal', {
+    precision: 12,
+    scale: 2,
+    default: 0,
+    transformer: decimalTransformer,
+  })
+  balance!: number;
 
-  @Column({ type: 'decimal', precision: 12, scale: 2 })
-  amount!: number;
+  @Column({ type: 'varchar', length: 10, default: 'NGN' })
+  currency!: string;
 
-  @Column({ nullable: true })
-  description?: string;
+  @Column({ default: true })
+  isActive!: boolean;
+
+  // ✅ Link to user
+  @OneToOne(() => User, (user) => user.wallet, { onDelete: 'CASCADE' })
+  @JoinColumn()
+  user!: User;
+
+  // ✅ Payments made from this wallet
+  @OneToMany(() => Payment, (payment) => payment.wallet)
+  payments!: Payment[];
+
+  // ✅ Transactions history
+  @OneToMany(() => Transaction, (tx) => tx.wallet, { cascade: true })
+  transactions!: Transaction[];
 
   @CreateDateColumn()
   createdAt!: Date;
 
-  // ✅ belongs to a wallet
-  @ManyToOne(() => Wallet, (wallet) => wallet.transactions, { onDelete: 'CASCADE' })
-  wallet!: Wallet;
+  @UpdateDateColumn()
+  updatedAt!: Date;
 }
