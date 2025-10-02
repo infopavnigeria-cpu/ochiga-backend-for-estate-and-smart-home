@@ -3,36 +3,30 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  CreateDateColumn,
   ManyToOne,
-  JoinColumn,
+  CreateDateColumn,
 } from 'typeorm';
 import { Wallet } from './wallet.entity';
 
 @Entity('transactions')
 export class Transaction {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string; // ✅ definite assignment assertion
 
-  @Column()
-  type: 'fund' | 'debit';
+  @Column({ type: 'enum', enum: ['fund', 'debit'] })
+  type!: 'fund' | 'debit'; // ✅ fixed
 
-  @Column('decimal', { precision: 10, scale: 2 })
-  amount: number;
+  @Column('decimal', { precision: 12, scale: 2 })
+  amount!: number; // ✅ fixed
 
-  @Column({ nullable: true })
-  description: string;
+  @Column({ type: 'text', nullable: true })
+  description?: string; // ✅ optional field
+
+  @ManyToOne(() => Wallet, (wallet) => wallet.transactions, {
+    onDelete: 'CASCADE',
+  })
+  wallet!: Wallet;
 
   @CreateDateColumn()
-  createdAt: Date;
-
-  @ManyToOne(() => Wallet, (wallet) => wallet.transactions, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'walletId' })
-  wallet: Wallet;
-
-  @Column()
-  walletId: string;
-
-  @Column()
-  userId: string;
+  createdAt!: Date;
 }
