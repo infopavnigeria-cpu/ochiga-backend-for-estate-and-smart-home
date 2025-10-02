@@ -16,7 +16,7 @@ import { VisitorsModule } from './visitors/visitors.module';
 import { PaymentsModule } from './payments/payments.module';
 import { UtilitiesModule } from './utilities/utilities.module';
 import { CommunityModule } from './community/community.module';
-import { NotificationsModule } from './notifications/notifications.module'; // ✅ new import
+import { NotificationsModule } from './notifications/notifications.module';
 
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { RolesGuard } from './auth/roles.guard';
@@ -39,12 +39,25 @@ import { RolesGuard } from './auth/roles.guard';
             username: config.get<string>('DB_USERNAME', 'postgres'),
             password: config.get<string>('DB_PASSWORD', 'postgres'),
             database: config.get<string>('DB_DATABASE', 'estate_app'),
-            entities: [path.join(__dirname, '**', '*.entity.{ts,js}')], // ✅ auto-load entities
+            entities: [path.join(__dirname, '**', '*.entity.{ts,js}')],
             synchronize: true,
           };
         }
 
-        // Default: better-sqlite3 for dev/local
+        if (dbType === 'sqlite') {
+          return {
+            type: 'sqlite' as const,
+            database: path.resolve(
+              __dirname,
+              '..',
+              config.get<string>('DB_DATABASE', 'db.sqlite'),
+            ),
+            entities: [path.join(__dirname, '**', '*.entity.{ts,js}')],
+            synchronize: true,
+          };
+        }
+
+        // Default: better-sqlite3 (dev/local fast DB)
         return {
           type: 'better-sqlite3' as const,
           database: path.resolve(
@@ -52,7 +65,7 @@ import { RolesGuard } from './auth/roles.guard';
             '..',
             config.get<string>('DB_DATABASE', 'db.sqlite'),
           ),
-          entities: [path.join(__dirname, '**', '*.entity.{ts,js}')], // ✅ auto-load entities
+          entities: [path.join(__dirname, '**', '*.entity.{ts,js}')],
           synchronize: true,
         };
       },
@@ -70,17 +83,11 @@ import { RolesGuard } from './auth/roles.guard';
     PaymentsModule,
     UtilitiesModule,
     CommunityModule,
-    NotificationsModule, // ✅ now wired in
+    NotificationsModule,
   ],
   providers: [
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: RolesGuard,
-    },
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
   ],
 })
 export class AppModule {}
