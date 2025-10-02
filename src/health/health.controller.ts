@@ -5,6 +5,7 @@ import {
   HealthCheckService,
   TypeOrmHealthIndicator,
 } from '@nestjs/terminus';
+import { Public } from '../auth/decorators/public.decorator'; // ✅ custom decorator
 
 @Controller('health')
 export class HealthController {
@@ -15,6 +16,7 @@ export class HealthController {
 
   @Get()
   @HealthCheck()
+  @Public() // ✅ allow access without JWT
   check() {
     return this.health.check([
       async () => this.db.pingCheck('database'),
