@@ -1,18 +1,21 @@
-# Backend Dockerfile
-FROM node:20
+# Use Node.js 20 LTS Alpine for smaller image
+FROM node:20-alpine
 
 # Set working directory
 WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
-RUN npm install
+RUN npm install --frozen-lockfile
 
 # Copy all backend code
 COPY . .
 
+# Build NestJS app
+RUN npm run build
+
 # Expose backend port
 EXPOSE 3000
 
-# Start NestJS in dev mode (you can change to start:prod later)
-CMD ["npm", "run", "start:dev"]
+# Start in production mode
+CMD ["npm", "run", "start:prod"]
