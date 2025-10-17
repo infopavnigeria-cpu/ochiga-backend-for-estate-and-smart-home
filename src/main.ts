@@ -11,11 +11,13 @@ async function bootstrap() {
 
   // ✅ Enable CORS for frontend
   app.enableCors({
-    origin: [
-      "https://ideal-space-enigma-q57px96qp7j3x7pr-3000.app.github.dev", // frontend
-    ],
-    credentials: true,
-  });
+  origin: [
+    "https://ideal-system-wrjxv66vrwwphgwj6-3000.app.github.dev", // ✅ updated frontend
+    "http://localhost:3000", // optional for local testing
+  ],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+});
 
   // ✅ Global validation rules
   app.useGlobalPipes(
