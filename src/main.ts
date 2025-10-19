@@ -9,15 +9,18 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   const logger = new Logger('Bootstrap');
 
-  // ✅ Enable CORS for frontend
+  // ✅ Global API prefix
+  app.setGlobalPrefix('api');
+
+  // ✅ Enable CORS for frontend (GitHub Codespaces + local)
   app.enableCors({
-  origin: [
-    "https://ideal-system-wrjxv66vrwwphgwj6-3000.app.github.dev", // ✅ updated frontend
-    "http://localhost:3000", // optional for local testing
-  ],
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-});
+    origin: [
+      "https://ideal-system-wrjxv66vrwwphgwj6-3000.app.github.dev", // frontend
+      "http://localhost:3000", // local testing
+    ],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  });
 
   // ✅ Global validation rules
   app.useGlobalPipes(
@@ -31,7 +34,7 @@ async function bootstrap() {
   // ✅ Global error handler
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  // ✅ Swagger config
+  // ✅ Swagger configuration
   const config = new DocumentBuilder()
     .setTitle('Ochiga Smart Home & Estate API')
     .setDescription('API documentation for Ochiga backend services')
@@ -58,7 +61,10 @@ async function bootstrap() {
   const port = process.env.PORT || 4000;
   await app.listen(port, '0.0.0.0');
 
-  logger.log(`🚀 Ochiga Backend running on: ${await app.getUrl()}`);
-  logger.log(`📖 Swagger Docs available at: ${await app.getUrl()}/api`);
+  const url = await app.getUrl();
+  logger.log(`🚀 Ochiga Backend running on: ${url}`);
+  logger.log(`📖 Swagger Docs available at: ${url}/api`);
+  logger.log(`✅ Health Check available at: ${url}/api/health`);
 }
+
 bootstrap();
