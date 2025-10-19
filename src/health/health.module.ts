@@ -1,11 +1,13 @@
-// src/health/health.module.ts
-import { Module } from '@nestjs/common';
-import { TerminusModule } from '@nestjs/terminus';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { HealthController } from './health.controller';
+import { Controller, Get } from '@nestjs/common';
 
-@Module({
-  imports: [TerminusModule, TypeOrmModule],
-  controllers: [HealthController],
-})
-export class HealthModule {}
+@Controller('api/health')
+export class HealthController {
+  @Get()
+  getHealth() {
+    return {
+      status: 'ok',
+      message: 'Ochiga backend is alive ✅',
+      timestamp: new Date().toISOString(),
+    };
+  }
+}
