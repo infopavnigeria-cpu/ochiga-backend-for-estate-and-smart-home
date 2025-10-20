@@ -12,11 +12,12 @@ async function bootstrap() {
   // ✅ Global API prefix
   app.setGlobalPrefix('api');
 
-  // ✅ Enable CORS for frontend (GitHub Codespaces + local)
+  // ✅ Enable CORS for frontend (GitHub Codespaces + local + production)
   app.enableCors({
     origin: [
-      "https://ideal-system-wrjxv66vrwwphgwj6-3000.app.github.dev", // frontend
-      "http://localhost:3000", // local testing
+      "https://ideal-system-wrjxv66vrwwphgwj6-3000.app.github.dev", // frontend (Codespaces)
+      "http://localhost:3000", // local
+      "*", // allow all origins in AWS for now — adjust later if needed
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
@@ -57,8 +58,8 @@ async function bootstrap() {
     swaggerOptions: { persistAuthorization: true },
   });
 
-  // ✅ Works locally & in Codespaces
-  const port = process.env.PORT || 4000;
+  // ✅ Use AWS Elastic Beanstalk’s default port (8080)
+  const port = process.env.PORT || 8080;
   await app.listen(port, '0.0.0.0');
 
   const url = await app.getUrl();
