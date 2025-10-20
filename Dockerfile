@@ -14,8 +14,9 @@ COPY . .
 # Build NestJS app
 RUN npm run build
 
-# Expose backend port
-EXPOSE 3000
+# Tell EB we're listening on port 8080
+ENV PORT=8080
+EXPOSE 8080
 
 # Start in production mode
 CMD ["npm", "run", "start:prod"]
