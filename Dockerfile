@@ -1,24 +1,29 @@
-# Use Node.js 20 LTS Alpine
+# Use Node.js 20 LTS on Alpine
 FROM node:20-alpine
 
-# Install build tools required by better-sqlite3
+# Install dependencies required for better-sqlite3 and NestJS build
 RUN apk add --no-cache python3 make g++ sqlite
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files and install deps
+# Copy package.json and package-lock.json first (for efficient Docker caching)
 COPY package*.json ./
-RUN npm install --force --frozen-lockfile
 
-# Copy all source files
+# Install dependencies (avoid --force, and lock deps properly)
+RUN npm ci || npm install
+
+# Copy source code
 COPY . .
 
-# Build NestJS app
+# Build the NestJS app
 RUN npm run build
 
-# Expose port (use 4000 to match main.ts)
+# Set NODE_ENV to production
+ENV NODE_ENV=production
+
+# Expose the port your NestJS app runs on
 EXPOSE 4000
 
-# Start app
-CMD ["npm", "run", "start:prod"]
+# Start the production build
+CMD ["node", "dist/main.js"]
