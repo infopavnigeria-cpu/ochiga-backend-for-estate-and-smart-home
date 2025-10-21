@@ -11,7 +11,7 @@ export class IotMqttService {
 
   constructor() {
     const endpoint = process.env.AWS_IOT_ENDPOINT;
-    const certDir = path.resolve(__dirname, '../../certs');
+    const certDir = path.resolve(process.cwd(), 'certs'); // <-- root-level certs folder
 
     const options = {
       host: endpoint,
