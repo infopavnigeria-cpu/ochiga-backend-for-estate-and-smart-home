@@ -19,11 +19,11 @@ export class AwsIotService {
 
     this.device.on('connect', () => {
       this.logger.log('✅ Connected to AWS IoT Core');
-      this.device.subscribe('ochiga/test/topic');
+      this.device.subscribe('ochiga/messages');
     });
 
     this.device.on('message', (topic, payload) => {
-      this.logger.log(`📩 Message from ${topic}: ${payload.toString()}`);
+      this.logger.log(`📩 Received from ${topic}: ${payload.toString()}`);
     });
 
     this.device.on('error', (error) => {
@@ -31,9 +31,16 @@ export class AwsIotService {
     });
   }
 
+  async publishMessage(topic: string, payload: any): Promise<void> {
+    this.device.publish(topic, JSON.stringify(payload));
+    this.logger.log(`📤 Published to ${topic}: ${JSON.stringify(payload)}`);
+  }
+
   async publishTestMessage(): Promise<void> {
-    const payload = { message: 'Hello from Ochiga Backend!', timestamp: new Date().toISOString() };
-    this.device.publish('ochiga/test/topic', JSON.stringify(payload));
-    this.logger.log(`📤 Published: ${JSON.stringify(payload)}`);
+    const payload = {
+      message: 'Hello from Ochiga Backend!',
+      timestamp: new Date().toISOString(),
+    };
+    await this.publishMessage('ochiga/test/topic', payload);
   }
 }
