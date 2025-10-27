@@ -122,7 +122,7 @@ export class TokenService {
   }): string {
     const secret = process.env.JWT_INVITE_SECRET || process.env.JWT_SECRET || 'invite-secret';
     const expiresIn = process.env.JWT_INVITE_EXPIRY || '7d';
-    return this.jwtService.sign(payload, { secret, expiresIn });
+    return this.jwtService.sign(payload, { secret, expiresIn: (expiresIn as any) });
   }
 
   async validateInviteToken(raw: string): Promise<{
