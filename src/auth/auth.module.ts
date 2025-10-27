@@ -17,7 +17,7 @@ import { RefreshToken } from './entities/refresh-token.entity';
     JwtModule.register({
       global: true,
       secret: process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET,
-      signOptions: { expiresIn: process.env.JWT_ACCESS_EXPIRY || '15m' },
+      signOptions: { expiresIn: (process.env.JWT_ACCESS_EXPIRY as any) || '15m' },
     }),
     UserModule,
   ],
