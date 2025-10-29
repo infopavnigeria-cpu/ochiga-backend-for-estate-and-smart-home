@@ -4,6 +4,7 @@ services:
   postgres:
     image: postgres:15
     container_name: ochiga_postgres
+    restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -13,15 +14,26 @@ services:
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
 
-  # Optional: your backend service (for local dev)
   backend:
-    build: ./ochiga-backend-for-estate-and-smart-home
+    build: .
     container_name: ochiga_backend
     restart: always
     depends_on:
       - postgres
+    ports:
+      - "4000:4000"
     environment:
+      NODE_ENV: production
       DB_TYPE: postgres
-      DB_HOST: postgres
+      DB_HOST: postgres         # 👈 same name as the service
       DB_PORT: 5432
-      DB_USERNAME
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: estate_app
+      JWT_SECRET: supersecret123
+      AWS_IOT_ENDPOINT: a3m9h28ikfvc7r-ats.iot.us-east-1.amazonaws.com
+      AWS_IOT_PRIVATE_KEY_PATH: certs/private.pem.key
+      AWS_IOT_CERT_PATH: certs/certificate.pem.crt
+      AWS_IOT_ROOT_CA_PATH: certs/AmazonRootCA1.pem
+    volumes:
+      - .:/app
