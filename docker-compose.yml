@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   postgres:
@@ -12,7 +12,8 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+      # ✅ Use a named volume instead of a folder to avoid permission issues
+      - pgdata:/var/lib/postgresql/data
 
   backend:
     build: .
@@ -25,7 +26,7 @@ services:
     environment:
       NODE_ENV: production
       DB_TYPE: postgres
-      DB_HOST: postgres         # 👈 same name as the service
+      DB_HOST: postgres       # 👈 same as the service name
       DB_PORT: 5432
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
@@ -37,3 +38,7 @@ services:
       AWS_IOT_ROOT_CA_PATH: certs/AmazonRootCA1.pem
     volumes:
       - .:/app
+
+volumes:
+  # ✅ Named volume prevents local folder permission errors
+  pgdata:
