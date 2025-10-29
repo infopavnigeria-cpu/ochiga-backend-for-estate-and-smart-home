@@ -6,9 +6,11 @@ RUN apt-get update && apt-get install -y python3 make g++ sqlite3 && rm -rf /var
 
 WORKDIR /app
 
-# Copy dependency files and install
+# Copy dependency files and install (include devDependencies for build)
 COPY package*.json ./
-RUN npm install --force --frozen-lockfile
+
+# Install ALL dependencies (not just production)
+RUN npm install --legacy-peer-deps
 
 # Copy app files
 COPY . .
