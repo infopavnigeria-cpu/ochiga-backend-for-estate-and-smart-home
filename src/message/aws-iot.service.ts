@@ -34,7 +34,9 @@ export class AwsIotService implements OnModuleInit {
         this.logger.error(`❌ AWS IoT Error: ${error.message}`);
       });
     } catch (error) {
-      this.logger.error(`⚠️ AWS IoT initialization failed: ${error.message}`);
+      const message =
+        error instanceof Error ? error.message : JSON.stringify(error);
+      this.logger.error(`⚠️ AWS IoT initialization failed: ${message}`);
     }
   }
 
