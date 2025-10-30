@@ -10,10 +10,8 @@ import {
 import { User } from '../../user/entities/user.entity';
 import { DeviceLog } from './device-log.entity';
 
-// ✅ Force fallback if DB_TYPE not loaded early enough
-if (!process.env.DB_TYPE) {
-  process.env.DB_TYPE = 'sqlite';
-}
+// 🩹 Force-load DB type safely
+const dbType = (process.env.DB_TYPE || 'sqlite').toLowerCase();
 
 @Entity()
 export class Device {
@@ -32,13 +30,9 @@ export class Device {
   @Column({ default: false })
   isEstateLevel!: boolean;
 
-  // ✅ 100% safe JSON column type selection
+  // ✅ Safe JSON type switch
   @Column({
-    type:
-      process.env.DB_TYPE &&
-      process.env.DB_TYPE.toLowerCase().includes('post')
-        ? 'jsonb'
-        : 'simple-json',
+    type: dbType.includes('post') ? 'jsonb' : 'simple-json',
     nullable: true,
   })
   metadata!: Record<string, any> | null;
