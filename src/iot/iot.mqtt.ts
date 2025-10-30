@@ -1,4 +1,3 @@
-// src/iot/iot.mqtt.ts
 import { Injectable, Logger } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -7,56 +6,51 @@ import { IotGateway } from './iot.gateway';
 
 @Injectable()
 export class IotMqttService {
-  private client: MqttClient;
+  private client?: MqttClient;
   private readonly logger = new Logger(IotMqttService.name);
 
   constructor(private readonly gateway: IotGateway) {
     const endpoint = process.env.AWS_IOT_ENDPOINT;
-    if (!endpoint) throw new Error('❌ AWS_IOT_ENDPOINT not set in environment variables');
-
+    const brokerUrl = process.env.MQTT_BROKER_URL || 'mqtt://broker.hivemq.com:1883';
     const certDir = path.resolve(process.cwd(), 'certs');
-    const url = `mqtts://${endpoint}:8883`;
 
-    const options = {
-      key: fs.readFileSync(path.join(certDir, 'private.pem.key')),
-      cert: fs.readFileSync(path.join(certDir, 'certificate.pem.crt')),
-      ca: fs.readFileSync(path.join(certDir, 'AmazonRootCA1.pem')),
-      rejectUnauthorized: true,
-      reconnectPeriod: 5000, // 🔁 Auto-reconnect every 5s
-      clientId: `ochiga-backend-${Math.floor(Math.random() * 10000)}`,
-    };
+    // Use AWS IoT if certs exist, else fallback
+    const hasCerts = fs.existsSync(path.join(certDir, 'private.pem.key'));
+    const url = hasCerts ? `mqtts://${endpoint}:8883` : brokerUrl;
 
-    this.logger.log('🚀 Connecting to AWS IoT Core...');
+    const options = hasCerts
+      ? {
+          key: fs.readFileSync(path.join(certDir, 'private.pem.key')),
+          cert: fs.readFileSync(path.join(certDir, 'certificate.pem.crt')),
+          ca: fs.readFileSync(path.join(certDir, 'AmazonRootCA1.pem')),
+          rejectUnauthorized: true,
+          reconnectPeriod: 5000,
+          clientId: `ochiga-${Math.floor(Math.random() * 10000)}`,
+        }
+      : { reconnectPeriod: 3000, clientId: `ochiga-local-${Math.random()}` };
+
+    this.logger.log(`🚀 Connecting to MQTT broker: ${url}`);
     this.client = connect(url, options);
 
     this.client.on('connect', () => {
-      this.logger.log('✅ Securely connected to AWS IoT Core');
+      this.logger.log('✅ Connected to MQTT broker');
       this.subscribeToTopics();
     });
 
-    this.client.on('reconnect', () => {
-      this.logger.warn('♻️ Reconnecting to AWS IoT Core...');
-    });
-
-    this.client.on('close', () => {
-      this.logger.warn('⚠️ MQTT connection closed');
-    });
-
     this.client.on('error', (err) => {
-      this.logger.error(`❌ AWS IoT MQTT error: ${err.message}`);
+      this.logger.error(`❌ MQTT error: ${err.message}`);
     });
 
     this.client.on('message', (topic, payload) => {
       try {
         const message = JSON.parse(payload.toString());
         this.handleIncomingMessage(topic, message);
-      } catch (err) {
-        this.logger.error(`⚠️ Invalid message on ${topic}: ${payload.toString()}`);
+      } catch {
+        this.logger.warn(`⚠️ Invalid JSON payload on ${topic}`);
       }
     });
   }
 
-  /** ✅ Subscribe to important AWS IoT topics */
   private subscribeToTopics() {
     const topics = [
       'devices/+/status',
@@ -65,49 +59,34 @@ export class IotMqttService {
       'devices/+/discovery',
     ];
 
-    topics.forEach((topic) => {
-      this.client.subscribe(topic, (err) => {
-        if (err) {
-          this.logger.error(`❌ Failed to subscribe to ${topic}: ${err.message}`);
-        } else {
-          this.logger.log(`📡 Subscribed to ${topic}`);
-        }
-      });
-    });
+    topics.forEach((topic) =>
+      this.client?.subscribe(topic, (err) => {
+        if (err) this.logger.error(`❌ Failed to subscribe: ${topic}`);
+        else this.logger.log(`📡 Subscribed: ${topic}`);
+      }),
+    );
   }
 
-  /** ✅ Handle incoming device messages */
   private handleIncomingMessage(topic: string, message: any) {
-    this.logger.log(`📥 [MQTT] ${topic}: ${JSON.stringify(message)}`);
-
-    // Example topic: devices/livingroom-light/status
-    const match = topic.match(/^devices\/(.+?)\/(\w+)$/);
+    this.logger.debug(`📥 MQTT ${topic}: ${JSON.stringify(message)}`);
+    const match = topic.match(/^devices\/([^/]+)\/([^/]+)$/);
     if (!match) return;
 
     const [_, deviceId, eventType] = match;
-
-    // Broadcast to WebSocket clients
-    if (eventType === 'status' || eventType === 'telemetry') {
+    if (['status', 'telemetry'].includes(eventType))
       this.gateway.notifyDeviceUpdate({ deviceId, eventType, message });
-    }
-
-    // Handle device discovery
-    if (eventType === 'discovery') {
+    if (eventType === 'discovery')
       this.gateway.broadcast('deviceDiscovered', { deviceId, message });
-    }
   }
 
-  /** ✅ Generic publish function */
   publish(topic: string, message: any) {
-    if (!this.client.connected) {
-      this.logger.warn(`⚠️ MQTT not connected, skipping publish to ${topic}`);
-      return;
-    }
+    if (!this.client?.connected)
+      return this.logger.warn(`⚠️ MQTT not connected (skip publish to ${topic})`);
+
     this.client.publish(topic, JSON.stringify(message), { qos: 1 });
-    this.logger.log(`📤 Published to ${topic}: ${JSON.stringify(message)}`);
+    this.logger.verbose(`📤 Published ${topic}`);
   }
 
-  /** ✅ Device-specific commands */
   publishToggle(deviceId: string, isOn: boolean) {
     this.publish(`devices/${deviceId}/toggle`, { isOn });
   }
