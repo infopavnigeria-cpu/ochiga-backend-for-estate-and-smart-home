@@ -30,7 +30,11 @@ export class RefreshToken {
   createdAt!: Date;
 
   // ✅ FIXED: Compatible with PostgreSQL and SQLite
-  @Column({ name: 'expires_at', type: 'timestamp', nullable: true })
+  @Column({
+    name: 'expires_at',
+    type: process.env.DB_TYPE === 'postgres' ? 'timestamp' : 'datetime',
+    nullable: true,
+  })
   expiresAt?: Date | null;
 
   @Column({ default: false })
