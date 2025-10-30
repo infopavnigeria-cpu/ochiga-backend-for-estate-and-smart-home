@@ -1,4 +1,4 @@
-// src/main.ts
+import 'dotenv/config'; // ensure envs are loaded as early as possible
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -7,28 +7,28 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
   console.log('🟡 Starting NestJS App...');
+
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   console.log('🟢 AppModule created successfully.');
 
   const logger = new Logger('Bootstrap');
 
-  // ✅ Global API prefix
+  // Global API prefix (keeps health at /api/health)
   app.setGlobalPrefix('api');
 
-  // ✅ Enable CORS for frontend (GitHub Codespaces + local + production)
+  // Enable CORS (dev-friendly). Tighten this in production.
   app.enableCors({
     origin: [
-      "https://ideal-system-wrjxv66vrwwphgwj6-3000.app.github.dev",
-      "http://localhost:3000",
-      "*", // allow all origins (safe for dev)
+      process.env.FRONTEND_ORIGIN || 'http://localhost:3000',
+      'https://ideal-system-wrjxv66vrwwphgwj6-3000.app.github.dev',
     ],
     credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   });
 
   console.log('✅ CORS, validation, and filters setup complete.');
 
-  // ✅ Global validation rules
+  // Validation
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -37,10 +37,10 @@ async function bootstrap() {
     }),
   );
 
-  // ✅ Global error handler
+  // Global error filter (keep your custom one)
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  // ✅ Swagger configuration
+  // Swagger (optional in prod)
   const config = new DocumentBuilder()
     .setTitle('Ochiga Smart Home & Estate API')
     .setDescription('API documentation for Ochiga backend services')
@@ -55,15 +55,19 @@ async function bootstrap() {
     })
     .build();
 
-  console.log('⚙️ Generating Swagger documentation...');
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document, {
-    swaggerOptions: { persistAuthorization: true },
-  });
-  console.log('✅ Swagger ready.');
+  console.log('⚙️ Generating Swagger documentation (if needed)...');
+  try {
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api', app, document, {
+      swaggerOptions: { persistAuthorization: true },
+    });
+    console.log('✅ Swagger ready.');
+  } catch (err) {
+    console.warn('⚠️ Swagger generation failed (continuing):', err);
+  }
 
-  // ✅ Use AWS Elastic Beanstalk’s default port (8080) or fallback
-  const port = process.env.PORT || 4000;
+  // port (Heroku / EB / Docker friendly)
+  const port = Number(process.env.PORT) || 4000;
   console.log(`🚀 Starting HTTP listener on port ${port}...`);
 
   await app.listen(port, '0.0.0.0');
