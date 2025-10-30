@@ -13,7 +13,7 @@ import { DeviceLog } from './device-log.entity';
 @Entity()
 export class Device {
   @PrimaryGeneratedColumn('uuid')
-  id!: string; // ✅ UUID ensures globally unique IDs across estates/devices
+  id!: string; // ✅ Globally unique ID for each device
 
   @Column()
   name!: string; // e.g. "Living Room Light"
@@ -22,31 +22,36 @@ export class Device {
   type!: string; // e.g. "light", "thermostat", "camera"
 
   @Column({ default: false })
-  isOn!: boolean; // ✅ quick toggle state
+  isOn!: boolean; // ✅ current on/off state
 
   @Column({ default: false })
-  isEstateLevel!: boolean; // ✅ true = device belongs to estate, not a single user
+  isEstateLevel!: boolean; // ✅ true = shared across estate, not per-user
 
-  // ✅ Metadata: stores flexible configs per device
-  // - SQLite uses "simple-json" (JSON stored as TEXT)
-  // - Postgres uses "jsonb" (queryable JSON)
+  /**
+   * ✅ Metadata column
+   * Automatically selects correct data type based on environment.
+   * - Uses 'jsonb' if running on Postgres
+   * - Uses 'simple-json' if SQLite (or fallback mode)
+   */
   @Column({
-    type: process.env.DB_TYPE === 'postgres' ? 'jsonb' : 'simple-json',
+    type: process.env.DB_TYPE?.toLowerCase().includes('post')
+      ? 'jsonb'
+      : 'simple-json',
     nullable: true,
   })
   metadata!: Record<string, any> | null;
 
-  // ✅ Relation: a device may belong to a user (or null if estate-level)
+  // ✅ Device belongs to a user (optional)
   @ManyToOne(() => User, (user) => user.devices, {
     onDelete: 'CASCADE',
     nullable: true,
   })
   owner!: User | null;
 
-  // ✅ Logs: one device can have many log entries (history of actions/events)
+  // ✅ Device can have many logs
   @OneToMany(() => DeviceLog, (log) => log.device, { cascade: true })
   logs!: DeviceLog[];
 
   @CreateDateColumn()
-  createdAt!: Date; // ✅ auto-set when device is created
+  createdAt!: Date; // ✅ Auto-set when created
 }
