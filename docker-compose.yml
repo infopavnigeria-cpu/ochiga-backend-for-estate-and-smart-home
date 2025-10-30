@@ -12,7 +12,6 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      # ✅ Use a named volume instead of a folder to avoid permission issues
       - pgdata:/var/lib/postgresql/data
 
   backend:
@@ -23,22 +22,12 @@ services:
       - postgres
     ports:
       - "4000:4000"
-    environment:
-      NODE_ENV: production
-      DB_TYPE: postgres
-      DB_HOST: postgres       # 👈 same as the service name
-      DB_PORT: 5432
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgres
-      DB_DATABASE: estate_app
-      JWT_SECRET: supersecret123
-      AWS_IOT_ENDPOINT: a3m9h28ikfvc7r-ats.iot.us-east-1.amazonaws.com
-      AWS_IOT_PRIVATE_KEY_PATH: certs/private.pem.key
-      AWS_IOT_CERT_PATH: certs/certificate.pem.crt
-      AWS_IOT_ROOT_CA_PATH: certs/AmazonRootCA1.pem
+    env_file:
+      - .env
     volumes:
       - .:/app
+      - /app/node_modules
+    command: npm run start:prod
 
 volumes:
-  # ✅ Named volume prevents local folder permission errors
   pgdata:
