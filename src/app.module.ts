@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import * as path from 'path';
+import * as net from 'net';
 
 // ✅ Core Feature Modules
 import { AuthModule } from './auth/auth.module';
@@ -19,7 +20,7 @@ import { UtilitiesModule } from './utilities/utilities.module';
 import { CommunityModule } from './community/community.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { HealthModule } from './health/health.module';
-import { MessageModule } from './message/message.module'; // ✅ Added this line
+import { MessageModule } from './message/message.module';
 
 // ✅ Global Guards
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
@@ -30,18 +31,34 @@ import { RolesGuard } from './auth/roles.guard';
     // ✅ Environment Config
     ConfigModule.forRoot({ isGlobal: true }),
 
-    // ✅ Database Configuration
+    // ✅ Smart Database Config (Auto-detect)
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => {
-        const dbType = config.get<string>('DB_TYPE', 'better-sqlite3');
+        const host = config.get<string>('DB_HOST', 'postgres');
+        const port = parseInt(config.get<string>('DB_PORT', '5432'), 10);
 
-        if (dbType === 'postgres') {
+        // 🧠 Helper to check if Postgres is reachable (for Docker)
+        const isPostgresAvailable = await new Promise<boolean>((resolve) => {
+          const socket = new net.Socket();
+          socket
+            .setTimeout(1000)
+            .once('connect', () => {
+              socket.destroy();
+              resolve(true);
+            })
+            .once('error', () => resolve(false))
+            .once('timeout', () => resolve(false))
+            .connect(port, host);
+        });
+
+        if (isPostgresAvailable) {
+          console.log('✅ Using PostgreSQL (Docker mode)');
           return {
             type: 'postgres' as const,
-            host: config.get<string>('DB_HOST', 'localhost'),
-            port: parseInt(config.get<string>('DB_PORT', '5432'), 10),
+            host,
+            port,
             username: config.get<string>('DB_USERNAME', 'postgres'),
             password: config.get<string>('DB_PASSWORD', 'postgres'),
             database: config.get<string>('DB_DATABASE', 'estate_app'),
@@ -50,26 +67,14 @@ import { RolesGuard } from './auth/roles.guard';
           };
         }
 
-        if (dbType === 'sqlite') {
-          return {
-            type: 'sqlite' as const,
-            database: path.resolve(
-              __dirname,
-              '..',
-              config.get<string>('DB_DATABASE', 'db.sqlite'),
-            ),
-            entities: [path.join(__dirname, '**', '*.entity.{ts,js}')],
-            synchronize: true,
-          };
-        }
-
-        // ✅ Default: better-sqlite3 (faster local DB)
+        // ⚙️ Fallback to local SQLite
+        console.log('💾 Using SQLite (Local Dev mode)');
         return {
           type: 'better-sqlite3' as const,
           database: path.resolve(
             __dirname,
             '..',
-            config.get<string>('DB_DATABASE', 'db.sqlite'),
+            config.get<string>('SQLITE_PATH', './data/estate.sqlite'),
           ),
           entities: [path.join(__dirname, '**', '*.entity.{ts,js}')],
           synchronize: true,
@@ -91,10 +96,9 @@ import { RolesGuard } from './auth/roles.guard';
     CommunityModule,
     NotificationsModule,
     HealthModule,
-    MessageModule, // ✅ Registered here
+    MessageModule,
   ],
 
-  // ✅ Apply Global Guards
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
