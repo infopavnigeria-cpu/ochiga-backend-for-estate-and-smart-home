@@ -1,11 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-
-// ✅ Import the clean database config helper
 import { getDatabaseConfig } from './config/database.config';
 
-// Feature modules
+// ✅ Feature modules
 import { AuthModule } from './auth/auth.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { UserModule } from './user/user.module';
@@ -20,24 +18,29 @@ import { CommunityModule } from './community/community.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { HealthModule } from './health/health.module';
 import { MessageModule } from './message/message.module';
+import { IotModule } from './iot/iot.module'; // 👈 added IoT module import
 
-// Guards
+// ✅ Global Guards
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { RolesGuard } from './auth/roles.guard';
 
 @Module({
   imports: [
-    // Global environment configuration
+    // 🌍 Global environment config
     ConfigModule.forRoot({ isGlobal: true }),
 
-    // ✅ Simplified TypeORM setup using helper
+    // 🗄️ Database connection using helper
     TypeOrmModule.forRootAsync({
-      useFactory: getDatabaseConfig,
       inject: [ConfigService],
+      useFactory: async () => ({
+        ...getDatabaseConfig(),
+        autoLoadEntities: true, // 👈 ensures all entities (like Device) auto-load
+        entities: [__dirname + '/**/*.entity{.ts,.js}'], // 👈 scan all entity files
+      }),
     }),
 
-    // ✅ Feature Modules
+    // 🧩 Feature Modules
     AuthModule,
     DashboardModule,
     UserModule,
@@ -52,10 +55,11 @@ import { RolesGuard } from './auth/roles.guard';
     NotificationsModule,
     HealthModule,
     MessageModule,
+    IotModule, // 👈 added here to register Device + DeviceLog entities
   ],
 
   providers: [
-    // ✅ Global guards for authentication & roles
+    // 🛡️ Global guards
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
   ],
