@@ -18,7 +18,7 @@ import { CommunityModule } from './community/community.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { HealthModule } from './health/health.module';
 import { MessageModule } from './message/message.module';
-import { IotModule } from './iot/iot.module'; // 👈 added IoT module import
+import { IotModule } from './iot/iot.module'; // 👈 Added IoT module import
 
 // ✅ Global Guards
 import { APP_GUARD } from '@nestjs/core';
@@ -30,14 +30,17 @@ import { RolesGuard } from './auth/roles.guard';
     // 🌍 Global environment config
     ConfigModule.forRoot({ isGlobal: true }),
 
-    // 🗄️ Database connection using helper
+    // 🗄️ Database connection using async helper
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: async () => ({
-        ...getDatabaseConfig(),
-        autoLoadEntities: true, // 👈 ensures all entities (like Device) auto-load
-        entities: [__dirname + '/**/*.entity{.ts,.js}'], // 👈 scan all entity files
-      }),
+      useFactory: async () => {
+        const dbConfig = await getDatabaseConfig(); // ✅ MUST await async config
+        return {
+          ...dbConfig,
+          autoLoadEntities: true, // ✅ auto-detect all entities across modules
+          entities: [__dirname + '/**/*.entity{.ts,.js}'], // ✅ ensures all entity files load
+        };
+      },
     }),
 
     // 🧩 Feature Modules
@@ -55,7 +58,7 @@ import { RolesGuard } from './auth/roles.guard';
     NotificationsModule,
     HealthModule,
     MessageModule,
-    IotModule, // 👈 added here to register Device + DeviceLog entities
+    IotModule, // 👈 Added to register Device + DeviceLog entities
   ],
 
   providers: [
