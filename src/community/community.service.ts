@@ -1,4 +1,3 @@
-// src/community/community.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -6,6 +5,7 @@ import { Post } from './entities/post.entity';
 import { Group } from './entities/group.entity';
 import { Comment } from './entities/comment.entity';
 import { Message } from './entities/message.entity';
+import { AiAgent } from '../ai/ai.agent';
 
 @Injectable()
 export class CommunityService {
@@ -14,6 +14,7 @@ export class CommunityService {
     @InjectRepository(Group) private groupRepo: Repository<Group>,
     @InjectRepository(Comment) private commentRepo: Repository<Comment>,
     @InjectRepository(Message) private messageRepo: Repository<Message>,
+    private readonly aiAgent: AiAgent, // 🧠 Injected AI brain
   ) {}
 
   // Posts
@@ -73,5 +74,19 @@ export class CommunityService {
       ],
       order: { createdAt: 'ASC' },
     });
+  }
+
+  // 🧠 AI Feature: Summarize feedback, posts, and sentiment
+  async summarizeCommunityFeedback(feedback: any[]) {
+    const prompt = `Summarize community discussions and highlight positive/negative sentiment:
+    ${JSON.stringify(feedback, null, 2)}`;
+    return await this.aiAgent.queryExternalAgent(prompt, feedback);
+  }
+
+  // 🧠 AI Feature: Detect trending topics or potential community conflicts
+  async detectCommunityTrends(posts: any[]) {
+    const prompt = `Analyze community posts to identify trending topics, shared concerns, and possible disputes:
+    ${JSON.stringify(posts, null, 2)}`;
+    return await this.aiAgent.queryExternalAgent(prompt, posts);
   }
 }
