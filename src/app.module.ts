@@ -1,4 +1,5 @@
-import { TypeOrmModule, DataSource } from '@nestjs/typeorm';
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { getDatabaseConfig } from './config/database.config';
 
@@ -17,7 +18,7 @@ import { CommunityModule } from './community/community.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { HealthModule } from './health/health.module';
 import { MessageModule } from './message/message.module';
-import { IotModule } from './iot/iot.module';
+import { IotModule } from './iot/iot.module'; // 👈 Added IoT module import
 
 // ✅ Global Guards
 import { APP_GUARD } from '@nestjs/core';
@@ -26,15 +27,20 @@ import { RolesGuard } from './auth/roles.guard';
 
 @Module({
   imports: [
+    // 🌍 Global environment config
     ConfigModule.forRoot({ isGlobal: true }),
 
+    // 🗄️ Database connection using async helper
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: async () => ({
-        ...(await getDatabaseConfig()),
-        autoLoadEntities: true,
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      }),
+      useFactory: async () => {
+        const dbConfig = await getDatabaseConfig(); // ✅ MUST await async config
+        return {
+          ...dbConfig,
+          autoLoadEntities: true, // ✅ auto-detect all entities across modules
+          entities: [__dirname + '/**/*.entity{.ts,.js}'], // ✅ ensures all entity files load
+        };
+      },
     }),
 
     // 🧩 Feature Modules
@@ -52,35 +58,21 @@ import { RolesGuard } from './auth/roles.guard';
     NotificationsModule,
     HealthModule,
     MessageModule,
-    IotModule,
+    IotModule, // 👈 Added to register Device + DeviceLog entities
   ],
 
   providers: [
+    // 🛡️ Global guards
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
   ],
 })
-export class AppModule implements OnModuleInit {
+export class AppModule {
   static dbType: 'postgres' | 'sqlite';
 
-  constructor(
-    private readonly config: ConfigService,
-    private readonly dataSource: DataSource,
-  ) {
+  constructor(private readonly config: ConfigService) {
     AppModule.dbType = (config.get<string>('DB_TYPE') || 'sqlite').toLowerCase() as
       | 'postgres'
       | 'sqlite';
-  }
-
-  async onModuleInit() {
-    const entities = this.dataSource.entityMetadatas;
-    console.log('🚀 --- Ochiga Smart Backend Boot Summary ---');
-    console.log(`📦 Database Type: ${AppModule.dbType.toUpperCase()}`);
-    console.log(`🧩 Registered Entities: ${entities.length}`);
-    console.log(
-      '🔗 Entities:',
-      entities.map((e: any) => e.name).join(', ') || 'None found',
-    );
-    console.log('✅ System initialized and ready to serve requests.\n');
   }
 }
