@@ -1,28 +1,24 @@
+import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
-import { Logger } from '@nestjs/common';
 
-/**
- * AiAgent
- * Handles external AI queries (e.g., to OpenAI API)
- * for intelligent reasoning, suggestions, and automation decisions.
- */
+@Injectable() // 👈 ensures Nest can inject it properly
 export class AiAgent {
   private readonly logger = new Logger(AiAgent.name);
 
   constructor(private readonly http: HttpService) {}
 
   /**
-   * Sends a prompt to the external AI model (like OpenAI GPT-4o-mini)
-   * and returns the assistant’s textual response.
-   *
-   * @param input - The prompt or user query
-   * @param context - Optional metadata/context for better reasoning
+   * Sends a prompt to the external AI model (like GPT-4o-mini)
+   * and returns the AI-generated textual response.
    */
-  async queryExternalAgent(input: string, context?: Record<string, any>): Promise<string> {
+  async queryExternalAgent(
+    input: string,
+    context?: Record<string, any>,
+  ): Promise<string> {
     try {
       const payload = {
-        model: 'gpt-4o-mini', // You can adjust this to your preferred model
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
@@ -42,11 +38,10 @@ export class AiAgent {
         }),
       );
 
-      const result = response.data?.choices?.[0]?.message?.content || 'No response.';
+      const result = response.data?.choices?.[0]?.message?.content ?? 'No response.';
       this.logger.log(`🤖 Agent response: ${result}`);
       return result;
     } catch (err: unknown) {
-      // ✅ Type-safe error handling
       if (err instanceof Error) {
         this.logger.error(`❌ External AI connection failed: ${err.message}`);
       } else {
