@@ -20,7 +20,7 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       process.env.FRONTEND_ORIGIN || 'http://localhost:3000',
-      'https://ideal-system-wrjxv66vrwwphgwj6-3000.app.github.dev',
+      'https://paranormal-superstition-jjpw6xvj5gxvf5wqv-3000.app.github.dev',
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
