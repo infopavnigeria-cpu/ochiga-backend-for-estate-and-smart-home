@@ -80,7 +80,7 @@ export class AppModule implements OnModuleInit {
     console.log(`🧩 Registered Entities: ${entities.length}`);
     console.log(
       '🔗 Entities:',
-      entities.map((e) => e.name).join(', ') || 'None found',
+      entities.map((e: any) => e.name).join(', ') || 'None found',
     );
     console.log('✅ System initialized and ready to serve requests.\n');
   }
