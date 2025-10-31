@@ -1,6 +1,5 @@
-import {
-  Controller, Get, Post, Param, Body, UseGuards, Req,
-} from '@nestjs/common';
+// src/iot/iot.controller.ts
+import { Controller, Get, Post, Param, Body, UseGuards, Req } from '@nestjs/common';
 import { IotService } from './iot.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -51,5 +50,13 @@ export class IotController {
   @Roles(UserRole.RESIDENT, UserRole.MANAGER)
   getDeviceLogs(@Req() { user }: AuthenticatedRequest, @Param('id') id: string) {
     return this.iotService.getDeviceLogs(user.id, user.role, id);
+  }
+
+  // 🧠 NEW: Smart AI analysis endpoint
+  @Post('analyze')
+  @Roles(UserRole.MANAGER, UserRole.RESIDENT)
+  async analyzeIoT(@Body() sensorData: any) {
+    const reasoning = await this.iotService.analyzeWithAI(sensorData);
+    return { message: 'AI analyzed sensor data', reasoning };
   }
 }
