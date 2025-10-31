@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import * as path from 'path';
-import * as net from 'net';
+
+// ✅ Import the clean database config helper
+import { getDatabaseConfig } from './config/database.config';
 
 // Feature modules
 import { AuthModule } from './auth/auth.module';
@@ -27,65 +28,16 @@ import { RolesGuard } from './auth/roles.guard';
 
 @Module({
   imports: [
+    // Global environment configuration
     ConfigModule.forRoot({ isGlobal: true }),
 
+    // ✅ Simplified TypeORM setup using helper
     TypeOrmModule.forRootAsync({
+      useFactory: getDatabaseConfig,
       inject: [ConfigService],
-      useFactory: async (config: ConfigService) => {
-        const dbType = (config.get<string>('DB_TYPE') || 'sqlite').toLowerCase();
-        const host = config.get<string>('DB_HOST', 'postgres');
-        const port = Number(config.get<string>('DB_PORT', '5432'));
-        const username = config.get<string>('DB_USERNAME', 'postgres');
-        const password = config.get<string>('DB_PASSWORD', 'postgres');
-        const database = config.get<string>('DB_DATABASE', 'estate_app');
-
-        const tryPostgres = dbType === 'postgres' || dbType === 'auto';
-        if (tryPostgres) {
-          const isPostgresAvailable = await new Promise<boolean>((resolve) => {
-            const socket = new net.Socket();
-            socket
-              .setTimeout(1000)
-              .once('connect', () => {
-                socket.destroy();
-                resolve(true);
-              })
-              .once('error', () => resolve(false))
-              .once('timeout', () => resolve(false))
-              .connect(port, host);
-          });
-
-          if (isPostgresAvailable) {
-            console.log('✅ Using PostgreSQL (TypeOrm).');
-            return {
-              type: 'postgres' as const,
-              host,
-              port,
-              username,
-              password,
-              database,
-              entities: [path.join(__dirname, '**', '*.entity.{ts,js}')],
-              migrations: [path.join(__dirname, 'migrations/*.{ts,js}')],
-              synchronize: config.get<boolean>('SYNC_SCHEMA', false),
-              logging: true,
-            };
-          } else {
-            console.warn('⚠️ Postgres not reachable — falling back to SQLite.');
-          }
-        }
-
-        const sqlitePath = config.get<string>('SQLITE_PATH', './data/estate.sqlite');
-        console.log('💾 Using SQLite (TypeOrm) at', sqlitePath);
-        return {
-          type: 'sqlite' as const,
-          database: path.resolve(process.cwd(), sqlitePath),
-          entities: [path.join(__dirname, '**', '*.entity.{ts,js}')],
-          migrations: [path.join(__dirname, 'migrations/*.{ts,js}')],
-          synchronize: true,
-          logging: true,
-        };
-      },
     }),
 
+    // ✅ Feature Modules
     AuthModule,
     DashboardModule,
     UserModule,
@@ -103,13 +55,17 @@ import { RolesGuard } from './auth/roles.guard';
   ],
 
   providers: [
+    // ✅ Global guards for authentication & roles
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
   ],
 })
 export class AppModule {
   static dbType: 'postgres' | 'sqlite';
-  constructor(config: ConfigService) {
-    AppModule.dbType = (config.get<string>('DB_TYPE') || 'sqlite').toLowerCase() as 'postgres' | 'sqlite';
+
+  constructor(private readonly config: ConfigService) {
+    AppModule.dbType = (config.get<string>('DB_TYPE') || 'sqlite').toLowerCase() as
+      | 'postgres'
+      | 'sqlite';
   }
 }
