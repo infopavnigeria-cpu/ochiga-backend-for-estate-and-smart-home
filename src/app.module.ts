@@ -1,5 +1,6 @@
 import { Module, OnModuleInit, Logger } from '@nestjs/common';
-import { TypeOrmModule, DataSource } from '@nestjs/typeorm';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { DataSource, EntityMetadata } from 'typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { getDatabaseConfig } from './config/database.config';
 
