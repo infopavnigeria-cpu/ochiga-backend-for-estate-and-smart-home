@@ -22,7 +22,7 @@ services:
   backend:
     build: .
     container_name: ochiga_backend
-    restart: always
+    restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
@@ -30,17 +30,21 @@ services:
       - "4000:4000"
     env_file:
       - .env
-    volumes:
-      - .:/app
     working_dir: /app
-    command: npm run start:prod
+    command: npm run start:dev
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: postgres
       DB_PASSWORD: postgres
       DB_NAME: estate_app
+      PORT: 4000
+    volumes:
+      # Mount only your source for live development
+      - ./src:/app/src
+      # Persist node_modules inside container
+      - /app/node_modules
 
 volumes:
   pgdata:
