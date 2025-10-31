@@ -1,5 +1,5 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { Module, OnModuleInit, Logger } from '@nestjs/common';
+import { TypeOrmModule, DataSource } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { getDatabaseConfig } from './config/database.config';
 
@@ -18,28 +18,34 @@ import { CommunityModule } from './community/community.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { HealthModule } from './health/health.module';
 import { MessageModule } from './message/message.module';
-import { IotModule } from './iot/iot.module'; // 👈 Added IoT module import
+import { IotModule } from './iot/iot.module';
 
-// ✅ Global Guards
-import { APP_GUARD } from '@nestjs/core';
+// ✅ Global Guards & Filters
+import { APP_GUARD, APP_FILTER } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { RolesGuard } from './auth/roles.guard';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 @Module({
   imports: [
-    // 🌍 Global environment config
+    // 🌍 Load environment configuration globally
     ConfigModule.forRoot({ isGlobal: true }),
 
-    // 🗄️ Database connection using async helper
+    // 🗄️ Database Configuration (Dynamic)
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: async () => {
-        const dbConfig = await getDatabaseConfig(); // ✅ MUST await async config
-        return {
-          ...dbConfig,
-          autoLoadEntities: true, // ✅ auto-detect all entities across modules
-          entities: [__dirname + '/**/*.entity{.ts,.js}'], // ✅ ensures all entity files load
-        };
+        try {
+          const dbConfig = await getDatabaseConfig();
+          return {
+            ...dbConfig,
+            autoLoadEntities: true,
+            entities: [__dirname + '/**/*.entity{.ts,.js}'],
+          };
+        } catch (error) {
+          console.error('❌ Database configuration failed:', error);
+          throw error;
+        }
       },
     }),
 
@@ -58,21 +64,39 @@ import { RolesGuard } from './auth/roles.guard';
     NotificationsModule,
     HealthModule,
     MessageModule,
-    IotModule, // 👈 Added to register Device + DeviceLog entities
+    IotModule,
   ],
 
   providers: [
-    // 🛡️ Global guards
+    // 🛡️ Global Guards
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
+
+    // ⚙️ Global Exception Filter
+    { provide: APP_FILTER, useClass: HttpExceptionFilter },
   ],
 })
-export class AppModule {
+export class AppModule implements OnModuleInit {
+  private readonly logger = new Logger(AppModule.name);
   static dbType: 'postgres' | 'sqlite';
 
-  constructor(private readonly config: ConfigService) {
+  constructor(
+    private readonly config: ConfigService,
+    private readonly dataSource: DataSource,
+  ) {
     AppModule.dbType = (config.get<string>('DB_TYPE') || 'sqlite').toLowerCase() as
       | 'postgres'
       | 'sqlite';
+  }
+
+  async onModuleInit() {
+    const entities = this.dataSource.entityMetadatas;
+    this.logger.log('🚀 --- Ochiga Smart Backend Boot Summary ---');
+    this.logger.log(`📦 Database Type: ${AppModule.dbType.toUpperCase()}`);
+    this.logger.log(`🧩 Registered Entities: ${entities.length}`);
+    this.logger.log(
+      `🔗 Entities: ${entities.map((e) => e.name).join(', ') || 'None found'}`,
+    );
+    this.logger.log('✅ System initialized and ready to serve requests.\n');
   }
 }
