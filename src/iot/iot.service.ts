@@ -1,8 +1,10 @@
+// src/iot/iot.service.ts
 import {
   Injectable,
   ForbiddenException,
   NotFoundException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -13,15 +15,33 @@ import { Device } from './entities/device.entity';
 import { DeviceLog } from './entities/device-log.entity';
 import { IotGateway } from './iot.gateway';
 import { IotMqttService } from './iot.mqtt';
+import { AiAgent } from '../ai/ai.agent'; // 🧠 NEW AI IMPORT
 
 @Injectable()
 export class IotService {
+  private readonly logger = new Logger(IotService.name);
+
   constructor(
     @InjectRepository(Device) private readonly deviceRepo: Repository<Device>,
     @InjectRepository(DeviceLog) private readonly logRepo: Repository<DeviceLog>,
     private readonly gateway: IotGateway,
     private readonly mqtt: IotMqttService,
+    private readonly ai: AiAgent, // 🧠 Inject AI agent here
   ) {}
+
+  // 🧠 NEW: Smart reasoning for IoT data
+  async analyzeWithAI(sensorData: any): Promise<string> {
+    const prompt = `
+      You are Ochiga Smart Infrastructure AI.
+      Analyze this IoT sensor data and recommend the best control action.
+      Sensor Data:
+      ${JSON.stringify(sensorData, null, 2)}
+    `;
+
+    const aiResponse = await this.ai.queryExternalAgent(prompt, { type: 'iot-reasoning' });
+    this.logger.log(`🤖 AI Reasoning Result: ${aiResponse}`);
+    return aiResponse;
+  }
 
   async findUserDevices(userId: string) {
     return this.deviceRepo.find({ where: { owner: { id: userId } }, relations: ['owner'] });
@@ -92,10 +112,9 @@ export class IotService {
     device.metadata = metadata;
     await this.deviceRepo.save(device);
 
-    // ✅ FIXED: Pass device entity, and details as an object
     await this.logRepo.save(
       this.logRepo.create({
-        device, // ✅ not { id: device.id }
+        device,
         action: dto.action,
         details: {
           value: dto.value,
