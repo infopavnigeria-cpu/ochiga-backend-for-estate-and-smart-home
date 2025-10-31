@@ -10,9 +10,6 @@ import {
 import { User } from '../../user/entities/user.entity';
 import { DeviceLog } from './device-log.entity';
 
-// 🩹 Force-load DB type safely
-const dbType = (process.env.DB_TYPE || 'sqlite').toLowerCase();
-
 @Entity()
 export class Device {
   @PrimaryGeneratedColumn('uuid')
@@ -30,10 +27,18 @@ export class Device {
   @Column({ default: false })
   isEstateLevel!: boolean;
 
-  // ✅ Safe JSON type switch
+  /**
+   * ✅ Metadata column:
+   * Uses `simple-json` for SQLite and `jsonb` for PostgreSQL automatically.
+   * This ensures compatibility across local/dev/prod environments.
+   */
   @Column({
-    type: dbType.includes('post') ? 'jsonb' : 'simple-json',
+    type:
+      (process.env.DB_TYPE || '').toLowerCase().includes('postgres')
+        ? 'jsonb'
+        : 'simple-json',
     nullable: true,
+    default: () => (process.env.DB_TYPE?.includes('postgres') ? `'{}'` : null),
   })
   metadata!: Record<string, any> | null;
 
