@@ -10,6 +10,9 @@ import { UserModule } from '../user/user.module';
 import { TokenService } from './token.service';
 import { RefreshToken } from './entities/refresh-token.entity';
 
+// 👇 Import the AI Module
+import { AiModule } from '../ai/ai.module';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([RefreshToken]),
@@ -20,6 +23,7 @@ import { RefreshToken } from './entities/refresh-token.entity';
       signOptions: { expiresIn: (process.env.JWT_ACCESS_EXPIRY as any) || '15m' },
     }),
     UserModule,
+    AiModule, // ✅ Added AI module here
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, TokenService],
