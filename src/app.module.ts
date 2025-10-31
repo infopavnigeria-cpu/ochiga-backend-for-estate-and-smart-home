@@ -4,7 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as path from 'path';
 import * as net from 'net';
 
-// Feature modules (preserved)
+// Feature modules
 import { AuthModule } from './auth/auth.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { UserModule } from './user/user.module';
@@ -20,30 +20,25 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { HealthModule } from './health/health.module';
 import { MessageModule } from './message/message.module';
 
-// Global Guards (preserve your existing guards)
+// Guards
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { RolesGuard } from './auth/roles.guard';
 
 @Module({
   imports: [
-    // Load env early and globally
     ConfigModule.forRoot({ isGlobal: true }),
 
-    // TypeORM - async factory to decide between Postgres or SQLite
     TypeOrmModule.forRootAsync({
-      imports: [/* no additional imports needed */],
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => {
-        // canonical env names
         const dbType = (config.get<string>('DB_TYPE') || 'sqlite').toLowerCase();
         const host = config.get<string>('DB_HOST', 'postgres');
         const port = Number(config.get<string>('DB_PORT', '5432'));
-        const username = config.get<string>('DB_USERNAME', config.get<string>('DB_USER', 'postgres'));
-        const password = config.get<string>('DB_PASSWORD', config.get<string>('DB_PASS', 'postgres'));
-        const database = config.get<string>('DB_DATABASE', config.get<string>('DB_NAME', 'estate_app'));
+        const username = config.get<string>('DB_USERNAME', 'postgres');
+        const password = config.get<string>('DB_PASSWORD', 'postgres');
+        const database = config.get<string>('DB_DATABASE', 'estate_app');
 
-        // Try to detect Postgres availability (Docker friendly)
         const tryPostgres = dbType === 'postgres' || dbType === 'auto';
         if (tryPostgres) {
           const isPostgresAvailable = await new Promise<boolean>((resolve) => {
@@ -70,7 +65,7 @@ import { RolesGuard } from './auth/roles.guard';
               database,
               entities: [path.join(__dirname, '**', '*.entity.{ts,js}')],
               migrations: [path.join(__dirname, 'migrations/*.{ts,js}')],
-              synchronize: config.get<boolean>('SQLITE_SYNC', false) ? true : false, // keep false in prod
+              synchronize: config.get<boolean>('SYNC_SCHEMA', false),
               logging: true,
             };
           } else {
@@ -78,7 +73,6 @@ import { RolesGuard } from './auth/roles.guard';
           }
         }
 
-        // SQLite fallback (local dev)
         const sqlitePath = config.get<string>('SQLITE_PATH', './data/estate.sqlite');
         console.log('💾 Using SQLite (TypeOrm) at', sqlitePath);
         return {
@@ -86,13 +80,12 @@ import { RolesGuard } from './auth/roles.guard';
           database: path.resolve(process.cwd(), sqlitePath),
           entities: [path.join(__dirname, '**', '*.entity.{ts,js}')],
           migrations: [path.join(__dirname, 'migrations/*.{ts,js}')],
-          synchronize: config.get<boolean>('SQLITE_SYNC', true), // dev friendly default
+          synchronize: true,
           logging: true,
         };
       },
     }),
 
-    // Feature modules
     AuthModule,
     DashboardModule,
     UserModule,
@@ -110,9 +103,13 @@ import { RolesGuard } from './auth/roles.guard';
   ],
 
   providers: [
-    // keep guards global
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
   ],
 })
-export class AppModule {}
+export class AppModule {
+  static dbType: 'postgres' | 'sqlite';
+  constructor(config: ConfigService) {
+    AppModule.dbType = (config.get<string>('DB_TYPE') || 'sqlite').toLowerCase() as 'postgres' | 'sqlite';
+  }
+}
