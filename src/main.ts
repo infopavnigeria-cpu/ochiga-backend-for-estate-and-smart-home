@@ -63,14 +63,17 @@ async function bootstrap() {
     }
 
     const port = Number(process.env.PORT) || 4000;
-    console.log(`🚀 Starting HTTP listener on port ${port}...`);
+console.log(`🚀 Starting HTTP listener on port ${port}...`);
 
-    await app.listen(port, '0.0.0.0');
-    const url = await app.getUrl();
+// ✅ Perfect spot — all modules initialized, app configured, ready to launch
+console.log('🧩 All modules loaded. Launching server...');
 
-    logger.log(`🚀 Ochiga Backend running on: ${url}`);
-    logger.log(`📖 Swagger Docs: ${url}/api`);
-    logger.log(`✅ Health Check: ${url}/api/health`);
+await app.listen(port, '0.0.0.0');
+const url = await app.getUrl();
+
+logger.log(`🚀 Ochiga Backend running on: ${url}`);
+logger.log(`📖 Swagger Docs: ${url}/api`);
+logger.log(`✅ Health Check: ${url}/api/health`);
   } catch (error) {
     // 💥 This block catches silent DB startup errors and shows the cause
     console.error('❌ FATAL STARTUP ERROR!');
