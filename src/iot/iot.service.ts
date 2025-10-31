@@ -1,5 +1,8 @@
 import {
-  Injectable, ForbiddenException, NotFoundException, BadRequestException,
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -47,7 +50,10 @@ export class IotService {
   }
 
   async controlDevice(userId: string, role: UserRole, deviceId: string, dto: ControlDeviceDto) {
-    const device = await this.deviceRepo.findOne({ where: { id: deviceId as any }, relations: ['owner'] });
+    const device = await this.deviceRepo.findOne({
+      where: { id: deviceId as any },
+      relations: ['owner'],
+    });
     if (!device) throw new NotFoundException('Device not found');
 
     if (device.isEstateLevel && role !== UserRole.MANAGER)
@@ -58,44 +64,75 @@ export class IotService {
     const metadata: Record<string, any> = device.metadata || {};
 
     switch (dto.action) {
-      case 'on': device.isOn = true; break;
-      case 'off': device.isOn = false; break;
-      case 'set-temp': metadata.temp = dto.value; break;
-      case 'set-brightness': metadata.brightness = dto.value; break;
-      case 'set-speed': metadata.speed = dto.value; break;
-      case 'set-mode': metadata.mode = dto.mode ?? dto.value; break;
-      case 'custom': Object.assign(metadata, dto.payload); break;
-      default: throw new BadRequestException(`Unsupported action: ${dto.action}`);
+      case 'on':
+        device.isOn = true;
+        break;
+      case 'off':
+        device.isOn = false;
+        break;
+      case 'set-temp':
+        metadata.temp = dto.value;
+        break;
+      case 'set-brightness':
+        metadata.brightness = dto.value;
+        break;
+      case 'set-speed':
+        metadata.speed = dto.value;
+        break;
+      case 'set-mode':
+        metadata.mode = dto.mode ?? dto.value;
+        break;
+      case 'custom':
+        Object.assign(metadata, dto.payload);
+        break;
+      default:
+        throw new BadRequestException(`Unsupported action: ${dto.action}`);
     }
 
     device.metadata = metadata;
     await this.deviceRepo.save(device);
 
-    await this.logRepo.save(this.logRepo.create({
-      device: { id: device.id } as Device,
-      action: dto.action,
-      details: JSON.stringify({
-        value: dto.value,
-        payload: dto.payload,
-        timestamp: new Date().toISOString(),
+    // ✅ FIXED: Pass device entity, and details as an object
+    await this.logRepo.save(
+      this.logRepo.create({
+        device, // ✅ not { id: device.id }
+        action: dto.action,
+        details: {
+          value: dto.value,
+          payload: dto.payload,
+          timestamp: new Date().toISOString(),
+        },
       }),
-    }));
+    );
 
-    const payload = { id: device.id, name: device.name, isOn: device.isOn, metadata };
+    const payload = {
+      id: device.id,
+      name: device.name,
+      isOn: device.isOn,
+      metadata,
+    };
+
     this.gateway.broadcast('deviceUpdated', payload);
     this.mqtt.publishToggle(device.id.toString(), device.isOn);
     this.mqtt.publishMetadata(device.id.toString(), metadata);
+
     return payload;
   }
 
   async getDeviceLogs(userId: string, role: UserRole, deviceId: string) {
-    const device = await this.deviceRepo.findOne({ where: { id: deviceId as any }, relations: ['owner'] });
+    const device = await this.deviceRepo.findOne({
+      where: { id: deviceId as any },
+      relations: ['owner'],
+    });
     if (!device) throw new NotFoundException('Device not found');
     if (device.isEstateLevel && role !== UserRole.MANAGER)
       throw new ForbiddenException('Only managers can view estate-level device logs');
     if (!device.isEstateLevel && (!device.owner || device.owner.id !== userId))
       throw new ForbiddenException('You can only view your own device logs');
 
-    return this.logRepo.find({ where: { device: { id: deviceId } }, order: { createdAt: 'DESC' } });
+    return this.logRepo.find({
+      where: { device: { id: deviceId } },
+      order: { createdAt: 'DESC' },
+    });
   }
 }
