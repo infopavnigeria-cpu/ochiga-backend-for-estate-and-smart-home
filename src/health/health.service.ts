@@ -6,6 +6,7 @@ import { AiAgent } from '../ai/ai.agent';
 export class HealthService {
   constructor(private readonly aiAgent: AiAgent) {}
 
+  /** 🔹 AI-powered health analysis */
   async analyzeHealthStats(healthData: any) {
     const prompt = `Analyze user health data and provide insights:
     ${JSON.stringify(healthData)}`;
