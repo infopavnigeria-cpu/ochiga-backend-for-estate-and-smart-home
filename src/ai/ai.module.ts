@@ -1,12 +1,11 @@
+// src/ai/ai.module.ts
 import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
-import { AiService } from './ai.service';
-import { AiController } from './ai.controller';
+import { AiAgent } from './ai.agent';
 
 @Module({
   imports: [HttpModule],
-  providers: [AiService],
-  controllers: [AiController],
-  exports: [AiService],
+  providers: [AiAgent],
+  exports: [AiAgent], // <-- So other modules can use it
 })
 export class AiModule {}
