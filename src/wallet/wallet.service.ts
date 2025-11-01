@@ -12,7 +12,7 @@ export class WalletService {
     @InjectRepository(Wallet) private walletRepo: Repository<Wallet>,
     @InjectRepository(User) private userRepo: Repository<User>,
     @InjectRepository(Transaction) private txRepo: Repository<Transaction>,
-    private readonly aiAgent: AiAgent, // 🧠 Injected AI Agent
+    private readonly aiAgent: AiAgent, // 🧠 Injected AI brain
   ) {}
 
   /** 🔹 Get wallet by user ID */
@@ -105,6 +105,17 @@ export class WalletService {
     }
 
     return wallet;
+  }
+
+  /** 🔹 Get user wallet balance only (for Assistant integration) */
+  async getBalance(userId: string): Promise<{ balance: number; currency: string }> {
+    const wallet = await this.walletRepo.findOne({
+      where: { user: { id: userId } },
+      relations: ['user'],
+    });
+    if (!wallet) throw new NotFoundException('Wallet not found');
+
+    return { balance: wallet.balance, currency: wallet.currency };
   }
 
   // 🧠 AI Feature: Spending Pattern Analysis
