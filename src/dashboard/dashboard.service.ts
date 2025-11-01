@@ -8,8 +8,7 @@ export class DashboardService {
   constructor(private readonly aiAgent: AiAgent) {}
 
   /** 
-   * 🔹 Generates AI-assisted smart summary from system metrics 
-   * (Used for insights, admin analytics, etc.)
+   * 🔹 AI-assisted smart summary from system metrics 
    */
   async generateSmartSummary(systemMetrics: any) {
     const prompt = `You are an infrastructure performance analyst AI.
@@ -98,5 +97,28 @@ export class DashboardService {
     );
 
     return { message: 'Unknown role', user, aiNote };
+  }
+
+  /** 🔹 Simple estate-wide summary (for AssistantService) */
+  async getSummary() {
+    // Simulated aggregated metrics
+    const summaryData = {
+      residents: 128,
+      visitors: 42,
+      totalBalance: 547000,
+      openTickets: 9,
+      systemHealth: 'Optimal',
+    };
+
+    // Optional AI-generated insight
+    const prompt = `Summarize this estate dashboard data into a short, friendly sentence for a voice assistant:
+    ${JSON.stringify(summaryData, null, 2)}`;
+
+    const aiSummary = await this.aiAgent.queryExternalAgent(prompt, summaryData);
+
+    return {
+      ...summaryData,
+      aiSummary,
+    };
   }
 }
