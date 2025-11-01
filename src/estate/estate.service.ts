@@ -12,22 +12,30 @@ export class EstateService {
     @InjectRepository(Estate)
     private readonly estateRepository: Repository<Estate>,
 
-    // 🧠 Inject AI agent for analysis and summaries
+    // 🧠 AI Assistant for insight generation, summaries, and recommendations
     private readonly aiAgent: AiAgent,
   ) {}
 
-  // ✅ Create a new estate
+  // ✅ Create a new estate record
   async create(createEstateDto: CreateEstateDto): Promise<Estate> {
     const estate = this.estateRepository.create(createEstateDto);
-    return await this.estateRepository.save(estate);
+    const savedEstate = await this.estateRepository.save(estate);
+
+    // 🔹 Optional: Generate instant AI note upon creation
+    const aiNote = await this.aiAgent.queryExternalAgent(
+      `A new estate has been added. Provide a quick summary and improvement suggestion for record keeping.`,
+      savedEstate,
+    );
+
+    return { ...savedEstate, aiNote } as any;
   }
 
-  // ✅ Get all estates
+  // ✅ Retrieve all estates
   async findAll(): Promise<Estate[]> {
     return await this.estateRepository.find();
   }
 
-  // ✅ Get one estate by ID
+  // ✅ Retrieve one estate by ID
   async findOne(id: string): Promise<Estate> {
     const estate = await this.estateRepository.findOne({ where: { id } });
     if (!estate) {
@@ -36,30 +44,50 @@ export class EstateService {
     return estate;
   }
 
-  // ✅ Update estate by ID
+  // ✅ Update estate details
   async update(id: string, updateEstateDto: UpdateEstateDto): Promise<Estate> {
     const estate = await this.findOne(id);
     Object.assign(estate, updateEstateDto);
-    return await this.estateRepository.save(estate);
+    const updatedEstate = await this.estateRepository.save(estate);
+
+    // 🔹 Generate AI-based improvement insights post-update
+    const prompt = `
+      Analyze the recent update made to the following estate and suggest operational or infrastructural improvements:
+
+      ${JSON.stringify(updatedEstate, null, 2)}
+    `;
+
+    const aiInsight = await this.aiAgent.queryExternalAgent(prompt, updatedEstate);
+    return { ...updatedEstate, aiInsight } as any;
   }
 
-  // ✅ Remove estate by ID
-  async remove(id: string): Promise<void> {
+  // ✅ Delete an estate by ID
+  async remove(id: string): Promise<{ message: string }> {
     const estate = await this.findOne(id);
     await this.estateRepository.remove(estate);
+
+    // Optional AI log / feedback
+    const aiNote = await this.aiAgent.queryExternalAgent(
+      `An estate record was deleted. Provide a brief note on what data retention policies should apply here.`,
+      estate,
+    );
+
+    return { message: `Estate ${id} deleted successfully.`, aiNote };
   }
 
-  // 🧠 ---------------- AI-Powered Insights ---------------- //
+  // 🧠 ------------------- AI-Powered Features ------------------- //
 
   /**
-   * 🔹 Analyze estate infrastructure and suggest optimization strategies.
-   * Can be used by estate managers to evaluate efficiency, cost, or energy usage.
+   * 🔹 Analyze estate infrastructure and performance.
+   * Provides smart insight for energy efficiency, maintenance patterns,
+   * and occupant satisfaction.
    */
   async analyzeEstatePerformance(estateData: any) {
     const prompt = `
-      You are a smart estate management assistant.
-      Analyze the following estate data and provide insights on energy efficiency, maintenance,
-      resident satisfaction, and infrastructure optimization:
+      You are a Smart Estate Performance Analyst.
+      Review and analyze the following estate's operational data.
+      Highlight strengths, weaknesses, potential risks,
+      and suggest optimization or automation strategies:
 
       ${JSON.stringify(estateData, null, 2)}
     `;
@@ -67,19 +95,27 @@ export class EstateService {
     const aiResponse = await this.aiAgent.queryExternalAgent(prompt, estateData);
     return {
       estateData,
-      analysis: aiResponse,
+      aiAnalysis: aiResponse,
     };
   }
 
   /**
    * 🔹 Generate AI summary for all estates.
-   * Useful for global admin dashboards to monitor multiple estates at once.
+   * Provides a global view of occupancy, efficiency, and areas needing attention.
    */
   async summarizeAllEstates() {
     const estates = await this.findAll();
+    if (!estates.length) {
+      return { message: 'No estates found', total: 0 };
+    }
+
     const prompt = `
-      Summarize and compare the following estates based on performance,
-      occupancy, maintenance history, and improvement opportunities:
+      Summarize the following estates, comparing them based on:
+      - Occupancy rate
+      - Energy or resource efficiency
+      - Maintenance frequency
+      - Revenue performance
+      - Recommended areas for automation or modernization
 
       ${JSON.stringify(estates, null, 2)}
     `;
@@ -89,5 +125,23 @@ export class EstateService {
       totalEstates: estates.length,
       aiSummary,
     };
+  }
+
+  /**
+   * 🔹 AI-Assisted search — use natural language to find estates
+   * (Optional feature if integrated with text-based queries later)
+   */
+  async aiSearchEstate(query: string) {
+    const estates = await this.findAll();
+    const prompt = `
+      From the following estate records, find the one(s) that best match the user query:
+      "${query}"
+
+      Estates:
+      ${JSON.stringify(estates, null, 2)}
+    `;
+
+    const aiResult = await this.aiAgent.queryExternalAgent(prompt, estates);
+    return { query, result: aiResult };
   }
 }
