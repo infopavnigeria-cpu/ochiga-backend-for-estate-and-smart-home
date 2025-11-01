@@ -11,7 +11,9 @@ export class EstateService {
   constructor(
     @InjectRepository(Estate)
     private readonly estateRepository: Repository<Estate>,
-    private readonly aiAgent: AiAgent, // 🧠 AI Assistant integrated
+
+    // 🧠 Inject AI agent for analysis and summaries
+    private readonly aiAgent: AiAgent,
   ) {}
 
   // ✅ Create a new estate
@@ -54,10 +56,13 @@ export class EstateService {
    * Can be used by estate managers to evaluate efficiency, cost, or energy usage.
    */
   async analyzeEstatePerformance(estateData: any) {
-    const prompt = `You are a smart estate management assistant. 
-    Analyze the following estate data and provide insights on energy efficiency, maintenance, 
-    resident satisfaction, and infrastructure optimization:
-    ${JSON.stringify(estateData, null, 2)}`;
+    const prompt = `
+      You are a smart estate management assistant.
+      Analyze the following estate data and provide insights on energy efficiency, maintenance,
+      resident satisfaction, and infrastructure optimization:
+
+      ${JSON.stringify(estateData, null, 2)}
+    `;
 
     const aiResponse = await this.aiAgent.queryExternalAgent(prompt, estateData);
     return {
@@ -67,14 +72,17 @@ export class EstateService {
   }
 
   /**
-   * 🔹 Generate AI summary for all estates
-   * Useful for global admin dashboards to monitor multiple estates at once
+   * 🔹 Generate AI summary for all estates.
+   * Useful for global admin dashboards to monitor multiple estates at once.
    */
   async summarizeAllEstates() {
     const estates = await this.findAll();
-    const prompt = `Summarize and compare the following estates based on performance, 
-    occupancy, maintenance history, and improvement opportunities:
-    ${JSON.stringify(estates, null, 2)}`;
+    const prompt = `
+      Summarize and compare the following estates based on performance,
+      occupancy, maintenance history, and improvement opportunities:
+
+      ${JSON.stringify(estates, null, 2)}
+    `;
 
     const aiSummary = await this.aiAgent.queryExternalAgent(prompt, estates);
     return {
