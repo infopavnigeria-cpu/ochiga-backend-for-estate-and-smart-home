@@ -9,10 +9,10 @@ import { AiModule } from '../ai/ai.module'; // ✅ import AiAgent
 @Module({
   imports: [
     TypeOrmModule.forFeature([Estate]),
-    AiAgentModule, // ✅ makes AiAgent injectable into EstateService
+    AiModule, // ✅ import this so AiAgent or AiService can be injected
   ],
   controllers: [EstateController],
   providers: [EstateService],
-  exports: [EstateService], // optional but helpful if used elsewhere
+  exports: [EstateService],
 })
 export class EstateModule {}
