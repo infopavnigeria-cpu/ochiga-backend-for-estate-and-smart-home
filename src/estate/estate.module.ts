@@ -4,10 +4,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { EstateService } from './estate.service';
 import { EstateController } from './estate.controller';
 import { Estate } from './entities/estate.entity';
+import { AiAgentModule } from '../ai-agent/ai-agent.module'; // ✅ import AiAgent module
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Estate])],
+  imports: [
+    TypeOrmModule.forFeature([Estate]),
+    AiAgentModule, // ✅ makes AiAgent injectable into EstateService
+  ],
   controllers: [EstateController],
   providers: [EstateService],
+  exports: [EstateService], // optional but helpful if used elsewhere
 })
 export class EstateModule {}
