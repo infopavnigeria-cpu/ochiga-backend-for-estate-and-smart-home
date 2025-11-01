@@ -1,4 +1,3 @@
-// src/iot/iot.service.ts
 import {
   Injectable,
   ForbiddenException,
@@ -179,6 +178,21 @@ export class IotService {
     );
 
     return { logs, aiSummary };
+  }
+
+  // ✅ Toggle device by name (for AI assistant)
+  async toggleDeviceByName(name: string) {
+    const device = await this.deviceRepo.findOne({ where: { name } });
+    if (!device) throw new NotFoundException(`Device "${name}" not found`);
+
+    device.isOn = !device.isOn;
+    await this.deviceRepo.save(device);
+
+    // 🔊 Broadcast changes and MQTT publish
+    this.gateway.broadcast('deviceUpdated', device);
+    this.mqtt.publishToggle(device.id.toString(), device.isOn);
+
+    return { message: `Device ${device.name} turned ${device.isOn ? 'on' : 'off'}` };
   }
 
   // 🧠 ---------------- AI-Driven Automation & Analytics ---------------- //
