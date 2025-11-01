@@ -15,45 +15,44 @@ import { Device } from './entities/device.entity';
 import { DeviceLog } from './entities/device-log.entity';
 import { IotGateway } from './iot.gateway';
 import { IotMqttService } from './iot.mqtt';
-import { AiAgent } from '../ai/ai.agent'; // 🧠 NEW AI IMPORT
+import { AiAgent } from '../ai/ai.agent';
 
 @Injectable()
 export class IotService {
   private readonly logger = new Logger(IotService.name);
 
   constructor(
-    @InjectRepository(Device) private readonly deviceRepo: Repository<Device>,
-    @InjectRepository(DeviceLog) private readonly logRepo: Repository<DeviceLog>,
+    @InjectRepository(Device)
+    private readonly deviceRepo: Repository<Device>,
+
+    @InjectRepository(DeviceLog)
+    private readonly logRepo: Repository<DeviceLog>,
+
     private readonly gateway: IotGateway,
     private readonly mqtt: IotMqttService,
-    private readonly ai: AiAgent, // 🧠 Inject AI agent here
+
+    // 🧠 Smart AI reasoning agent for IoT insights
+    private readonly aiAgent: AiAgent,
   ) {}
 
-  // 🧠 NEW: Smart reasoning for IoT data
-  async analyzeWithAI(sensorData: any): Promise<string> {
-    const prompt = `
-      You are Ochiga Smart Infrastructure AI.
-      Analyze this IoT sensor data and recommend the best control action.
-      Sensor Data:
-      ${JSON.stringify(sensorData, null, 2)}
-    `;
-
-    const aiResponse = await this.ai.queryExternalAgent(prompt, { type: 'iot-reasoning' });
-    this.logger.log(`🤖 AI Reasoning Result: ${aiResponse}`);
-    return aiResponse;
-  }
-
+  // ✅ Find all devices belonging to a user
   async findUserDevices(userId: string) {
-    return this.deviceRepo.find({ where: { owner: { id: userId } }, relations: ['owner'] });
+    return this.deviceRepo.find({
+      where: { owner: { id: userId } },
+      relations: ['owner'],
+    });
   }
 
+  // ✅ Find all estate-level devices (for manager view)
   async findEstateDevices() {
     return this.deviceRepo.find({ where: { isEstateLevel: true } });
   }
 
+  // ✅ Create a new device with AI post-validation
   async createDevice(userId: string, role: UserRole, dto: CreateDeviceDto) {
-    if (dto.isEstateLevel && role !== UserRole.MANAGER)
+    if (dto.isEstateLevel && role !== UserRole.MANAGER) {
       throw new ForbiddenException('Only managers can create estate-level devices');
+    }
 
     const device = this.deviceRepo.create({
       ...dto,
@@ -63,12 +62,22 @@ export class IotService {
     });
 
     const saved = await this.deviceRepo.save(device);
+
+    // 🔔 Notify connected clients and sync MQTT
     this.gateway.broadcast('deviceCreated', saved);
     this.mqtt.publishToggle(saved.id.toString(), saved.isOn);
 
-    return saved;
+    // 🧠 AI Insight: Device Registration
+    const aiNote = await this.aiAgent.queryExternalAgent(
+      `A new IoT device has been registered. 
+      Analyze the device type and suggest best automation routines or efficiency tips.`,
+      saved,
+    );
+
+    return { ...saved, aiNote };
   }
 
+  // ✅ Control a specific device (with validation and AI log context)
   async controlDevice(userId: string, role: UserRole, deviceId: string, dto: ControlDeviceDto) {
     const device = await this.deviceRepo.findOne({
       where: { id: deviceId as any },
@@ -76,13 +85,14 @@ export class IotService {
     });
     if (!device) throw new NotFoundException('Device not found');
 
+    // 🔐 Role-based control
     if (device.isEstateLevel && role !== UserRole.MANAGER)
       throw new ForbiddenException('Only managers can control estate-level devices');
     if (!device.isEstateLevel && (!device.owner || device.owner.id !== userId))
       throw new ForbiddenException('You can only control your own devices');
 
+    // 🧩 Update metadata dynamically
     const metadata: Record<string, any> = device.metadata || {};
-
     switch (dto.action) {
       case 'on':
         device.isOn = true;
@@ -112,6 +122,7 @@ export class IotService {
     device.metadata = metadata;
     await this.deviceRepo.save(device);
 
+    // 🧾 Log the control event
     await this.logRepo.save(
       this.logRepo.create({
         device,
@@ -124,20 +135,26 @@ export class IotService {
       }),
     );
 
-    const payload = {
-      id: device.id,
-      name: device.name,
-      isOn: device.isOn,
-      metadata,
-    };
-
+    // 🔊 Realtime broadcast & MQTT sync
+    const payload = { id: device.id, name: device.name, isOn: device.isOn, metadata };
     this.gateway.broadcast('deviceUpdated', payload);
     this.mqtt.publishToggle(device.id.toString(), device.isOn);
     this.mqtt.publishMetadata(device.id.toString(), metadata);
 
-    return payload;
+    // 🧠 AI Insight: Device Control Analysis
+    const aiInsight = await this.aiAgent.queryExternalAgent(
+      `Analyze this IoT control action:
+      - Device: ${device.name}
+      - Action: ${dto.action}
+      - Metadata: ${JSON.stringify(metadata)}
+      Provide a short reasoning on potential energy impact or efficiency improvement.`,
+      payload,
+    );
+
+    return { ...payload, aiInsight };
   }
 
+  // ✅ Get device logs (with permission check)
   async getDeviceLogs(userId: string, role: UserRole, deviceId: string) {
     const device = await this.deviceRepo.findOne({
       where: { id: deviceId as any },
@@ -149,9 +166,78 @@ export class IotService {
     if (!device.isEstateLevel && (!device.owner || device.owner.id !== userId))
       throw new ForbiddenException('You can only view your own device logs');
 
-    return this.logRepo.find({
+    const logs = await this.logRepo.find({
       where: { device: { id: deviceId } },
       order: { createdAt: 'DESC' },
     });
+
+    // 🧠 Optional: AI-assisted log summary
+    const aiSummary = await this.aiAgent.queryExternalAgent(
+      `Summarize the recent IoT logs for the device "${device.name}".
+      Identify any anomalies, repeated errors, or maintenance recommendations.`,
+      logs,
+    );
+
+    return { logs, aiSummary };
+  }
+
+  // 🧠 ---------------- AI-Driven Automation & Analytics ---------------- //
+
+  /** 
+   * 🔹 Analyze raw IoT sensor data and recommend best control action
+   * Used for automation routines or predictive response
+   */
+  async analyzeWithAI(sensorData: any) {
+    const prompt = `
+      You are Ochiga Smart Infrastructure AI.
+      Analyze this IoT sensor data (temperature, humidity, energy, motion, etc.).
+      Detect anomalies, energy inefficiencies, and suggest the optimal control response.
+      Data:
+      ${JSON.stringify(sensorData, null, 2)}
+    `;
+
+    const aiResponse = await this.aiAgent.queryExternalAgent(prompt, sensorData);
+    this.logger.log(`🤖 AI IoT Analysis: ${aiResponse}`);
+    return aiResponse;
+  }
+
+  /**
+   * 🔹 Predictive Maintenance & Failure Risk Estimation
+   */
+  async predictDeviceHealth(deviceData: any) {
+    const prompt = `
+      You are an AI maintenance analyst for smart devices.
+      Analyze the following IoT device data and predict:
+      - Potential failure points
+      - Maintenance urgency
+      - Recommended service schedule
+      - Estimated lifespan extension if optimized
+
+      ${JSON.stringify(deviceData, null, 2)}
+    `;
+
+    const aiPrediction = await this.aiAgent.queryExternalAgent(prompt, deviceData);
+    return { prediction: aiPrediction };
+  }
+
+  /**
+   * 🔹 Estate-wide IoT Performance Summary
+   */
+  async summarizeAllDevices() {
+    const devices = await this.deviceRepo.find();
+    const prompt = `
+      Summarize the overall IoT device network performance for the estate.
+      Include:
+      - Total devices
+      - Active vs inactive ratio
+      - Energy efficiency overview
+      - Faulty or offline devices
+      - Recommendations for optimization and automation upgrades
+
+      ${JSON.stringify(devices, null, 2)}
+    `;
+
+    const aiSummary = await this.aiAgent.queryExternalAgent(prompt, devices);
+    return { totalDevices: devices.length, aiSummary };
   }
 }
