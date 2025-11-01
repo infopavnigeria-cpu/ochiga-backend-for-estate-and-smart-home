@@ -62,17 +62,17 @@ export class EstateService {
   }
 
   // ✅ Delete an estate by ID
-  async remove(id: string): Promise<{ message: string }> {
+  async remove(id: string): Promise<{ message: string; note?: string }> {
     const estate = await this.findOne(id);
     await this.estateRepository.remove(estate);
 
-    // Optional AI log / feedback
+    // 🧠 AI-powered data retention recommendation
     const aiNote = await this.aiAgent.queryExternalAgent(
       `An estate record was deleted. Provide a brief note on what data retention policies should apply here.`,
       estate,
     );
 
-    return { message: `Estate ${id} deleted successfully.`, aiNote };
+    return { message: `Estate ${id} deleted successfully.`, note: aiNote };
   }
 
   // 🧠 ------------------- AI-Powered Features ------------------- //
