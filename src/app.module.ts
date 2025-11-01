@@ -4,7 +4,7 @@ import { DataSource } from 'typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { getDatabaseConfig } from './config/database.config';
 
-// Feature Modules
+// ✅ Feature Modules
 import { AuthModule } from './auth/auth.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { UserModule } from './user/user.module';
@@ -20,9 +20,10 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { HealthModule } from './health/health.module';
 import { MessageModule } from './message/message.module';
 import { IotModule } from './iot/iot.module';
-import { AiModule } from './ai/ai.module'; // 👈 NEW
+import { AiModule } from './ai/ai.module';
+import { AssistantModule } from './assistant/assistant.module'; // 👈 NEW — Smart Assistant layer
 
-// Guards & Filters
+// ✅ Guards & Filters
 import { APP_GUARD, APP_FILTER } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { RolesGuard } from './auth/roles.guard';
@@ -30,7 +31,10 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 @Module({
   imports: [
+    // 🌍 Global config
     ConfigModule.forRoot({ isGlobal: true }),
+
+    // 🗄️ Database
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: async () => {
@@ -43,7 +47,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
       },
     }),
 
-    // Existing modules
+    // 🧩 Core Application Modules
     AuthModule,
     DashboardModule,
     UserModule,
@@ -60,8 +64,9 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
     MessageModule,
     IotModule,
 
-    // 👇 New AI intelligence layer
+    // 🤖 AI + Assistant Layer
     AiModule,
+    AssistantModule, // 👈 Added here
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },
