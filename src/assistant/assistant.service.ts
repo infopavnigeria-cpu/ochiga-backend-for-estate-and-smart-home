@@ -9,7 +9,7 @@ import { EstateService } from '../estate/estate.service';
 import { DashboardService } from '../dashboard/dashboard.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Command } from './command.entity'; // ✅ simplified path fix
+import { Command } from './command.entity';
 
 @Injectable()
 export class AssistantService {
@@ -65,19 +65,23 @@ export class AssistantService {
 
       // --- Visitors ---
       if (/(visitor|guest)/i.test(text)) {
-        const visitors = (await this.visitorsService.findAll?.()) || [];
+        const visitors =
+          (this.visitorsService.getAllVisitors && (await this.visitorsService.getAllVisitors())) || [];
         return { reply: `🚪 You currently have ${visitors.length} visitor(s).` };
       }
 
       // --- Utilities ---
       if (/(bill|utility|power|water|waste|electricity)/i.test(text)) {
-        const bills = (await this.utilitiesService.findAll?.()) || [];
+        const bills =
+          (this.utilitiesService.getAllUtilities && (await this.utilitiesService.getAllUtilities())) || [];
         return { reply: `⚡ You have ${bills.length} pending utility bill(s).` };
       }
 
       // --- Notifications ---
       if (/(notification|alert|message)/i.test(text)) {
-        const notifs = (await this.notificationsService.findAll?.()) || [];
+        const notifs =
+          (this.notificationsService.getAllNotifications &&
+            (await this.notificationsService.getAllNotifications())) || [];
         if (!notifs.length) return { reply: '🔔 You have no new notifications.' };
         const latest = notifs[0];
         return { reply: `🔔 You have ${notifs.length} notifications. Latest: "${latest.title || 'Untitled'}".` };
@@ -85,58 +89,20 @@ export class AssistantService {
 
       // --- Community Events ---
       if (/(event|meeting|community|party)/i.test(text)) {
-        const events = (await this.communityService.findAll?.()) || [];
+        const events = (this.communityService.getEvents && (await this.communityService.getEvents())) || [];
         if (!events.length) return { reply: '🏡 No upcoming community events right now.' };
         return { reply: `📅 ${events.length} community event(s) coming up. Next: "${events[0].title}".` };
       }
 
       // --- Estate Info ---
       if (text.includes('estate')) {
-        const estate = (await this.estateService.findOne?.(1)) || { name: 'Your Estate', units: 0, residents: 0 };
+        const estate =
+          (this.estateService.getEstateOverview && (await this.estateService.getEstateOverview())) || {
+            name: 'Your Estate',
+            units: 0,
+            residents: 0,
+          };
         return {
-          reply: `🏠 Estate: ${estate.name}\nUnits: ${estate.units}\nResidents: ${estate.residents}\nYou're living smart with Ochiga.`,
-        };
-      }
-
-      // --- Dashboard ---
-      if (/(summary|dashboard|report|overview)/i.test(text)) {
-        const summary = await this.dashboardService.getSummary?.();
-        if (!summary)
-          return { reply: '📊 Dashboard data not available right now. Please try again later.' };
-        return {
-          reply: `📊 Estate Summary:\nResidents: ${summary.residents}\nVisitors: ${summary.visitors}\nWallet Total: ₦${summary.totalBalance}`,
-        };
-      }
-
-      // --- Help ---
-      if (/help|assist|what can you do|commands/i.test(text)) {
-        return {
-          reply:
-            '🤖 You can ask me to:\n- Control smart devices\n- Check or fund your wallet\n- View visitors, utilities, or notifications\n- Get estate info or dashboard summary',
-        };
-      }
-
-      // --- Default ---
-      return { reply: "🤖 Sorry, I didn’t quite catch that. Try 'turn on living room light' or 'show wallet balance'." };
-    } catch (error: any) {
-      this.logger.error(`❌ Error processing command: ${error.message}`);
-      return { reply: '⚠️ Something went wrong while processing your request.' };
-    }
-  }
-
-  async getCommandById(id: string) {
-    const command = await this.commandRepo.findOne({ where: { id: id as any } });
-    if (!command) throw new NotFoundException('Command not found');
-    return command;
-  }
-
-  extractDeviceName(text: string): string | null {
-    const match = text.match(/(?:toggle|turn on|turn off|switch|activate|deactivate)\s+([\w\s]+)/i);
-    return match ? match[1].trim() : null;
-  }
-
-  extractAmount(text: string): number {
-    const match = text.match(/\d+/);
-    return match ? parseInt(match[0], 10) : 0;
-  }
-}
+          reply: `🏠 Estate: ${estate.name}\nUnits: ${estate.units ?? 'N/A'}\nResidents: ${
+            estate.residents ?? 'N/A'
+          }\nYou're
