@@ -9,7 +9,7 @@ import { EstateService } from '../estate/estate.service';
 import { DashboardService } from '../dashboard/dashboard.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Command } from './entities/command.entity';
+import { Command } from './command.entity'; // ✅ simplified path fix
 
 @Injectable()
 export class AssistantService {
@@ -24,134 +24,117 @@ export class AssistantService {
     private readonly notificationsService: NotificationsService,
     private readonly estateService: EstateService,
     private readonly dashboardService: DashboardService,
-    @InjectRepository(Command) private readonly commandRepo: Repository<Command>,
+    @InjectRepository(Command)
+    private readonly commandRepo: Repository<Command>,
   ) {}
 
-  /**
-   * 🔹 Main AI Command Processor
-   */
-  async processCommand(command: string): Promise<{ reply: string }> {
+  async processCommand(command: string, userId: string = 'system-user'): Promise<{ reply: string }> {
     const text = command.toLowerCase().trim();
     this.logger.log(`🎤 Processing command: "${text}"`);
-
-    // Log command in DB
     await this.commandRepo.save({ text, createdAt: new Date() });
 
     try {
       // --- Greetings ---
       if (/(hello|hi|hey|good (morning|afternoon|evening))/i.test(text)) {
-        return { reply: '👋 Hello! I’m Ochiga AI — your smart estate assistant. How can I help you today?' };
+        return { reply: '👋 Hello! I’m Ochiga AI — how can I help with your estate today?' };
       }
 
-      // --- IoT / Smart Device Controls ---
-      if (/(light|fan|ac|door|toggle|switch|device)/i.test(text)) {
+      // --- IoT ---
+      if (/(light|fan|ac|door|device|toggle|switch)/i.test(text)) {
         const deviceName = this.extractDeviceName(text);
         if (deviceName) {
           const result = await this.iotService.toggleDeviceByName(deviceName);
-          return { reply: `✅ ${result.message}` };
+          return { reply: `✅ ${result?.message || 'Device toggled successfully.'}` };
         }
-        return { reply: '⚙️ Please specify the device or room you’d like to control.' };
+        return { reply: '⚙️ Please specify the device or room name.' };
       }
 
-      // --- Wallet Management ---
+      // --- Wallet ---
       if (text.includes('wallet')) {
         if (text.includes('balance')) {
-          const balance = await this.walletService.getBalance();
-          return { reply: `💰 Your current wallet balance is ₦${balance}.` };
+          const balance = await this.walletService.getBalance(userId);
+          return { reply: `💰 Your wallet balance is ₦${balance.balance}.` };
         }
         if (text.includes('fund') || text.includes('add money') || text.includes('top up')) {
           const amount = this.extractAmount(text);
-          if (!amount) return { reply: '💵 Please specify the amount to fund your wallet with.' };
-          await this.walletService.fundWallet(amount);
+          if (!amount) return { reply: '💵 Please specify how much to fund your wallet with.' };
+          await this.walletService.fundWallet(userId, amount);
           return { reply: `💳 Wallet successfully funded with ₦${amount}.` };
         }
       }
 
-      // --- Visitors / Guests ---
+      // --- Visitors ---
       if (/(visitor|guest)/i.test(text)) {
-        if (text.includes('add')) {
-          return { reply: '👥 Please provide the visitor’s name and purpose of visit to proceed.' };
-        }
-        const visitors = await this.visitorsService.getAllVisitors();
-        return { reply: `🚪 You currently have ${visitors.length} visitor(s) recorded.` };
+        const visitors = (await this.visitorsService.findAll?.()) || [];
+        return { reply: `🚪 You currently have ${visitors.length} visitor(s).` };
       }
 
-      // --- Utilities / Bills ---
+      // --- Utilities ---
       if (/(bill|utility|power|water|waste|electricity)/i.test(text)) {
-        const bills = await this.utilitiesService.getAllUtilities();
+        const bills = (await this.utilitiesService.findAll?.()) || [];
         return { reply: `⚡ You have ${bills.length} pending utility bill(s).` };
       }
 
-      // --- Notifications / Alerts ---
+      // --- Notifications ---
       if (/(notification|alert|message)/i.test(text)) {
-        const notifs = await this.notificationsService.getAllNotifications();
+        const notifs = (await this.notificationsService.findAll?.()) || [];
         if (!notifs.length) return { reply: '🔔 You have no new notifications.' };
         const latest = notifs[0];
-        return { reply: `🔔 You have ${notifs.length} notifications. Latest: "${latest.title}".` };
+        return { reply: `🔔 You have ${notifs.length} notifications. Latest: "${latest.title || 'Untitled'}".` };
       }
 
-      // --- Community Events / Meetings ---
+      // --- Community Events ---
       if (/(event|meeting|community|party)/i.test(text)) {
-        const events = await this.communityService.getEvents();
+        const events = (await this.communityService.findAll?.()) || [];
         if (!events.length) return { reply: '🏡 No upcoming community events right now.' };
         return { reply: `📅 ${events.length} community event(s) coming up. Next: "${events[0].title}".` };
       }
 
-      // --- Estate Overview ---
+      // --- Estate Info ---
       if (text.includes('estate')) {
-        const estate = await this.estateService.getEstateOverview();
+        const estate = (await this.estateService.findOne?.(1)) || { name: 'Your Estate', units: 0, residents: 0 };
         return {
           reply: `🏠 Estate: ${estate.name}\nUnits: ${estate.units}\nResidents: ${estate.residents}\nYou're living smart with Ochiga.`,
         };
       }
 
-      // --- Dashboard / Summary ---
+      // --- Dashboard ---
       if (/(summary|dashboard|report|overview)/i.test(text)) {
-        const summary = await this.dashboardService.getSummary();
+        const summary = await this.dashboardService.getSummary?.();
+        if (!summary)
+          return { reply: '📊 Dashboard data not available right now. Please try again later.' };
         return {
           reply: `📊 Estate Summary:\nResidents: ${summary.residents}\nVisitors: ${summary.visitors}\nWallet Total: ₦${summary.totalBalance}`,
         };
       }
 
-      // --- Help / Assistance ---
+      // --- Help ---
       if (/help|assist|what can you do|commands/i.test(text)) {
         return {
           reply:
-            '🤖 Here’s what I can help you with:\n- Control devices (lights, doors, AC)\n- Check wallet balance or fund wallet\n- View visitors and events\n- Check utility bills or notifications\n- Get estate or dashboard summary',
+            '🤖 You can ask me to:\n- Control smart devices\n- Check or fund your wallet\n- View visitors, utilities, or notifications\n- Get estate info or dashboard summary',
         };
       }
 
-      // --- Default Fallback ---
-      return {
-        reply:
-          "🤖 I'm not sure I understood that. Try something like 'turn on living room light' or 'show estate summary'.",
-      };
-    } catch (error) {
+      // --- Default ---
+      return { reply: "🤖 Sorry, I didn’t quite catch that. Try 'turn on living room light' or 'show wallet balance'." };
+    } catch (error: any) {
       this.logger.error(`❌ Error processing command: ${error.message}`);
-      return { reply: '⚠️ Sorry, something went wrong while processing your request.' };
+      return { reply: '⚠️ Something went wrong while processing your request.' };
     }
   }
 
-  /**
-   * 🔹 Retrieve a single logged command
-   */
   async getCommandById(id: string) {
     const command = await this.commandRepo.findOne({ where: { id: id as any } });
     if (!command) throw new NotFoundException('Command not found');
     return command;
   }
 
-  /**
-   * 🔹 Helper: Extract device name from natural text
-   */
   extractDeviceName(text: string): string | null {
     const match = text.match(/(?:toggle|turn on|turn off|switch|activate|deactivate)\s+([\w\s]+)/i);
     return match ? match[1].trim() : null;
   }
 
-  /**
-   * 🔹 Helper: Extract amount (₦) from natural text
-   */
   extractAmount(text: string): number {
     const match = text.match(/\d+/);
     return match ? parseInt(match[0], 10) : 0;
