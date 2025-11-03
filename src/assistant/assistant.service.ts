@@ -65,32 +65,40 @@ export class AssistantService {
 
       // --- Visitors ---
       if (/(visitor|guest)/i.test(text)) {
-        const visitors =
-          (this.visitorsService.getAllVisitors && (await this.visitorsService.getAllVisitors())) || [];
-        return { reply: `🚪 You currently have ${visitors.length} visitor(s).` };
+        let visitorsCount = 0;
+        try {
+          const visitors = await (this.visitorsService as any).find?.();
+          visitorsCount = Array.isArray(visitors) ? visitors.length : 0;
+        } catch {
+          visitorsCount = 0;
+        }
+        return { reply: `🚪 You currently have ${visitorsCount} visitor(s).` };
       }
 
       // --- Utilities ---
       if (/(bill|utility|power|water|waste|electricity)/i.test(text)) {
-        const utilities =
-          (this.utilitiesService.getAllUtilities &&
-            (await this.utilitiesService.getAllUtilities())) ||
-          (this.utilitiesService.findAll && (await this.utilitiesService.findAll())) ||
-          [];
-        return { reply: `⚡ You have ${utilities.length} pending utility bill(s).` };
+        let utilitiesCount = 0;
+        try {
+          const utilities = await (this.utilitiesService as any).find?.();
+          utilitiesCount = Array.isArray(utilities) ? utilities.length : 0;
+        } catch {
+          utilitiesCount = 0;
+        }
+        return { reply: `⚡ You have ${utilitiesCount} pending utility bill(s).` };
       }
 
       // --- Notifications ---
       if (/(notification|alert|message)/i.test(text)) {
-        const notifs =
-          (this.notificationsService.getAllNotifications &&
-            (await this.notificationsService.getAllNotifications())) ||
-          (this.notificationsService.findAll && (await this.notificationsService.findAll())) ||
-          [];
-        if (!notifs.length) return { reply: '🔔 You have no new notifications.' };
-        const latest = notifs[0];
+        let notifications = [];
+        try {
+          notifications = (await (this.notificationsService as any).find?.()) || [];
+        } catch {
+          notifications = [];
+        }
+        if (!notifications.length) return { reply: '🔔 You have no new notifications.' };
+        const latest = notifications[0];
         return {
-          reply: `🔔 You have ${notifs.length} notifications. Latest: "${
+          reply: `🔔 You have ${notifications.length} notifications. Latest: "${
             latest.title || 'Untitled'
           }".`,
         };
@@ -98,33 +106,38 @@ export class AssistantService {
 
       // --- Community Events ---
       if (/(event|meeting|community|party)/i.test(text)) {
-        const events =
-          (this.communityService.getEvents && (await this.communityService.getEvents())) ||
-          (this.communityService.findAll && (await this.communityService.findAll())) ||
-          [];
+        let events = [];
+        try {
+          events = (await (this.communityService as any).find?.()) || [];
+        } catch {
+          events = [];
+        }
         if (!events.length) return { reply: '🏡 No upcoming community events right now.' };
         return { reply: `📅 ${events.length} community event(s) coming up. Next: "${events[0].title}".` };
       }
 
       // --- Estate Info ---
       if (text.includes('estate')) {
-        const estate =
-          (this.estateService.getEstateOverview &&
-            (await this.estateService.getEstateOverview())) ||
-          (await this.estateService.findOne?.()) ||
-          { name: 'Your Estate' };
-
-        const units = (estate as any)?.units ?? 'N/A';
-        const residents = (estate as any)?.residents ?? 'N/A';
+        let estate: any = { name: 'Your Estate', units: 'N/A', residents: 'N/A' };
+        try {
+          estate = await (this.estateService as any).findOne?.('1');
+        } catch {
+          // fallback to default
+        }
 
         return {
-          reply: `🏠 Estate: ${estate.name}\nUnits: ${units}\nResidents: ${residents}\nYou're all set!`,
+          reply: `🏠 Estate: ${estate.name}\nUnits: ${estate.units}\nResidents: ${estate.residents}\nYou're all set!`,
         };
       }
 
       // --- Dashboard Overview ---
       if (text.includes('overview') || text.includes('status')) {
-        const data = await this.dashboardService.getDashboardSummary?.();
+        let data = null;
+        try {
+          data = await (this.dashboardService as any).getSummary?.();
+        } catch {
+          data = null;
+        }
         if (!data) return { reply: '📊 No dashboard data available.' };
         return { reply: `📊 Overview: ${JSON.stringify(data)}` };
       }
@@ -151,4 +164,7 @@ export class AssistantService {
   }
 
   private extractDeviceName(text: string): string | null {
-    const match = text.match(/(?:turn on|turn off|toggle|activate|switch off|switch on)\s(.+)
+    const match = text.match(/(?:turn on|turn off|toggle|activate|switch off|switch on)\s(.+)/i);
+    return match ? match[1].trim() : null;
+  }
+}
