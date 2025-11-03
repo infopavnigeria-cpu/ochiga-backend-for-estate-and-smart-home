@@ -17,14 +17,9 @@ interface CommandRequest {
 export class AssistantController {
   constructor(private readonly assistantService: AssistantService) {}
 
-  /**
-   * 🔹 Handle incoming AI/voice/text commands
-   * Example body: { "command": "turn on all lights in living room" }
-   */
   @Post('command')
   async handleCommand(@Body() body: CommandRequest) {
     const command = body?.command?.trim();
-
     if (!command) {
       throw new HttpException('Command cannot be empty', HttpStatus.BAD_REQUEST);
     }
@@ -48,10 +43,6 @@ export class AssistantController {
     }
   }
 
-  /**
-   * 🧠 Test endpoint — for debugging or health checks
-   * Route: GET /assistant/ping
-   */
   @Get('ping')
   ping() {
     return {
@@ -61,24 +52,20 @@ export class AssistantController {
     };
   }
 
-  /**
-   * 🔹 Retrieve previously executed command details (if logged)
-   * Example route: GET /assistant/command/:id
-   */
   @Get('command/:id')
   async getCommandById(@Param('id') id: string) {
     try {
       const result = await this.assistantService.getCommandById(id);
-      return {
-        success: true,
-        data: result,
-      };
+      if (!result) {
+        throw new HttpException('Command not found', HttpStatus.NOT_FOUND);
+      }
+      return { success: true, data: result };
     } catch (error: any) {
       throw new HttpException(
         {
           success: false,
           message: `Failed to retrieve command with ID ${id}`,
-          error: error?.message || 'Command not found',
+          error: error?.message || 'Unknown error',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
