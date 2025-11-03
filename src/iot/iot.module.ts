@@ -11,9 +11,10 @@ import { AiModule } from '../ai/ai.module'; // 👈 added
 @Module({
   imports: [
     TypeOrmModule.forFeature([Device, DeviceLog]),
-    AiModule, // 👈 added this line
+    AiModule, // 👈 keep this line
   ],
   providers: [IotService, IotGateway, IotMqttService],
   controllers: [IotController],
+  exports: [IotService], // ✅ make IotService available to AssistantModule and others
 })
 export class IotModule {}
