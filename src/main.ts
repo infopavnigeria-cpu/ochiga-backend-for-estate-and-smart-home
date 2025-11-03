@@ -13,6 +13,9 @@ async function bootstrap() {
     const app = await NestFactory.create(AppModule, { bufferLogs: true });
     console.log('🟢 AppModule created successfully.');
 
+    // Enable shutdown hooks for container environments (like GitHub Codespaces)
+    app.enableShutdownHooks();
+
     // Global prefix for all APIs
     app.setGlobalPrefix('api');
 
@@ -63,19 +66,18 @@ async function bootstrap() {
     }
 
     const port = Number(process.env.PORT) || 4000;
-console.log(`🚀 Starting HTTP listener on port ${port}...`);
+    console.log(`🚀 Starting HTTP listener on port ${port}...`);
 
-// ✅ Perfect spot — all modules initialized, app configured, ready to launch
-console.log('🧩 All modules loaded. Launching server...');
+    // ✅ Perfect spot — all modules initialized, app configured, ready to launch
+    console.log('🧩 All modules loaded. Launching server...');
 
-await app.listen(port, '0.0.0.0');
-const url = await app.getUrl();
+    await app.listen(port, '0.0.0.0');
+    const url = await app.getUrl();
 
-logger.log(`🚀 Ochiga Backend running on: ${url}`);
-logger.log(`📖 Swagger Docs: ${url}/api`);
-logger.log(`✅ Health Check: ${url}/api/health`);
+    logger.log(`🚀 Ochiga Backend running on: ${url}`);
+    logger.log(`📖 Swagger Docs: ${url}/api`);
+    logger.log(`✅ Health Check: ${url}/api/health`);
   } catch (error) {
-    // 💥 This block catches silent DB startup errors and shows the cause
     console.error('❌ FATAL STARTUP ERROR!');
     console.error('🔍 Likely causes: Database misconfiguration or entity mismatch.');
     console.error('📄 Error stack trace:\n', error);
@@ -86,12 +88,19 @@ logger.log(`✅ Health Check: ${url}/api/health`);
 // Global safeguard for uncaught exceptions/rejections
 process.on('uncaughtException', (err) => {
   console.error('💣 Uncaught Exception:', err);
-  process.exit(1);
+  // Commented out exit for debugging so we can see the logs before dying
+  // process.exit(1);
 });
 
 process.on('unhandledRejection', (reason) => {
   console.error('💥 Unhandled Rejection:', reason);
-  process.exit(1);
+  // Commented out exit for debugging so we can see what rejected
+  // process.exit(1);
+});
+
+// Log exit events (helps know if app dies silently)
+process.on('exit', (code) => {
+  console.log(`🔚 Process exiting with code: ${code}`);
 });
 
 bootstrap()
