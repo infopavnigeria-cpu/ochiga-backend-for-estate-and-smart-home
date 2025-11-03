@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 // Controllers & Services
 import { AssistantController } from './assistant.controller';
 import { AssistantService } from './assistant.service';
+import { Command } from './command.entity';
 
 // Core Feature Modules (same ones registered in AppModule)
 import { AuthModule } from '../auth/auth.module';
@@ -23,6 +25,7 @@ import { IotModule } from '../iot/iot.module';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([Command]), // 👈 Added for Command entity
     AuthModule,
     DashboardModule,
     UserModule,
@@ -41,5 +44,6 @@ import { IotModule } from '../iot/iot.module';
   ],
   controllers: [AssistantController],
   providers: [AssistantService],
+  exports: [AssistantService], // 👈 Added in case other modules use it
 })
 export class AssistantModule {}
